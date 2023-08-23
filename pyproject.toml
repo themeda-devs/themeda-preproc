@@ -27,7 +27,7 @@ odc-geo = "^0.4.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"
-black = "^21.10b0"
+black = "23.7.0"
 mypy = "^1.3.0"
 ruff = "^0.0.267"
 types-tqdm = "^4.65.0.1"
@@ -40,6 +40,10 @@ ipython = "^8.14.0"
 jupyter = "^1.0.0"
 pyqt5 = "^5.15.9"
 matplotlib = "^3.7.2"
+
+
+[tool.poetry.group.dev.dependencies]
+fawltydeps = "^0.12.1"
 
 [tool.mypy]
 plugins = "numpy.typing.mypy_plugin"
@@ -101,3 +105,7 @@ target-version = "py39"
 ignore = [
         "ANN101",  # typing self
 ]
+
+[tool.fawltydeps]
+ignore_unused = ["black", "fawltydeps", "mypy", "ruff", "ipython"]
+output_format = "human_detailed"

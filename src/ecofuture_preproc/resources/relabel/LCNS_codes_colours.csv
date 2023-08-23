@@ -1,0 +1,25 @@
+LCNS_n,LCNS_label,LCNS_HexCol,LCNS_lev0,LCNS_lev0_label
+0,No data,#0B0B0B,0,No data
+1,Cultivated closed,#FFE800,1,Cultivated
+2,Cultivated open 40,#FFF341,1,Cultivated
+3,Cultivated open 15,#FFF98E,1,Cultivated
+4,Cultivated sparse,#FFFBC2,1,Cultivated
+5,Woody closed,#005D29,2,Woody
+6,Woody open 40,#007D37,2,Woody
+7,Woody open 15,#009A44,2,Woody
+8,Woody sparse,#89CC87,2,Woody
+9,Herbaceous closed,#77BB00,3,Herbaceous
+10,Herbaceous open 40,#93CC31,3,Herbaceous
+11,Herbaceous open 15,#B1E25D,3,Herbaceous
+12,Herbaceous sparse,#B9EE6E,3,Herbaceous
+13,Herbaceous scattered,#D4F7A2,3,Herbaceous
+14,Aquatic Woody closed,#00A7A7,4,Aquatic
+15,Aquatic Woody open,#2ECABC,4,Aquatic
+16,Aquatic Woody sparse to open,#6BE6CD,4,Aquatic
+17,Aquatic Herbaceous,#A8F8EB,4,Aquatic
+18,Artificial Surface,#E95769,5,Artificial surface
+19,Bare ground,#F3AC6A,6,Bare ground
+20,Water,#1D57BC,7,Water
+21,Water 1 to 6 months,#63BBFF,7,Water
+22,Ocean water,#BEE8FF,8,Ocean water
+,,,,
