@@ -1,6 +1,8 @@
 import argparse
 import pathlib
 import os
+import importlib
+import inspect
 
 import ecofuture_preproc.roi
 import ecofuture_preproc.source
@@ -52,12 +54,12 @@ def main() -> None:
         help="Pre-process a ROI definition",
     )
 
-    _ = subparsers.add_parser(
+    acquire_parser = subparsers.add_parser(
         "acquire",
         help="Acquire the necessary data",
     )
 
-    _ = subparsers.add_parser(
+    prep_parser = subparsers.add_parser(
         "prep",
         help="Prepare the raw data for pre-processing",
     )
@@ -80,7 +82,12 @@ def main() -> None:
             type=ecofuture_preproc.roi.ROIName,
         )
 
-    for parser_needing_source_name in [to_chips_parser, to_chiplets_parser]:
+    for parser_needing_source_name in [
+        acquire_parser,
+        prep_parser,
+        to_chips_parser,
+        to_chiplets_parser,
+    ]:
         parser_needing_source_name.add_argument(
             "-source_name",
             required=True,
@@ -90,16 +97,23 @@ def main() -> None:
 
     args = parser.parse_args()
 
-    runner_lut = {
-        "roi_prep": ecofuture_preproc.roi.run_prep,
-    }
-
-    kwargs = {key: value for (key, value) in vars(args).items() if key != "command"}
 
     if args.command is None:
-        print("Please provide a command")
+        raise ValueError("Please provide a command")
+
+    if args.command == "roi_prep":
+        runner_str = "ecofuture_preproc.roi"
     else:
-        runner_lut[args.command](**kwargs)
+        handler_name = ecofuture_preproc.source.DATA_SOURCE_HANDLER[args.source_name]
+        runner_str = f"ecofuture_preproc.{handler_name}.{args.command}"
+
+    module = importlib.import_module(name=runner_str)
+    function = module.run
+    signature = inspect.signature(function)
+    param_names = list(signature.parameters)
+    args = {param_name: getattr(args, param_name) for param_name in param_names}
+
+    function(**args)
 
 
 if __name__ == "__main__":

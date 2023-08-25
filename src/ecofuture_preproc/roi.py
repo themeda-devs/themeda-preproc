@@ -13,6 +13,8 @@ import numpy.typing as npt
 import shapely
 import pyproj
 
+import ecofuture_preproc.utils
+
 
 class ROIName(enum.Enum):
     SAVANNA = "savanna"
@@ -137,11 +139,10 @@ class RegionOfInterest:
             self._shape = pickle.load(handle)
 
 
-def run_prep(
+def run(
     roi_name: ROIName,
     base_output_dir: pathlib.Path,
-    protect: bool = True,
-    show_progress: bool = True,
+    protect: bool,
 ) -> None:
 
     roi = RegionOfInterest(
@@ -152,4 +153,5 @@ def run_prep(
 
     roi.prepare()
 
-
+    if protect:
+        ecofuture_preproc.utils.protect_path(path=roi.shape_path)

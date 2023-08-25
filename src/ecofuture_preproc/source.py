@@ -11,3 +11,13 @@ class DataSourceName(enum.Enum):
 
     def __str__(self) -> str:
         return str(self.value)
+
+
+DATA_SOURCE_HANDLER = {
+    DataSourceName("land_cover"): "dea",
+    DataSourceName("tmax"): "climate",
+    DataSourceName("rain"): "climate",
+    DataSourceName("elevation"): "elevation",
+    DataSourceName("land_use"): "land_use",
+    DataSourceName("fire_scar"): "fire_scar",
+}
