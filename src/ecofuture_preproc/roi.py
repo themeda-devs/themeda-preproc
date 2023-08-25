@@ -135,3 +135,21 @@ class RegionOfInterest:
 
         with self.shape_path.open("rb") as handle:
             self._shape = pickle.load(handle)
+
+
+def run_prep(
+    roi_name: ROIName,
+    base_output_dir: pathlib.Path,
+    protect: bool = True,
+    show_progress: bool = True,
+) -> None:
+
+    roi = RegionOfInterest(
+        name=roi_name,
+        base_output_dir=base_output_dir,
+        load=False,
+    )
+
+    roi.prepare()
+
+

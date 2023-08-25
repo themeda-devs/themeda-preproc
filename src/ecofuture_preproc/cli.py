@@ -96,7 +96,10 @@ def main() -> None:
 
     kwargs = {key: value for (key, value) in vars(args).items() if key != "command"}
 
-    runner_lut[args.command](**kwargs)
+    if args.command is None:
+        print("Please provide a command")
+    else:
+        runner_lut[args.command](**kwargs)
 
 
 if __name__ == "__main__":
