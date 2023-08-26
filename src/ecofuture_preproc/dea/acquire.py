@@ -1,16 +1,25 @@
+"""
+Acquires the land cover data by downloading the GeoTIFF files for all years and
+spatial regions from the DEA database.
+"""
+
 import pathlib
 import contextlib
 
 import boto3
 import botocore
 
+import tqdm
+
 import ecofuture_preproc.source
+import ecofuture_preproc.utils
 
 
 def run(
     source_name: ecofuture_preproc.source.DataSourceName,
     base_output_dir: pathlib.Path,
     protect: bool = True,
+    show_progress: bool = True,
 ) -> None:
 
     output_dir = base_output_dir / "raw" / source_name.value
@@ -32,6 +41,8 @@ def run(
             Prefix=f"derivative/{product}/1-0-0/",
         )
 
+        to_download = {}
+
         for page in pages:
             for item in page["Contents"]:
 
@@ -42,11 +53,25 @@ def run(
                     local_path = output_dir / path.name
 
                     if not local_path.exists():
-                        client.download_file(
-                            Bucket=bucket,
-                            Key=item["Key"],
-                            Filename=str(local_path),
-                        )
+                        to_download[item["Key"]] = local_path
 
-                    if protect:
-                        ecofuture_preproc.utils.protect_path(path=local_path)
+        with contextlib.closing(
+            tqdm.tqdm(
+                iterable=None,
+                total=len(to_download),
+                disable=not show_progress,
+            )
+        ) as progress_bar:
+
+            for (file_key, local_path) in to_download.items():
+
+                client.download_file(
+                    Bucket=bucket,
+                    Key=file_key,
+                    Filename=str(local_path),
+                )
+
+                if protect:
+                    ecofuture_preproc.utils.protect_path(path=local_path)
+
+                progress_bar.update()

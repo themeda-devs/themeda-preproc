@@ -1,7 +1,7 @@
 import pathlib
 
 
-def protect_file(
+def protect_path(
     path: pathlib.Path,
     permissions: int = 0o440,
 ) -> None:
