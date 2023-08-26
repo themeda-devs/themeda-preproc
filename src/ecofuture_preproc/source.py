@@ -7,7 +7,8 @@ class DataSourceName(enum.Enum):
     RAIN = "rain"
     ELEVATION = "elevation"
     LAND_USE = "land_use"
-    FIRE_SCAR = "fire_scar"
+    FIRE_SCAR_EARLY = "fire_scar_early"
+    FIRE_SCAR_LATE = "fire_scar_late"
 
     def __str__(self) -> str:
         return str(self.value)
@@ -19,5 +20,6 @@ DATA_SOURCE_HANDLER = {
     DataSourceName("rain"): "climate",
     DataSourceName("elevation"): "elevation",
     DataSourceName("land_use"): "land_use",
-    DataSourceName("fire_scar"): "fire_scar",
+    DataSourceName("fire_scar_early"): "fire_scar",
+    DataSourceName("fire_scar_late"): "fire_scar",
 }
