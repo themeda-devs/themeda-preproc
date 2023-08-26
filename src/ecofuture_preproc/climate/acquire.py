@@ -48,10 +48,10 @@ def run(
 
         for (dataset_name, dataset) in year_catalog.datasets.items():
 
-            if not dataset.name.endswith(".nc"):
-                raise ValueError(f"Unexpected dataset name ({dataset.name})")
+            if not dataset_name.endswith(".nc"):
+                raise ValueError(f"Unexpected dataset name ({dataset_name})")
 
-            local_path = output_dir / dataset.name
+            local_path = output_dir / dataset_name
 
             if not local_path.exists():
                 to_download[dataset] = local_path

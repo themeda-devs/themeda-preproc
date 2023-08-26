@@ -15,7 +15,7 @@ class DataSourceName(enum.Enum):
 
 
 DATA_SOURCE_HANDLER = {
-    DataSourceName("land_cover"): "dea",
+    DataSourceName("land_cover"): "land_cover",
     DataSourceName("tmax"): "climate",
     DataSourceName("rain"): "climate",
     DataSourceName("elevation"): "elevation",
