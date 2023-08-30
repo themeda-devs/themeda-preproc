@@ -28,6 +28,7 @@ fiona = "^1.9.4.post1"
 siphon = "^0.9"
 botocore = "^1.31.35"
 numpy = "^1.25.2"
+xarray = "^2023.8.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"

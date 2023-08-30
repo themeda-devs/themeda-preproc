@@ -62,8 +62,10 @@ def run(
 
         for grid_ref_path_info in prep_chip_path_info.values():
 
+            (representative_chip, *_) = grid_ref_path_info
+
             if not is_grid_ref_valid(
-                grid_ref_chip_path_info=grid_ref_path_info,
+                grid_ref_chip_path_info=representative_chip,
                 roi=roi,
             ):
                 continue
