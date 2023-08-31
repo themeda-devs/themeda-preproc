@@ -3,6 +3,7 @@ import pathlib
 import os
 import importlib
 import inspect
+import multiprocessing
 
 import ecofuture_preproc.roi
 import ecofuture_preproc.source
@@ -30,6 +31,14 @@ def main() -> None:
         required=False,
         default=default_base_output_dir,
         help="Base directory to write the output",
+    )
+
+    parser.add_argument(
+        "-cores",
+        type=int,
+        required=False,
+        default=multiprocessing.cpu_count() - 1,
+        help="Number of cores to use with multiprocessing",
     )
 
     parser.add_argument(

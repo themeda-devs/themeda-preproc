@@ -1,5 +1,9 @@
 import typing
 import contextlib
+import collections
+import pathlib
+import os
+import types
 
 import numpy as np
 
@@ -13,13 +17,132 @@ import shapely
 import affine
 
 import ecofuture_preproc.roi
+import ecofuture_preproc.chips
+
+
+def run(
+    roi_name: ecofuture_preproc.roi.ROIName,
+    base_output_dir: pathlib.Path,
+    pad_size_pix: int,
+    protect: bool = True,
+    show_progress: bool = True,
+) -> None:
+
+    table_path = get_table_path(
+        roi_name=roi_name,
+        base_output_dir=base_output_dir,
+        pad_size_pix=pad_size_pix,
+    )
+
+    # if it already exists and is protected, bail
+    if table_path.exists() and not os.access(table_path, os.W_OK):
+        print(f"Path {table_path} exists and is protected; skipping")
+        return
+
+    roi = ecofuture_preproc.roi.RegionOfInterest(
+        name=roi_name,
+        base_output_dir=base_output_dir,
+        load=True,
+    )
+
+    rand_seed = get_rand_seed(
+        roi_name=roi_name,
+        pad_size_pix=pad_size_pix,
+    )
+
+    ref_data_source = "land_cover"
+
+    ref_chips_base_dir = (
+        base_output_dir / "chips" / f"roi_{roi_name.value}" / ref_data_source
+    )
+
+    (ref_year, *_) = sorted(
+        [
+            ref_chip_year_path
+            for ref_chip_year_path in ref_chips_base_dir.glob("*")
+            if ref_chip_year_path.is_dir()
+        ]
+    )
+
+    ref_chips_dir = ref_chips_base_dir / ref_year
+
+    ref_chips_paths = sorted(
+        [
+            ref_chip_path
+            for ref_chip_path in ref_chips_dir.glob("*.tif")
+        ]
+    )
+
+    ref_chips: list[xr.DataArray] = [
+        ecofuture_preproc.chips.read_chip(
+            path=ref_chip_path,
+            chunks="auto",
+            load_data=False,
+        )
+        for ref_chip_path in ref_chips_paths
+    ]
+
+    table = form_chiplet_table(
+        chips=ref_chips[50:53],
+        roi=roi,
+        pad_size_pix=pad_size_pix,
+        rand_seed=rand_seed,
+        show_progress=show_progress,
+    )
+
+    table.write_parquet(file=table_path)
+
+    if protect:
+        ecofuture_preproc.utils.protect_path(path=table_path)
+
+
+def get_table_path(
+    roi_name: ecofuture_preproc.roi.ROIName,
+    base_output_dir: pathlib.Path,
+    pad_size_pix: int,
+) -> pathlib.Path:
+
+    table_dir = (
+        base_output_dir
+        / "chiplet_table"
+        / f"roi_{roi_name.value}"
+        / f"pad_{pad_size_pix}"
+    )
+
+    table_dir.mkdir(parents=True, exist_ok=True)
+
+    table_path = (
+        table_dir
+        / f"chiplet_table_roi_{roi_name.value}_pad_{pad_size_pix}.parquet"
+    )
+
+    return table_path
+
+
+def load_table(
+    roi_name: ecofuture_preproc.roi.ROIName,
+    base_output_dir: pathlib.Path,
+    pad_size_pix: int,
+) -> pl.dataframe.frame.DataFrame:
+
+    table_path = get_table_path(
+        roi_name=roi_name,
+        base_output_dir=base_output_dir,
+        pad_size_pix=pad_size_pix,
+    )
+
+    table = pl.read_parquet(source=table_path)
+
+    return table
 
 
 def form_chiplet_table(
     chips: list[xr.DataArray],
     roi: ecofuture_preproc.roi.RegionOfInterest,
     pad_size_pix: int,
+    rand_seed: int,
     base_size_pix: int = 160,
+    n_spatial_subsets: int = 5,
     show_progress: bool = True,
 ) -> pl.dataframe.frame.DataFrame:
 
@@ -48,8 +171,30 @@ def form_chiplet_table(
 
         table = pl.concat(items=items)
 
-    return table
+    index = np.arange(len(table))
 
+    rand = np.random.RandomState(rand_seed)
+
+    subset_num = rand.choice(
+        a=np.arange(1, n_spatial_subsets + 1),
+        size=len(table),
+    )
+
+    subset_instance_counter: collections.Counter[int] = collections.Counter()
+
+    subset_instance_num = []
+
+    for row_subset_num in subset_num:
+        subset_instance_counter[row_subset_num] += 1
+        subset_instance_num.append(subset_instance_counter[row_subset_num])
+
+    table = table.with_columns(
+        index=pl.Series(values=index),
+        subset_num=pl.Series(values=subset_num),
+        subset_instance_num=pl.Series(values=subset_instance_num),
+    )
+
+    return table
 
 
 def form_chiplet_table_entry(
@@ -191,3 +336,15 @@ def get_schema() -> dict[str, typing.Union[pl.Int64, pl.UInt64, pl.Float64]]:
     }
 
     return schema
+
+
+def get_rand_seed(roi_name: ecofuture_preproc.roi.ROIName, pad_size_pix: int) -> int:
+
+    rand_seed_lut = types.MappingProxyType(
+        {
+            ("savanna", 32): 845627234,
+            ("australia", 32): 587902257,
+        }
+    )
+
+    return rand_seed_lut[(roi_name.value, pad_size_pix)]
