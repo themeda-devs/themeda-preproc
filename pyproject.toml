@@ -81,6 +81,7 @@ module = [
         "rasterio",
 	"siphon",
 	"siphon.catalog",
+	"affine",
 ]
 ignore_missing_imports = true
 

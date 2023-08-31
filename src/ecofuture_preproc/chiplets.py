@@ -1,50 +1,33 @@
 
+import numpy as np
+
 import xarray as xr
 
-import polars as pl
-
-import ecofuture_preproc.roi
+import affine
 
 
-def form_chiplet_table(
-    chips: list[xr.DataArray],
-    roi: ecofuture_preproc.roi.RegionOfInterest,
-    pad_size_pix: int,
-    base_size_pix: int = 160,
-) -> pl.dataframe.frame.DataFrame:
-
-    pass
-
-
-def form_chiplet_table_entry(
-    chip: xr.DataArray,
-    roi: ecofuture_preproc.roi.RegionOfInterest,
+def get_chiplet_from_packet(
+    packet: xr.DataArray,
+    chip_i_x_base: int,
+    chip_i_y_base: int,
+    chip_i_to_coords_transform: affine.Affine,
     base_size_pix: int,
     pad_size_pix: int,
-) -> pl.dataframe.frame.DataFrame:
+) -> xr.DataArray:
 
-    chip_transform = chip.rio.transform()
+    i_x = np.arange(
+        chip_i_x_base - pad_size_pix,
+        chip_i_x_base + base_size_pix + pad_size_pix,
+    ) + 0.5
+    i_y = np.arange(
+        chip_i_y_base - pad_size_pix,
+        chip_i_y_base + base_size_pix + pad_size_pix,
+    ) + 0.5
 
-    schema = {
-        f"{pad_prefix}bbox_{pos}": pl.Int64
-        for pad_prefix in ["", "pad_"]
-        for pos in ["left", "bottom", "right", "top"]
-    }
+    i_xy = np.row_stack((i_x, i_y))
 
-    schema = {
-        **schema,
-        "chip_i_x_base": pl.UInt64,
-        "chip_i_y_base": pl.UInt64,
-        "chip_grid_ref_x_base": pl.Int64,
-        "chip_grid_ref_y_base": pl.Int64,
-    }
+    (x, y) = chip_i_to_coords_transform * i_xy
 
-    for chip_i_x_base in range(0, chip.sizes["x"], base_size_pix):
-        for chip_i_y_base in range(0, chip.sizes["y"], base_size_pix):
+    chiplet = packet.sel(x=x, y=y)
 
-            i_base_x = np.arange(chip_i_x_base, chip_i_x_base + base_size_pix)
-            i_base_y = np.arange(chip_i_y_base, chip_i_y_base + base_size_pix)
-
-            # TODO
-
-    return schema
+    return chiplet
