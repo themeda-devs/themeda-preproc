@@ -3,6 +3,7 @@ import typing
 import os
 import multiprocessing
 import functools
+import contextlib
 
 import numpy as np
 
@@ -21,7 +22,7 @@ import ecofuture_preproc.packet
 
 
 def form_chiplets(
-    table: pl.dataframe.frame.DataFrame,
+    #table: pl.dataframe.frame.DataFrame,
     source_name: ecofuture_preproc.source.DataSourceName,
     roi: ecofuture_preproc.roi.RegionOfInterest,
     base_size_pix: int,
@@ -40,21 +41,18 @@ def form_chiplets(
     )
 
     years = [
-        int(year)
-        for year in sorted(source_chip_dir.glob("*"))
-        if year.is_dir()
+        int(year_path.name)
+        for year_path in sorted(source_chip_dir.glob("*"))
+        if year_path.is_dir()
     ]
 
-    progress_bars = [
-        tqdm.tqdm(
-            iterable=None,
-            total=len(years),
-            disable=not show_progress,
-            position=position,
-            desc=str(year),
-        )
-        for (position, year) in enumerate(years)
-    ]
+    roi_name = ecofuture_preproc.roi.ROIName(roi.name)
+
+    table = ecofuture_preproc.chiplet_table.load_table(
+        roi_name=roi_name,
+        base_output_dir=base_output_dir,
+        pad_size_pix=pad_size_pix,
+    )[:5]
 
     func = functools.partial(
         form_year_chiplets,
@@ -65,102 +63,111 @@ def form_chiplets(
         pad_size_pix=pad_size_pix,
         base_output_dir=base_output_dir,
         protect=protect,
+        show_progress=show_progress,
     )
 
     with multiprocessing.Pool(processes=cores) as pool:
-        pool.starmap(func, zip(years, progress_bars))
+        pool.starmap(func, enumerate(years))
 
 
 def form_year_chiplets(
+    progress_bar_position: int,
+    year: int,
     table: pl.dataframe.frame.DataFrame,
     source_name: ecofuture_preproc.source.DataSourceName,
-    year: int,
     roi: ecofuture_preproc.roi.RegionOfInterest,
     base_size_pix: int,
     pad_size_pix: int,
     base_output_dir: pathlib.Path,
     protect: bool,
-    progress_bar: typing.Optional[tqdm.std.tqdm] = None,  # type: ignore
+    show_progress: bool,
 ) -> None:
 
-    chip_dir = (
-        base_output_dir
-        / "chips"
-        / f"roi_{roi.name.value}"
-        / source_name.value
-        / str(year)
-    )
+    with contextlib.closing(
+        tqdm.tqdm(
+            iterable=None,
+            total=5,
+            disable=not show_progress,
+            position=progress_bar_position,
+            desc=str(year),
+        )
+    ) as progress_bar:
 
-    chip_paths = sorted(chip_dir.glob("*.tif"))
-
-    if len(chip_paths) == 0:
-        raise ValueError(f"No chips found in {chip_dir}")
-
-    roi_name = ecofuture_preproc.roi.ROIName(roi.name)
-
-    output_path = get_chiplet_path(
-        source_name=source_name,
-        year=year,
-        roi_name=roi_name,
-        pad_size_pix=pad_size_pix,
-        base_output_dir=base_output_dir,
-    )
-
-    if output_path.exists() and not os.access(output_path, os.W_OK):
-        print(f"Path {output_path} exists and is protected; skipping")
-        return
-
-    packet = ecofuture_preproc.packet.form_packet(
-        paths=chip_paths,
-        fill_value=ecofuture_preproc.source.DATA_SOURCE_NODATA[source_name],
-    )
-
-    chiplets = np.memmap(
-        filename=output_path,
-        dtype=ecofuture_preproc.source.DATA_SOURCE_DTYPE[source_name],
-        mode="w+",
-        shape=get_array_shape(
-            table=table,
-            base_size_pix=base_size_pix,
-            pad_size_pix=pad_size_pix,
-        ),
-    )
-
-    transforms: dict[ecofuture_preproc.chips.GridRef, affine.Affine] = {}
-
-    for row in table.iter_rows(named=True):
-
-        grid_ref = ecofuture_preproc.chips.GridRef(
-            x=row["chip_grid_ref_x_base"],
-            y=row["chip_grid_ref_y_base"],
+        chip_dir = (
+            base_output_dir
+            / "chips"
+            / f"roi_{roi.name.value}"
+            / source_name.value
+            / str(year)
         )
 
-        if grid_ref not in transforms:
-            transforms[grid_ref] = get_transform_from_row(row=row)
+        chip_paths = sorted(chip_dir.glob("*.tif"))
 
-        chiplet = get_chiplet_from_packet(
-            packet=packet,
-            chip_i_x_base=row["chip_i_x_base"],
-            chip_i_y_base=row["chip_i_y_base"],
-            chip_i_to_coords_transform=transforms[grid_ref],
-            base_size_pix=base_size_pix,
+        if len(chip_paths) == 0:
+            raise ValueError(f"No chips found in {chip_dir}")
+
+        output_path = get_chiplet_path(
+            source_name=source_name,
+            year=year,
+            roi_name=ecofuture_preproc.roi.ROIName(roi.name),
             pad_size_pix=pad_size_pix,
+            base_output_dir=base_output_dir,
         )
 
-        chiplets[row["index"], ...] = chiplet.values
+        if output_path.exists() and not os.access(output_path, os.W_OK):
+            print(f"Path {output_path} exists and is protected; skipping")
+            return
 
-        if progress_bar is not None:
+        packet = ecofuture_preproc.packet.form_packet(
+            paths=chip_paths,
+            fill_value=ecofuture_preproc.source.DATA_SOURCE_NODATA[source_name],
+        )
+
+        chiplets = np.memmap(
+            filename=output_path,
+            dtype=ecofuture_preproc.source.DATA_SOURCE_DTYPE[source_name],
+            mode="w+",
+            shape=get_array_shape(
+                table=table,
+                base_size_pix=base_size_pix,
+                pad_size_pix=pad_size_pix,
+            ),
+        )
+
+        transforms: dict[ecofuture_preproc.chips.GridRef, affine.Affine] = {}
+
+        for row in table.iter_rows(named=True):
+
+            grid_ref = ecofuture_preproc.chips.GridRef(
+                x=row["chip_grid_ref_x_base"],
+                y=row["chip_grid_ref_y_base"],
+            )
+
+            if grid_ref not in transforms:
+                transforms[grid_ref] = get_transform_from_row(row=row)
+
+            chiplet = get_chiplet_from_packet(
+                packet=packet,
+                chip_i_x_base=row["chip_i_x_base"],
+                chip_i_y_base=row["chip_i_y_base"],
+                chip_i_to_coords_transform=transforms[grid_ref],
+                base_size_pix=base_size_pix,
+                pad_size_pix=pad_size_pix,
+            )
+
+            chiplets[row["index"], ...] = chiplet.values
+
             progress_bar.update()
 
-    # write changes to disk
-    chiplets.flush()
+        # write changes to disk
+        chiplets.flush()
 
-    # close the handle
-    # see https://github.com/numpy/numpy/issues/13510
-    chiplets._mmap.close()  # type: ignore
+        # close the handle
+        # see https://github.com/numpy/numpy/issues/13510
+        chiplets._mmap.close()  # type: ignore
 
-    if protect:
-        ecofuture_preproc.utils.protect_path(path=output_path)
+        if protect:
+            ecofuture_preproc.utils.protect_path(path=output_path)
 
 
 def load_chiplets(
