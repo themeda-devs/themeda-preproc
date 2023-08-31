@@ -22,7 +22,7 @@ import ecofuture_preproc.packet
 
 
 def form_chiplets(
-    #table: pl.dataframe.frame.DataFrame,
+    table: pl.dataframe.frame.DataFrame,
     source_name: ecofuture_preproc.source.DataSourceName,
     roi: ecofuture_preproc.roi.RegionOfInterest,
     base_size_pix: int,
@@ -46,14 +46,6 @@ def form_chiplets(
         if year_path.is_dir()
     ]
 
-    roi_name = ecofuture_preproc.roi.ROIName(roi.name)
-
-    table = ecofuture_preproc.chiplet_table.load_table(
-        roi_name=roi_name,
-        base_output_dir=base_output_dir,
-        pad_size_pix=pad_size_pix,
-    )[:5]
-
     func = functools.partial(
         form_year_chiplets,
         table=table,
@@ -70,6 +62,7 @@ def form_chiplets(
         pool.starmap(func, enumerate(years))
 
 
+
 def form_year_chiplets(
     progress_bar_position: int,
     year: int,
@@ -83,91 +76,89 @@ def form_year_chiplets(
     show_progress: bool,
 ) -> None:
 
-    with contextlib.closing(
-        tqdm.tqdm(
-            iterable=None,
-            total=5,
-            disable=not show_progress,
-            position=progress_bar_position,
-            desc=str(year),
-        )
-    ) as progress_bar:
+    progress_bar = tqdm.tqdm(
+        iterable=None,
+        total=5,
+        disable=not show_progress,
+        position=progress_bar_position,
+        desc=str(year),
+    )
 
-        chip_dir = (
-            base_output_dir
-            / "chips"
-            / f"roi_{roi.name.value}"
-            / source_name.value
-            / str(year)
-        )
+    chip_dir = (
+        base_output_dir
+        / "chips"
+        / f"roi_{roi.name.value}"
+        / source_name.value
+        / str(year)
+    )
 
-        chip_paths = sorted(chip_dir.glob("*.tif"))
+    chip_paths = sorted(chip_dir.glob("*.tif"))
 
-        if len(chip_paths) == 0:
-            raise ValueError(f"No chips found in {chip_dir}")
+    if len(chip_paths) == 0:
+        raise ValueError(f"No chips found in {chip_dir}")
 
-        output_path = get_chiplet_path(
-            source_name=source_name,
-            year=year,
-            roi_name=ecofuture_preproc.roi.ROIName(roi.name),
+    output_path = get_chiplet_path(
+        source_name=source_name,
+        year=year,
+        roi_name=ecofuture_preproc.roi.ROIName(roi.name),
+        pad_size_pix=pad_size_pix,
+        base_output_dir=base_output_dir,
+    )
+
+    if output_path.exists() and not os.access(output_path, os.W_OK):
+        print(f"Path {output_path} exists and is protected; skipping")
+        return
+
+    packet = ecofuture_preproc.packet.form_packet(
+        paths=chip_paths,
+        fill_value=ecofuture_preproc.source.DATA_SOURCE_NODATA[source_name],
+    )
+
+    chiplets = np.memmap(
+        filename=output_path,
+        dtype=ecofuture_preproc.source.DATA_SOURCE_DTYPE[source_name],
+        mode="w+",
+        shape=get_array_shape(
+            table=table,
+            base_size_pix=base_size_pix,
             pad_size_pix=pad_size_pix,
-            base_output_dir=base_output_dir,
+        ),
+    )
+
+    transforms: dict[ecofuture_preproc.chips.GridRef, affine.Affine] = {}
+
+    for row in table.iter_rows(named=True):
+
+        grid_ref = ecofuture_preproc.chips.GridRef(
+            x=row["chip_grid_ref_x_base"],
+            y=row["chip_grid_ref_y_base"],
         )
 
-        if output_path.exists() and not os.access(output_path, os.W_OK):
-            print(f"Path {output_path} exists and is protected; skipping")
-            return
+        if grid_ref not in transforms:
+            transforms[grid_ref] = get_transform_from_row(row=row)
 
-        packet = ecofuture_preproc.packet.form_packet(
-            paths=chip_paths,
-            fill_value=ecofuture_preproc.source.DATA_SOURCE_NODATA[source_name],
+        chiplet = get_chiplet_from_packet(
+            packet=packet,
+            chip_i_x_base=row["chip_i_x_base"],
+            chip_i_y_base=row["chip_i_y_base"],
+            chip_i_to_coords_transform=transforms[grid_ref],
+            base_size_pix=base_size_pix,
+            pad_size_pix=pad_size_pix,
         )
 
-        chiplets = np.memmap(
-            filename=output_path,
-            dtype=ecofuture_preproc.source.DATA_SOURCE_DTYPE[source_name],
-            mode="w+",
-            shape=get_array_shape(
-                table=table,
-                base_size_pix=base_size_pix,
-                pad_size_pix=pad_size_pix,
-            ),
-        )
+        chiplets[row["index"], ...] = chiplet.values
 
-        transforms: dict[ecofuture_preproc.chips.GridRef, affine.Affine] = {}
+        progress_bar.update()
 
-        for row in table.iter_rows(named=True):
+    # write changes to disk
+    chiplets.flush()
 
-            grid_ref = ecofuture_preproc.chips.GridRef(
-                x=row["chip_grid_ref_x_base"],
-                y=row["chip_grid_ref_y_base"],
-            )
+    # close the handle
+    # see https://github.com/numpy/numpy/issues/13510
+    chiplets._mmap.close()  # type: ignore
 
-            if grid_ref not in transforms:
-                transforms[grid_ref] = get_transform_from_row(row=row)
-
-            chiplet = get_chiplet_from_packet(
-                packet=packet,
-                chip_i_x_base=row["chip_i_x_base"],
-                chip_i_y_base=row["chip_i_y_base"],
-                chip_i_to_coords_transform=transforms[grid_ref],
-                base_size_pix=base_size_pix,
-                pad_size_pix=pad_size_pix,
-            )
-
-            chiplets[row["index"], ...] = chiplet.values
-
-            progress_bar.update()
-
-        # write changes to disk
-        chiplets.flush()
-
-        # close the handle
-        # see https://github.com/numpy/numpy/issues/13510
-        chiplets._mmap.close()  # type: ignore
-
-        if protect:
-            ecofuture_preproc.utils.protect_path(path=output_path)
+    if protect:
+        ecofuture_preproc.utils.protect_path(path=output_path)
 
 
 def load_chiplets(
