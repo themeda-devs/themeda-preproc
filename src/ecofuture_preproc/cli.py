@@ -48,10 +48,14 @@ def main() -> None:
 
     subparsers = parser.add_subparsers(dest="command")
 
-    # roi prep
     roi_parser = subparsers.add_parser(
         "roi_prep",
         help="Pre-process a ROI definition",
+    )
+
+    chiplet_table_parser = subparsers.add_parser(
+        "chiplet_table_prep",
+        help="Prepare the chiplet info table",
     )
 
     acquire_parser = subparsers.add_parser(
@@ -74,7 +78,9 @@ def main() -> None:
         help="Convert the data to a chiplet representation",
     )
 
-    for parser_needing_roi_name in [roi_parser, to_chips_parser, to_chiplets_parser]:
+    for parser_needing_roi_name in [
+        roi_parser, to_chips_parser, to_chiplets_parser, chiplet_table_parser
+    ]:
         parser_needing_roi_name.add_argument(
             "-roi_name",
             required=True,
@@ -95,14 +101,25 @@ def main() -> None:
             type=ecofuture_preproc.source.DataSourceName,
         )
 
-    args = parser.parse_args()
+    for parser_needing_pad_size_pix in [
+        chiplet_table_parser,
+        to_chiplets_parser,
+    ]:
+        parser_needing_pad_size_pix.add_argument(
+            "-pad_size_pix",
+            required=True,
+            type=int,
+        )
 
+    args = parser.parse_args()
 
     if args.command is None:
         raise ValueError("Please provide a command")
 
     if args.command == "roi_prep":
         runner_str = "ecofuture_preproc.roi"
+    elif args.command == "chiplet_table_prep":
+        runner_str = "ecofuture_preproc.chiplet_table"
     else:
         handler_name = ecofuture_preproc.source.DATA_SOURCE_HANDLER[args.source_name]
         runner_str = f"ecofuture_preproc.{handler_name}.{args.command}"
