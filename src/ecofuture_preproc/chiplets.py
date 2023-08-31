@@ -1,6 +1,8 @@
 import pathlib
 import typing
 import os
+import multiprocessing
+import functools
 
 import numpy as np
 
@@ -10,10 +12,63 @@ import polars as pl
 
 import affine
 
+import tqdm
+
 import ecofuture_preproc.source
 import ecofuture_preproc.roi
 import ecofuture_preproc.chips
 import ecofuture_preproc.packet
+
+
+def form_chiplets(
+    table: pl.dataframe.frame.DataFrame,
+    source_name: ecofuture_preproc.source.DataSourceName,
+    roi: ecofuture_preproc.roi.RegionOfInterest,
+    base_size_pix: int,
+    pad_size_pix: int,
+    base_output_dir: pathlib.Path,
+    protect: bool,
+    cores: int,
+    show_progress: bool = True,
+) -> None:
+
+    source_chip_dir = (
+        base_output_dir
+        / "chips"
+        / f"roi_{roi.name.value}"
+        / source_name.value
+    )
+
+    years = [
+        int(year)
+        for year in sorted(source_chip_dir.glob("*"))
+        if year.is_dir()
+    ]
+
+    progress_bars = [
+        tqdm.tqdm(
+            iterable=None,
+            total=len(years),
+            disable=not show_progress,
+            position=position,
+            desc=str(year),
+        )
+        for (position, year) in enumerate(years)
+    ]
+
+    func = functools.partial(
+        form_year_chiplets,
+        table=table,
+        source_name=source_name,
+        roi=roi,
+        base_size_pix=base_size_pix,
+        pad_size_pix=pad_size_pix,
+        base_output_dir=base_output_dir,
+        protect=protect,
+    )
+
+    with multiprocessing.Pool(processes=cores) as pool:
+        pool.starmap(func, zip(years, progress_bars))
 
 
 def form_year_chiplets(
@@ -24,6 +79,8 @@ def form_year_chiplets(
     base_size_pix: int,
     pad_size_pix: int,
     base_output_dir: pathlib.Path,
+    protect: bool,
+    progress_bar: typing.Optional[tqdm.std.tqdm] = None,  # type: ignore
 ) -> None:
 
     chip_dir = (
@@ -92,14 +149,18 @@ def form_year_chiplets(
 
         chiplets[row["index"], ...] = chiplet.values
 
+        if progress_bar is not None:
+            progress_bar.update()
+
     # write changes to disk
     chiplets.flush()
 
     # close the handle
     # see https://github.com/numpy/numpy/issues/13510
-    chiplets._mmap.close()
+    chiplets._mmap.close()  # type: ignore
 
-    return packet
+    if protect:
+        ecofuture_preproc.utils.protect_path(path=output_path)
 
 
 def load_chiplets(
@@ -110,7 +171,7 @@ def load_chiplets(
     base_size_pix: int,
     pad_size_pix: int,
     base_output_dir: pathlib.Path,
-) -> np.memmap:
+) -> np.memmap:  # type: ignore
 
     chiplet_path = get_chiplet_path(
         source_name=source_name,
@@ -153,7 +214,7 @@ def get_chiplet_path(
     base_output_dir: pathlib.Path,
 ) -> pathlib.Path:
 
-    chiplet_dir = (
+    chiplet_dir: pathlib.Path = (
         base_output_dir
         / "chiplets"
         / f"roi_{roi_name.value}"
@@ -165,7 +226,10 @@ def get_chiplet_path(
 
     chiplet_path = (
         chiplet_dir
-        / f"chiplets_{source_name.value}_roi_{roi_name.value}_pad_{pad_size_pix}.npy"
+        / (
+            f"chiplets_{source_name.value}_{year}_"
+            + f"roi_{roi_name.value}_pad_{pad_size_pix}.npy"
+        )
     )
 
     return chiplet_path
