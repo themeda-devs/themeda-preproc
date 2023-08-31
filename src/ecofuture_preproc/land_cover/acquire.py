@@ -21,7 +21,6 @@ def run(
     protect: bool = True,
     show_progress: bool = True,
 ) -> None:
-
     output_dir = base_output_dir / "raw" / source_name.value
 
     bucket = "dea-public-data"
@@ -33,7 +32,6 @@ def run(
             config=botocore.client.Config(signature_version=botocore.UNSIGNED),
         )
     ) as client:
-
         paginator = client.get_paginator("list_objects")
 
         pages = paginator.paginate(
@@ -45,11 +43,9 @@ def run(
 
         for page in pages:
             for item in page["Contents"]:
-
                 path = pathlib.Path(item["Key"])
 
                 if path.name.endswith("level4.tif"):
-
                     local_path = output_dir / path.name
 
                     if not local_path.exists():
@@ -62,9 +58,7 @@ def run(
                 disable=not show_progress,
             )
         ) as progress_bar:
-
-            for (file_key, local_path) in to_download.items():
-
+            for file_key, local_path in to_download.items():
                 client.download_file(
                     Bucket=bucket,
                     Key=file_key,

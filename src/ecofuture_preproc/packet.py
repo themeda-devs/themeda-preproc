@@ -14,7 +14,6 @@ def form_packet(
     paths: list[pathlib.Path],
     fill_value: typing.Union[float, int],
 ) -> xr.DataArray:
-
     return xr.combine_by_coords(
         data_objects=[
             ecofuture_preproc.chips.read_chip(

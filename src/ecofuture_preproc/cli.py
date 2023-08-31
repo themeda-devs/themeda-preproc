@@ -10,7 +10,6 @@ import ecofuture_preproc.source
 
 
 def main() -> None:
-
     parser = argparse.ArgumentParser(
         description="Pre-processing for the Ecofuture project",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -18,11 +17,7 @@ def main() -> None:
 
     default_base_output_dir = os.environ.get(
         "ECOFUTURE_PREPROC_BASE_OUTPUT_DIR",
-        default=(
-            pathlib.Path(__file__).parent /
-            "../../../../" /
-            "data"
-        ).resolve(),
+        default=(pathlib.Path(__file__).parent / "../../../../" / "data").resolve(),
     )
 
     parser.add_argument(
@@ -88,7 +83,10 @@ def main() -> None:
     )
 
     for parser_needing_roi_name in [
-        roi_parser, to_chips_parser, to_chiplets_parser, chiplet_table_parser
+        roi_parser,
+        to_chips_parser,
+        to_chiplets_parser,
+        chiplet_table_parser,
     ]:
         parser_needing_roi_name.add_argument(
             "-roi_name",

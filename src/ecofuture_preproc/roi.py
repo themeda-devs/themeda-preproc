@@ -25,10 +25,9 @@ class ROIName(enum.Enum):
 
 
 class RegionOfInterest:
-
     __slots__ = ("name", "_shape", "base_output_dir")
 
-    _geojson_filename_lut : typing.ClassVar = {
+    _geojson_filename_lut: typing.ClassVar = {
         "savanna": "NAust_mask_RoI_WGS1984.geojson",
         "australia": "Aust_coastline_mainland_WGS1984.geojson",
     }
@@ -59,14 +58,11 @@ class RegionOfInterest:
         if self.base_output_dir is None:
             raise ValueError("Need to set `base_output_dir`")
         return (
-            self.base_output_dir
-            / "roi"
-            / f"ecofuture_roi_shape_{self.name.value}.pkl"
+            self.base_output_dir / "roi" / f"ecofuture_roi_shape_{self.name.value}.pkl"
         )
 
     @property
     def geojson_path(self) -> pathlib.Path:
-
         path = pathlib.Path(
             str(
                 importlib.resources.files("ecofuture_preproc.resources.roi").joinpath(
@@ -134,7 +130,6 @@ class RegionOfInterest:
         self.load()
 
     def load(self) -> None:
-
         with self.shape_path.open("rb") as handle:
             self._shape = pickle.load(handle)
 
@@ -144,7 +139,6 @@ def run(
     base_output_dir: pathlib.Path,
     protect: bool,
 ) -> None:
-
     roi = RegionOfInterest(
         name=roi_name,
         base_output_dir=base_output_dir,

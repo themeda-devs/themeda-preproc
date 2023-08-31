@@ -3,9 +3,7 @@ import pathlib
 import ecofuture_preproc.chips
 
 
-def parse_chip_path(
-    path: pathlib.Path
-) -> ecofuture_preproc.chips.ChipPathInfo:
+def parse_chip_path(path: pathlib.Path) -> ecofuture_preproc.chips.ChipPathInfo:
     "Parses the metadata in a chip filename"
 
     # example: ga_ls_landcover_class_cyear_2_1-0-0_au_x9y-24_1993-01-01_level4
@@ -41,7 +39,6 @@ def parse_chip_path(
 
 
 def get_grid_ref_from_xy_str(xy_str: str) -> ecofuture_preproc.chips.GridRef:
-
     if not xy_str.startswith("x") or "y" not in xy_str:
         raise ValueError("Unexpected filename format")
 

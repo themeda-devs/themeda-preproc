@@ -1,4 +1,3 @@
-
 import pathlib
 import types
 import collections
@@ -22,7 +21,6 @@ def run(
     protect: bool = True,
     show_progress: bool = True,
 ) -> None:
-
     roi = ecofuture_preproc.roi.RegionOfInterest(
         name=roi_name,
         base_output_dir=base_output_dir,
@@ -37,12 +35,10 @@ def run(
     prep_chip_path_info = collections.defaultdict(list)
 
     for year in prep_dir.glob("*"):
-
         if not year.is_dir():
             continue
 
         for chip_path in year.glob("*.tif"):
-
             chip_path_info = ecofuture_preproc.land_cover.utils.parse_chip_path(
                 path=chip_path,
             )
@@ -59,9 +55,7 @@ def run(
             disable=not show_progress,
         )
     ) as progress_bar:
-
         for grid_ref_path_info in prep_chip_path_info.values():
-
             (representative_chip, *_) = grid_ref_path_info
 
             if not is_grid_ref_valid(
@@ -71,7 +65,6 @@ def run(
                 continue
 
             for chip_path_info in grid_ref_path_info:
-
                 output_dir = chip_dir / str(chip_path_info.year)
 
                 output_dir.mkdir(exist_ok=True, parents=True)
@@ -79,7 +72,6 @@ def run(
                 output_path = output_dir / chip_path_info.path.name
 
                 if not output_path.exists():
-
                     try:
                         shutil.copy2(
                             src=chip_path_info.path,
@@ -98,14 +90,12 @@ def is_grid_ref_valid(
     grid_ref_chip_path_info: ecofuture_preproc.chips.ChipPathInfo,
     roi: ecofuture_preproc.roi.RegionOfInterest,
 ) -> bool:
-
     with contextlib.closing(
         ecofuture_preproc.chips.read_chip(
             path=grid_ref_chip_path_info.path,
             load_data=False,
         )
     ) as reference_chip:
-
         chip_bounds = reference_chip.odc.geobox.boundingbox.polygon.geom
 
         intersects: bool = chip_bounds.intersects(other=roi.shape)

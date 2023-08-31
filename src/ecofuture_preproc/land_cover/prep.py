@@ -1,4 +1,3 @@
-
 import pathlib
 import types
 import collections
@@ -18,14 +17,12 @@ def run(
     protect: bool = True,
     show_progress: bool = True,
 ) -> None:
-
     raw_dir = base_output_dir / "raw" / source_name.value
     prep_dir = base_output_dir / "prep" / source_name.value
 
     raw_chip_path_info = collections.defaultdict(list)
 
     for chip_path in raw_dir.glob("*.tif"):
-
         chip_path_info = ecofuture_preproc.land_cover.utils.parse_chip_path(
             path=chip_path,
         )
@@ -51,9 +48,7 @@ def run(
             disable=not show_progress,
         )
     ) as progress_bar:
-
         for grid_ref_raw_path_info in raw_chip_path_info.values():
-
             if not is_grid_ref_valid(
                 grid_ref_raw_chip_path_info=grid_ref_raw_path_info,
                 expected_n_years=expected_n_years,
@@ -61,7 +56,6 @@ def run(
                 continue
 
             for chip_path_info in grid_ref_raw_path_info:
-
                 output_dir = prep_dir / str(chip_path_info.year)
 
                 output_dir.mkdir(exist_ok=True, parents=True)
@@ -69,7 +63,6 @@ def run(
                 output_path = output_dir / chip_path_info.path.name
 
                 if not output_path.exists():
-
                     try:
                         shutil.copy2(
                             src=chip_path_info.path,
@@ -86,9 +79,8 @@ def run(
 
 def is_grid_ref_valid(
     grid_ref_raw_chip_path_info: list[ecofuture_preproc.chips.ChipPathInfo],
-    expected_n_years: int
+    expected_n_years: int,
 ) -> bool:
-
     n_years = len(grid_ref_raw_chip_path_info)
 
     if n_years != expected_n_years:
@@ -100,14 +92,12 @@ def is_grid_ref_valid(
     )
 
     for comparison_chip_path_info in grid_ref_raw_chip_path_info[1:]:
-
         with contextlib.closing(
             ecofuture_preproc.chips.read_chip(
                 path=comparison_chip_path_info.path,
                 load_data=False,
             )
         ) as comparison_chip:
-
             ok = all(
                 [
                     reference_chip.x.equals(comparison_chip.x),

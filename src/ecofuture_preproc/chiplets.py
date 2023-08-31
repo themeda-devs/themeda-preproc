@@ -1,4 +1,3 @@
-
 import numpy as np
 
 import xarray as xr
@@ -14,15 +13,20 @@ def get_chiplet_from_packet(
     base_size_pix: int,
     pad_size_pix: int,
 ) -> xr.DataArray:
-
-    i_x = np.arange(
-        chip_i_x_base - pad_size_pix,
-        chip_i_x_base + base_size_pix + pad_size_pix,
-    ) + 0.5
-    i_y = np.arange(
-        chip_i_y_base - pad_size_pix,
-        chip_i_y_base + base_size_pix + pad_size_pix,
-    ) + 0.5
+    i_x = (
+        np.arange(
+            chip_i_x_base - pad_size_pix,
+            chip_i_x_base + base_size_pix + pad_size_pix,
+        )
+        + 0.5
+    )
+    i_y = (
+        np.arange(
+            chip_i_y_base - pad_size_pix,
+            chip_i_y_base + base_size_pix + pad_size_pix,
+        )
+        + 0.5
+    )
 
     i_xy = np.row_stack((i_x, i_y))
 

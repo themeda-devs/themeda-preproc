@@ -27,7 +27,6 @@ def run(
     protect: bool = True,
     show_progress: bool = True,
 ) -> None:
-
     table_path = get_table_path(
         roi_name=roi_name,
         base_output_dir=base_output_dir,
@@ -67,10 +66,7 @@ def run(
     ref_chips_dir = ref_chips_base_dir / ref_year
 
     ref_chips_paths = sorted(
-        [
-            ref_chip_path
-            for ref_chip_path in ref_chips_dir.glob("*.tif")
-        ]
+        [ref_chip_path for ref_chip_path in ref_chips_dir.glob("*.tif")]
     )
 
     ref_chips: list[xr.DataArray] = [
@@ -101,7 +97,6 @@ def get_table_path(
     base_output_dir: pathlib.Path,
     pad_size_pix: int,
 ) -> pathlib.Path:
-
     table_dir = (
         base_output_dir
         / "chiplet_table"
@@ -112,8 +107,7 @@ def get_table_path(
     table_dir.mkdir(parents=True, exist_ok=True)
 
     table_path = (
-        table_dir
-        / f"chiplet_table_roi_{roi_name.value}_pad_{pad_size_pix}.parquet"
+        table_dir / f"chiplet_table_roi_{roi_name.value}_pad_{pad_size_pix}.parquet"
     )
 
     return table_path
@@ -124,7 +118,6 @@ def load_table(
     base_output_dir: pathlib.Path,
     pad_size_pix: int,
 ) -> pl.dataframe.frame.DataFrame:
-
     table_path = get_table_path(
         roi_name=roi_name,
         base_output_dir=base_output_dir,
@@ -145,7 +138,6 @@ def form_chiplet_table(
     n_spatial_subsets: int = 5,
     show_progress: bool = True,
 ) -> pl.dataframe.frame.DataFrame:
-
     with contextlib.closing(
         tqdm.tqdm(
             iterable=None,
@@ -153,11 +145,9 @@ def form_chiplet_table(
             disable=not show_progress,
         )
     ) as progress_bar:
-
         items = []
 
         for chip in chips:
-
             items.append(
                 form_chiplet_table_entry(
                     chip=chip,
@@ -203,7 +193,6 @@ def form_chiplet_table_entry(
     base_size_pix: int,
     pad_size_pix: int,
 ) -> pl.dataframe.frame.DataFrame:
-
     chip_transform = chip.rio.transform()
 
     chip_grid_ref = ecofuture_preproc.chips.get_grid_ref_from_chip(chip=chip)
@@ -230,7 +219,6 @@ def form_chiplet_table_entry(
 
     for chip_i_x_base in range(0, chip.sizes["x"], base_size_pix):
         for chip_i_y_base in range(0, chip.sizes["y"], base_size_pix):
-
             (base_bbox, padded_bbox) = (
                 get_bbox(
                     i_x_base=chip_i_x_base,
@@ -243,7 +231,6 @@ def form_chiplet_table_entry(
             )
 
             if not roi_contains_chip:
-
                 base_bbox_shape = shapely.geometry.box(
                     minx=base_bbox["left"],
                     miny=base_bbox["bottom"],
@@ -270,9 +257,11 @@ def form_chiplet_table_entry(
                 "chip_i_y_base": chip_i_y_base,
                 **{
                     f"{pad_prefix}bbox_{pos}": bbox[pos]
-                    for (bbox, pad_prefix) in zip((base_bbox, padded_bbox), ["", "pad_"])
+                    for (bbox, pad_prefix) in zip(
+                        (base_bbox, padded_bbox), ["", "pad_"]
+                    )
                     for pos in ["left", "bottom", "right", "top"]
-                }
+                },
             }
 
             rows.append(row_data)
@@ -289,21 +278,21 @@ def get_bbox(
     pad_size_pix: int,
     transform: affine.Affine,
 ) -> dict[str, float]:
-
-    (x, y) = (
-        transform
-        * np.array(
+    (x, y) = transform * np.array(
+        [
             [
-                [
-                    i_x_base - pad_size_pix, i_x_base + base_size_pix + pad_size_pix,
-                    i_x_base - pad_size_pix, i_x_base + base_size_pix + pad_size_pix,
-                ],
-                [
-                    i_y_base - pad_size_pix, i_y_base + base_size_pix + pad_size_pix,
-                    i_y_base - pad_size_pix, i_y_base + base_size_pix + pad_size_pix,
-                ],
-            ]
-        )
+                i_x_base - pad_size_pix,
+                i_x_base + base_size_pix + pad_size_pix,
+                i_x_base - pad_size_pix,
+                i_x_base + base_size_pix + pad_size_pix,
+            ],
+            [
+                i_y_base - pad_size_pix,
+                i_y_base + base_size_pix + pad_size_pix,
+                i_y_base - pad_size_pix,
+                i_y_base + base_size_pix + pad_size_pix,
+            ],
+        ]
     )
 
     bbox = {
@@ -317,7 +306,6 @@ def get_bbox(
 
 
 def get_schema() -> dict[str, typing.Union[pl.Int64, pl.UInt64, pl.Float64]]:
-
     schema = {
         "partial_roi_overlap": pl.Boolean,
         "chip_i_x_base": pl.UInt64,
@@ -339,7 +327,6 @@ def get_schema() -> dict[str, typing.Union[pl.Int64, pl.UInt64, pl.Float64]]:
 
 
 def get_rand_seed(roi_name: ecofuture_preproc.roi.ROIName, pad_size_pix: int) -> int:
-
     rand_seed_lut = types.MappingProxyType(
         {
             ("savanna", 32): 845627234,

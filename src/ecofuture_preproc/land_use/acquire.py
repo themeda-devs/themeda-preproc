@@ -13,7 +13,6 @@ def run(
     base_output_dir: pathlib.Path,
     protect: bool = True,
 ) -> None:
-
     output_dir = base_output_dir / "raw" / source_name.value
 
     urls = [
