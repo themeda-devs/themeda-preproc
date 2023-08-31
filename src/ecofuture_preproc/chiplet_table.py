@@ -1,3 +1,5 @@
+import typing
+import contextlib
 
 import numpy as np
 
@@ -5,6 +7,9 @@ import xarray as xr
 
 import polars as pl
 
+import tqdm
+
+import shapely
 import affine
 
 import ecofuture_preproc.roi
@@ -15,9 +20,36 @@ def form_chiplet_table(
     roi: ecofuture_preproc.roi.RegionOfInterest,
     pad_size_pix: int,
     base_size_pix: int = 160,
+    show_progress: bool = True,
 ) -> pl.dataframe.frame.DataFrame:
 
-    pass
+    with contextlib.closing(
+        tqdm.tqdm(
+            iterable=None,
+            total=len(chips),
+            disable=not show_progress,
+        )
+    ) as progress_bar:
+
+        items = []
+
+        for chip in chips:
+
+            items.append(
+                form_chiplet_table_entry(
+                    chip=chip,
+                    roi=roi,
+                    base_size_pix=base_size_pix,
+                    pad_size_pix=pad_size_pix,
+                )
+            )
+
+            progress_bar.update()
+
+        table = pl.concat(items=items)
+
+    return table
+
 
 
 def form_chiplet_table_entry(
@@ -31,27 +63,7 @@ def form_chiplet_table_entry(
 
     chip_grid_ref = ecofuture_preproc.chips.get_grid_ref_from_chip(chip=chip)
 
-    schema = {
-        f"{pad_prefix}bbox_{pos}": pl.Int64
-        for pad_prefix in ["", "pad_"]
-        for pos in ["left", "bottom", "right", "top"]
-    }
-
-    schema = {
-        **schema,
-        "chip_i_x_base": pl.UInt64,
-        "chip_i_y_base": pl.UInt64,
-        "chip_grid_ref_x_base": pl.Int64,
-        "chip_grid_ref_y_base": pl.Int64,
-    }
-
-    schema = {
-        **schema,
-        **{
-            f"chip_transform_i_to_coords_coeff_{letter}": pl.Float64
-            for letter in "abcdefghi"
-        },
-    }
+    schema = get_schema()
 
     common_columns = {
         "chip_grid_ref_x_base": chip_grid_ref.x,
@@ -64,6 +76,10 @@ def form_chiplet_table_entry(
             for letter in "abcdefghi"
         },
     }
+
+    roi_contains_chip = roi.shape.contains(
+        other=chip.odc.geobox.boundingbox.polygon.geom
+    )
 
     rows = []
 
@@ -81,8 +97,30 @@ def form_chiplet_table_entry(
                 for bbox_pad_size_pix in [0, pad_size_pix]
             )
 
+            if not roi_contains_chip:
+
+                base_bbox_shape = shapely.geometry.box(
+                    minx=base_bbox["left"],
+                    miny=base_bbox["bottom"],
+                    maxx=base_bbox["right"],
+                    maxy=base_bbox["top"],
+                )
+
+                shapely.prepare(base_bbox_shape)
+
+                chiplet_intersects_roi = base_bbox_shape.intersects(other=roi.shape)
+
+                if not chiplet_intersects_roi:
+                    continue
+
+                roi_contains_chiplet = roi.shape.contains(other=base_bbox_shape)
+
+            else:
+                roi_contains_chiplet = True
+
             row_data = {
                 **common_columns,
+                "partial_roi_overlap": not roi_contains_chiplet,
                 "chip_i_x_base": chip_i_x_base,
                 "chip_i_y_base": chip_i_y_base,
                 **{
@@ -131,3 +169,25 @@ def get_bbox(
     }
 
     return bbox
+
+
+def get_schema() -> dict[str, typing.Union[pl.Int64, pl.UInt64, pl.Float64]]:
+
+    schema = {
+        "partial_roi_overlap": pl.Boolean,
+        "chip_i_x_base": pl.UInt64,
+        "chip_i_y_base": pl.UInt64,
+        "chip_grid_ref_x_base": pl.Int64,
+        "chip_grid_ref_y_base": pl.Int64,
+        **{
+            f"{pad_prefix}bbox_{pos}": pl.Int64
+            for pad_prefix in ["", "pad_"]
+            for pos in ["left", "bottom", "right", "top"]
+        },
+        **{
+            f"chip_transform_i_to_coords_coeff_{letter}": pl.Float64
+            for letter in "abcdefghi"
+        },
+    }
+
+    return schema
