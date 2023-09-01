@@ -77,7 +77,7 @@ def form_year_chiplets(
 
     progress_bar = tqdm.tqdm(
         iterable=None,
-        total=5,
+        total=len(table),
         disable=not show_progress,
         position=progress_bar_position,
         desc=str(year),
@@ -144,6 +144,8 @@ def form_year_chiplets(
             base_size_pix=base_size_pix,
             pad_size_pix=pad_size_pix,
         )
+
+        # do relabellin'
 
         chiplets[row["index"], ...] = chiplet.values
 
