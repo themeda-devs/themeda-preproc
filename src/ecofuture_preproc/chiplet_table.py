@@ -79,7 +79,7 @@ def run(
     ]
 
     table = form_chiplet_table(
-        chips=ref_chips[50:53],
+        chips=ref_chips,
         roi=roi,
         pad_size_pix=pad_size_pix,
         rand_seed=rand_seed,
