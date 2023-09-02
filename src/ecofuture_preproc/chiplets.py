@@ -29,6 +29,9 @@ def form_chiplets(
     base_output_dir: pathlib.Path,
     protect: bool,
     cores: int,
+    relabeller: typing.Optional[
+        typing.Callable[[xr.DataArray, bool], xr.DataArray]
+    ] = None,
     show_progress: bool = True,
 ) -> None:
 
@@ -55,6 +58,7 @@ def form_chiplets(
         base_output_dir=base_output_dir,
         protect=protect,
         show_progress=show_progress,
+        relabeller=relabeller,
     )
 
     with multiprocessing.Pool(processes=cores) as pool:
@@ -73,6 +77,9 @@ def form_year_chiplets(
     base_output_dir: pathlib.Path,
     protect: bool,
     show_progress: bool,
+    relabeller: typing.Optional[
+        typing.Callable[[xr.DataArray, bool], xr.DataArray]
+    ] = None,
 ) -> None:
 
     progress_bar = tqdm.tqdm(
@@ -146,6 +153,11 @@ def form_year_chiplets(
         )
 
         # do relabellin'
+        if relabeller is not None:
+            chiplet = relabeller(
+                chiplet,
+                row["partial_roi_overlap"],
+            )
 
         chiplets[row["index"], ...] = chiplet.values
 
