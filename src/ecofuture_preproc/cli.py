@@ -124,8 +124,8 @@ def main() -> None:
     ]:
         parser_needing_pad_size_pix.add_argument(
             "-pad_size_pix",
-            required=True,
             type=int,
+            default=32,
         )
 
     args = parser.parse_args()
