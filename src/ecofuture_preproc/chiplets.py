@@ -88,6 +88,7 @@ def form_year_chiplets(
         disable=not show_progress,
         position=progress_bar_position,
         desc=str(year),
+        leave=True,
     )
 
     chip_dir = (
