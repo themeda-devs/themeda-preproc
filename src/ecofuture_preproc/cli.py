@@ -108,6 +108,16 @@ def main() -> None:
             type=ecofuture_preproc.source.DataSourceName,
         )
 
+    for parser_needing_base_size_pix in [
+        chiplet_table_parser,
+        to_chiplets_parser,
+    ]:
+        parser_needing_base_size_pix.add_argument(
+            "-base_size_pix",
+            type=int,
+            default=160,
+        )
+
     for parser_needing_pad_size_pix in [
         chiplet_table_parser,
         to_chiplets_parser,
