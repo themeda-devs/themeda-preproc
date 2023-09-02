@@ -62,7 +62,7 @@ def form_chiplets(
     )
 
     with multiprocessing.Pool(processes=cores) as pool:
-        pool.starmap(func, enumerate(years))
+        pool.starmap(func, enumerate(years), chunksize=1)
 
 
 
