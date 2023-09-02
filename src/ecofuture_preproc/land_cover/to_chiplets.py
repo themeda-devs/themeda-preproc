@@ -25,9 +25,6 @@ def run(
         pad_size_pix=pad_size_pix,
     )
 
-    # TMMMP
-    table = table[:5]
-
     roi = ecofuture_preproc.roi.RegionOfInterest(
         name=roi_name,
         base_output_dir=base_output_dir,
