@@ -3,6 +3,7 @@ import types
 import collections
 import contextlib
 import shutil
+import os
 
 import tqdm
 
@@ -62,14 +63,16 @@ def run(
 
                 output_path = output_dir / chip_path_info.path.name
 
-                if not output_path.exists():
-                    try:
-                        shutil.copy2(
-                            src=chip_path_info.path,
-                            dst=output_path,
-                        )
-                    except PermissionError:
-                        pass
+                exists_and_read_only = (
+                    output_path.exists()
+                    and (not os.access(output_path, os.W_OK))
+                )
+
+                if not exists_and_read_only:
+                    shutil.copy2(
+                        src=chip_path_info.path,
+                        dst=output_path,
+                    )
 
                 if protect:
                     ecofuture_preproc.utils.protect_path(path=output_path)
