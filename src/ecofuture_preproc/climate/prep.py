@@ -2,9 +2,10 @@ import pathlib
 import types
 import collections
 import contextlib
-import shutil
 import os
 import dataclasses
+
+import xarray as xr
 
 import tqdm
 
@@ -18,7 +19,7 @@ class ChipPathInfo:
     source_name: ecofuture_preproc.source.DataSourceName
     path: pathlib.Path
     year: int
-    month: str
+    month: int
 
 
 def run(
@@ -55,25 +56,26 @@ def run(
             # work out which year we're dealing with
             (year,) = {chip_path_info.year for chip_path_info in year_raw_path_info}
 
-            # TODO TODO TODO
+            output_dir = prep_dir / str(year)
 
-            for chip_path_info in grid_ref_raw_path_info:
-                output_dir = prep_dir / str(chip_path_info.year)
+            output_dir.mkdir(exist_ok=True, parents=True)
 
-                output_dir.mkdir(exist_ok=True, parents=True)
+            output_path = output_dir / f"{source_name.value}_{year}.tif"
 
-                output_path = output_dir / chip_path_info.path.name
+            exists_and_read_only = (
+                output_path.exists()
+                and (not os.access(output_path, os.W_OK))
+            )
 
-                exists_and_read_only = (
-                    output_path.exists()
-                    and (not os.access(output_path, os.W_OK))
+            if not exists_and_read_only:
+
+                data = summarise_year_chips(
+                    year_raw_path_info=year_raw_path_info,
+                    source_name=source_name,
                 )
 
-                if not exists_and_read_only:
-                    shutil.copy2(
-                        src=chip_path_info.path,
-                        dst=output_path,
-                    )
+                # and save
+                data.rio.to_raster(raster_path=output_path)
 
                 if protect:
                     ecofuture_preproc.utils.protect_path(path=output_path)
@@ -81,9 +83,57 @@ def run(
             progress_bar.update()
 
 
+def summarise_year_chips(
+    year_raw_path_info: list[ChipPathInfo],
+    source_name: ecofuture_preproc.source.DataSourceName,
+) -> xr.DataArray:
+
+    year_data = xr.concat(
+        objs=[
+            ecofuture_preproc.chips.read_chip(
+                path=chip_path_info.path,
+                masked=True,
+            )
+            for chip_path_info in year_raw_path_info
+        ],
+        dim="time",
+    )
+
+    if source_name == ecofuture_preproc.source.DataSourceName("rain"):
+        summ_func = year_data.sum
+    elif source_name == ecofuture_preproc.source.DataSourceName("tmax"):
+        summ_func = year_data.mean
+    else:
+        raise ValueError(f"Unexpected source name ({source_name})")
+
+    data = summ_func(dim="time", skipna=False)
+
+    # some attributes get lost in the summarisation, so restore
+    # see https://corteva.github.io/rioxarray/stable/getting_started/manage_information_loss.html
+    data.rio.write_crs(input_crs=year_data.rio.crs, inplace=True)
+    data.rio.update_attrs(new_attrs=year_data.attrs, inplace=True)
+    data.rio.update_encoding(new_encoding=year_data.encoding, inplace=True)
+
+    if data.attrs["coordinates"] != "time lat lon":
+        raise ValueError("Unexpected coordinates")
+
+    for attr_to_remove in [
+        "NETCDF_DIM_EXTRA",
+        "NETCDF_DIM_time_DEF",
+        "NETCDF_DIM_time_VALUES",
+    ]:
+        del data.attrs[attr_to_remove]
+
+    data.attrs["coordinates"] = "lat lon"
+
+    return data
+
+
 def is_year_valid(year_raw_chip_path_info: list[ChipPathInfo]) -> bool:
 
-    months = sorted([chip_path_info.month for chip_path_info in year_raw_chip_path_info])
+    months = sorted(
+        [chip_path_info.month for chip_path_info in year_raw_chip_path_info]
+    )
 
     valid_year = months == list(range(1, 12 + 1))
 
