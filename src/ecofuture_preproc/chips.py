@@ -15,6 +15,9 @@ class GridRef:
     x: int
     y: int
 
+    def __str__(self) -> str:
+        return f"x{self.x}y{self.y}"
+
 
 @dataclasses.dataclass
 class ChipPathInfo:

@@ -1,6 +1,44 @@
 import pathlib
+import types
+
+import xarray as xr
 
 import ecofuture_preproc.chips
+
+
+def load_reference_chips(
+    base_output_dir: pathlib.Path,
+    roi_name: ecofuture_preproc.roi.ROIName,
+) -> types.MappingProxyType[ecofuture_preproc.chips.GridRef, xr.DataArray]:
+
+    base_chip_dir = base_output_dir / "chips" / f"roi_{roi_name.value}" / "land_cover"
+
+    # work out which DEA chip year to use as the reference
+    (base_chip_ref_year, *_) = (
+        int(base_chip_year_path.name)
+        for base_chip_year_path in sorted(base_chip_dir.glob("*"))
+        if base_chip_year_path.is_dir()
+    )
+
+    chip_dir = base_chip_dir / str(base_chip_ref_year)
+
+    # load all the DEA chips
+    base_chips: dict[ecofuture_preproc.chips.GridRef, xr.DataArray] = {}
+
+    for base_chip_path in sorted(chip_dir.glob("*.tif")):
+
+        base_chip_path_info = parse_chip_path(path=base_chip_path)
+
+        base_chip = ecofuture_preproc.chips.read_chip(path=base_chip_path)
+
+        if base_chip_path_info.grid_ref in base_chips:
+            raise ValueError("Unexpected grid ref duplication")
+
+        base_chips[base_chip_path_info.grid_ref] = base_chip
+
+    base_chips = types.MappingProxyType(base_chips)
+
+    return base_chips
 
 
 def parse_chip_path(path: pathlib.Path) -> ecofuture_preproc.chips.ChipPathInfo:

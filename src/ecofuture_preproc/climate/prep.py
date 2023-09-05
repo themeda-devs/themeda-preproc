@@ -77,6 +77,8 @@ def run(
                 # and save
                 data.rio.to_raster(raster_path=output_path)
 
+                data.close()
+
                 if protect:
                     ecofuture_preproc.utils.protect_path(path=output_path)
 
@@ -88,16 +90,16 @@ def summarise_year_chips(
     source_name: ecofuture_preproc.source.DataSourceName,
 ) -> xr.DataArray:
 
-    year_data = xr.concat(
-        objs=[
-            ecofuture_preproc.chips.read_chip(
-                path=chip_path_info.path,
-                masked=True,
-            )
-            for chip_path_info in year_raw_path_info
-        ],
-        dim="time",
-    )
+    year_chips = [
+        ecofuture_preproc.chips.read_chip(
+            path=chip_path_info.path,
+            masked=True,
+            load_data=True,
+        )
+        for chip_path_info in year_raw_path_info
+    ]
+
+    year_data = xr.concat(objs=year_chips, dim="time")
 
     if source_name == ecofuture_preproc.source.DataSourceName("rain"):
         summ_func = year_data.sum
@@ -117,6 +119,7 @@ def summarise_year_chips(
     if data.attrs["coordinates"] != "time lat lon":
         raise ValueError("Unexpected coordinates")
 
+    # we have summarised over time, so remove references to that dimension
     for attr_to_remove in [
         "NETCDF_DIM_EXTRA",
         "NETCDF_DIM_time_DEF",
@@ -125,6 +128,11 @@ def summarise_year_chips(
         del data.attrs[attr_to_remove]
 
     data.attrs["coordinates"] = "lat lon"
+
+    for year_chip in year_chips:
+        year_chip.close()
+
+    year_data.close()
 
     return data
 
