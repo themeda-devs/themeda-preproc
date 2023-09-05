@@ -330,6 +330,7 @@ def get_rand_seed(roi_name: ecofuture_preproc.roi.ROIName, pad_size_pix: int) ->
     rand_seed_lut = types.MappingProxyType(
         {
             ("savanna", 32): 845627234,
+            ("savanna", 0): 845627234,
             ("australia", 32): 587902257,
         }
     )

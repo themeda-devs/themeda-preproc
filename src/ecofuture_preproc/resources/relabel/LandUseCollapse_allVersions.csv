@@ -1,0 +1,198 @@
+﻿Value,Class,NewValue
+0,No data,0
+100,Nature Conservation,1
+110,Nature Conservation,1
+111,Nature Conservation,1
+112,Nature Conservation,1
+113,Nature Conservation,1
+114,Nature Conservation,1
+115,Nature Conservation,1
+116,Nature Conservation,1
+117,Nature Conservation,1
+120,Managed resource protection,2
+121,Managed resource protection,2
+122,Managed resource protection,2
+123,Managed resource protection,2
+124,Managed resource protection,2
+125,Managed resource protection,2
+130,Other minimal use,3
+131,Other minimal use,3
+132,Other minimal use,3
+133,Other minimal use,3
+134,Other minimal use,3
+200,Grazing Native Vegetation,4
+210,Grazing Native Vegetation,4
+220,Production native forests,5
+221,Production native forests,5
+222,Production native forests,5
+300,Grazing modified pastures,6
+310,Plantation forest,7
+311,Plantation forest,7
+312,Plantation forest,7
+313,Plantation forest,7
+314,Plantation forest,7
+320,Grazing modified pastures,6
+321,Grazing modified pastures,6
+322,Grazing modified pastures,6
+323,Grazing modified pastures,6
+324,Grazing modified pastures,6
+325,Grazing modified pastures,6
+330,Cropping,8
+331,Cropping,8
+332,Cropping,8
+333,Cropping,8
+334,Cropping,8
+335,Cropping,8
+336,Cropping,8
+337,Cropping,8
+338,Cropping,8
+340,Horticulture,9
+341,Horticulture,9
+342,Horticulture,9
+343,Horticulture,9
+344,Horticulture,9
+345,Horticulture,9
+346,Horticulture,9
+347,Horticulture,9
+348,Horticulture,9
+349,Horticulture,9
+350,Horticulture,9
+351,Horticulture,9
+352,Horticulture,9
+353,Horticulture,9
+360,Grazing modified pastures,6
+361,Grazing modified pastures,6
+362,Grazing modified pastures,6
+363,Grazing modified pastures,6
+364,Grazing modified pastures,6
+365,Grazing modified pastures,6
+400,Grazing modified pastures,6
+410,Plantation forest,7
+411,Plantation forest,7
+412,Plantation forest,7
+413,Plantation forest,7
+414,Plantation forest,7
+420,Grazing modified pastures,6
+421,Grazing modified pastures,6
+422,Grazing modified pastures,6
+423,Grazing modified pastures,6
+424,Grazing modified pastures,6
+430,Cropping,8
+431,Cropping,8
+432,Cropping,8
+433,Cropping,8
+434,Cropping,8
+435,Cropping,8
+436,Cropping,8
+437,Cropping,8
+438,Cropping,8
+440,Horticulture,9
+441,Horticulture,9
+442,Horticulture,9
+443,Horticulture,9
+444,Horticulture,9
+445,Horticulture,9
+446,Horticulture,9
+447,Horticulture,9
+448,Horticulture,9
+449,Horticulture,9
+450,Horticulture,9
+451,Horticulture,9
+452,Horticulture,9
+453,Horticulture,9
+454,Horticulture,9
+460,Grazing modified pastures,6
+461,Grazing modified pastures,6
+462,Grazing modified pastures,6
+463,Grazing modified pastures,6
+464,Grazing modified pastures,6
+465,Grazing modified pastures,6
+500,Intensive uses,10
+510,Intensive uses,10
+511,Intensive uses,10
+512,Intensive uses,10
+513,Intensive uses,10
+514,Intensive uses,10
+515,Intensive uses,10
+520,Intensive uses,10
+521,Intensive uses,10
+522,Intensive uses,10
+523,Intensive uses,10
+524,Intensive uses,10
+525,Intensive uses,10
+526,Intensive uses,10
+527,Intensive uses,10
+528,Intensive uses,10
+530,Intensive uses,10
+531,Intensive uses,10
+532,Intensive uses,10
+533,Intensive uses,10
+534,Intensive uses,10
+535,Intensive uses,10
+536,Intensive uses,10
+537,Intensive uses,10
+538,Intensive uses,10
+540,Intensive uses,10
+541,Intensive uses,10
+542,Intensive uses,10
+543,Intensive uses,10
+544,Intensive uses,10
+545,Intensive uses,10
+550,Intensive uses,10
+551,Intensive uses,10
+552,Intensive uses,10
+553,Intensive uses,10
+554,Intensive uses,10
+555,Intensive uses,10
+560,Intensive uses,10
+561,Intensive uses,10
+562,Intensive uses,10
+563,Intensive uses,10
+564,Intensive uses,10
+565,Intensive uses,10
+566,Intensive uses,10
+567,Intensive uses,10
+570,Intensive uses,10
+571,Intensive uses,10
+572,Intensive uses,10
+573,Intensive uses,10
+574,Intensive uses,10
+575,Intensive uses,10
+580,Mining and waste,11
+581,Mining and waste,11
+582,Mining and waste,11
+583,Mining and waste,11
+584,Mining and waste,11
+590,Mining and waste,11
+591,Mining and waste,11
+592,Mining and waste,11
+593,Mining and waste,11
+594,Mining and waste,11
+595,Mining and waste,11
+600,Water,12
+610,Water,12
+611,Water,12
+612,Water,12
+613,Water,12
+614,Water,12
+620,Water,12
+621,Water,12
+622,Water,12
+623,Water,12
+630,Water,12
+631,Water,12
+632,Water,12
+633,Water,12
+640,Water,12
+641,Water,12
+642,Water,12
+643,Water,12
+650,Water,12
+651,Water,12
+652,Water,12
+653,Water,12
+654,Water,12
+660,Water,12
+661,Water,12
+662,Water,12
+663,Water,12
