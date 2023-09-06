@@ -122,6 +122,8 @@ def convert_to_chip(
 
     for geom in relevant_geoms:
 
+        # slower, but doesn't require potentially lots of RAM to hold the
+        # individual geom rasters
         raster = rioxarray.merge.merge_arrays(
             dataarrays=(
                 raster,
