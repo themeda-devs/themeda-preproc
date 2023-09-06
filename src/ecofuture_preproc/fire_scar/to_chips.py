@@ -3,8 +3,6 @@ import contextlib
 import os
 import pickle
 
-import numpy as np
-
 import xarray as xr
 
 import rioxarray.merge
@@ -38,6 +36,7 @@ def run(
     ref_chips = ecofuture_preproc.land_cover.utils.load_reference_chips(
         base_output_dir=base_output_dir,
         roi_name=roi_name,
+        # cache=False,
     )
 
     years = sorted(
@@ -119,22 +118,19 @@ def convert_to_chip(
         if geom.intersects(chip_bbox)
     ]
 
-    rasters = [
-        odc.geo.xr.rasterize(
-            poly=poly,
-            how=chip_geobox,
-        ).astype(int)
-        for poly in relevant_geoms
-    ]
+    raster = xr.zeros_like(other=dea_chip)
 
-    raster = rioxarray.merge.merge_arrays(
-        dataarrays=rasters,
-        method=rasterio.merge.copy_sum,
-    )
+    for geom in relevant_geoms:
 
-    if raster.max() > 255:
-        raise ValueError("Unexpectedly large value")
-
-    raster = raster.astype(np.uint8)
+        raster = rioxarray.merge.merge_arrays(
+            dataarrays=(
+                raster,
+                odc.geo.xr.rasterize(
+                    poly=geom,
+                    how=chip_geobox,
+                ).astype(int),
+            ),
+            method=rasterio.merge.copy_sum,
+        )
 
     return raster
