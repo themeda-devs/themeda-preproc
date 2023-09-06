@@ -83,6 +83,7 @@ module = [
 	"siphon",
 	"siphon.catalog",
 	"affine",
+	"fiona",
 ]
 ignore_missing_imports = true
 
