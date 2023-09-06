@@ -1,23 +1,3 @@
-# Some thoughts:
-#  * Use `fiona` to read the shp file
-#  * Iterate over `handle` and read `.geometry.coordinates`
-#  * Transform points into Albers
-#  * Use `rasterio` to rasterise the geometries; how to define the base raster?
-#  * Match chip resolution to that of the data (1km resolution)
-#  * https://catalogue.data.wa.gov.au/dataset/noaa-fire-history-mapping
-#  * Maybe loop through all the coordinates to work out the bounding-box and the
-#    resolution?
-#  * Might also be easier to use odc-geo:
-#    https://odc-geo.readthedocs.io/en/latest/_api/odc.geo.xr.rasterize.html#odc.geo.xr.rasterize
-#  * odc.geo.geom.polygon(next(h).geometry.coordinates[0],4326)
-#  * odc.geo.xr.rasterize(g, 0.0001)
-#  * actually, odc.geo.geom.multigeom([polygons]) and then rasterize
-#  * but we want a count at each pixel, not just presence/absence
-#  * rioxarray.merge.merge_arrays((...), method=rasterio.merge.copy_sum)
-#  * need to set resolution also
-#  * need to rename the dimensions to 'x' and 'y' rather than lat/lon
-#  * next(h).properties["DATE"] to get the date of a burn (for wet/dry determination)
-
 import pathlib
 import os
 import types
@@ -106,21 +86,7 @@ def process_year(
 
         for entry in handle:
 
-            date_str = entry.properties["DATE"]
-
-            if len(date_str) != 8:
-                raise ValueError(f"Unexpected date string: {date_str}")
-
-            # YYYYMMDD format
-            month = int(date_str[4:6])
-
-            if not (1 <= month <= 12):
-                raise ValueError(f"Unexpected month: {month}")
-
-            if month <= 7:
-                season = "early"
-            else:
-                season = "late"
+            season = get_season_of_entry(entry=entry)
 
             if not source_name.value.endswith(season):
                 continue
@@ -136,6 +102,38 @@ def process_year(
                 geoms.append(geom)
 
     return geoms
+
+
+def get_season_of_entry(entry: fiona.model.Feature) -> str:
+
+    if "DATE" in entry.properties:
+        date_str = entry.properties["DATE"]
+
+        if len(date_str) != 8:
+            raise ValueError(f"Unexpected date string: {date_str}")
+
+        # YYYYMMDD format
+        month = int(date_str[4:6])
+
+    elif "DATE1" in entry.properties:
+        date_str = entry.properties["DATE1"]
+
+        (_, month, _) = date_str.split("-")
+
+        month = int(month)
+
+    else:
+        raise ValueError("Cannot find date; {entry.properties.__dict__}")
+
+    if not (1 <= month <= 12):
+        raise ValueError(f"Unexpected month: {month}")
+
+    if month <= 7:
+        season = "early"
+    else:
+        season = "late"
+
+    return season
 
 
 def geom_from_shape(
