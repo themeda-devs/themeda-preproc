@@ -4,6 +4,13 @@ import typing
 import requests
 
 
+def num_str_to_int(num_str: str) -> int:
+    num = float(num_str)
+    if not num.is_integer():
+        raise ValueError(f"{num_str} is not an integer")
+    return int(num)
+
+
 def protect_path(
     path: pathlib.Path,
     permissions: int = 0o440,
