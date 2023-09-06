@@ -1,6 +1,5 @@
 import pathlib
 import typing
-import os
 import multiprocessing
 import functools
 
@@ -114,8 +113,9 @@ def form_year_chiplets(
         base_output_dir=base_output_dir,
     )
 
-    if output_path.exists() and not os.access(output_path, os.W_OK):
-        print(f"Path {output_path} exists and is protected; skipping")
+    if ecofuture_preproc.utils.is_path_existing_and_read_only(
+        path=output_path
+    ):
         return
 
     packet = ecofuture_preproc.packet.form_packet(

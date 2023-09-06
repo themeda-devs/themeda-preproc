@@ -1,7 +1,15 @@
 import pathlib
 import typing
+import os
 
 import requests
+
+
+def is_path_existing_and_read_only(path: pathlib.Path) -> bool:
+    return (
+        path.exists()
+        and (not os.access(path, os.W_OK))
+    )
 
 
 def num_str_to_int(num_str: str) -> int:

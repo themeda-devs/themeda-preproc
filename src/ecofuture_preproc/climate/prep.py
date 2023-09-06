@@ -2,7 +2,6 @@ import pathlib
 import types
 import collections
 import contextlib
-import os
 import dataclasses
 
 import xarray as xr
@@ -57,17 +56,12 @@ def run(
             (year,) = {chip_path_info.year for chip_path_info in year_raw_path_info}
 
             output_dir = prep_dir / str(year)
-
             output_dir.mkdir(exist_ok=True, parents=True)
-
             output_path = output_dir / f"{source_name.value}_{year}.tif"
 
-            exists_and_read_only = (
-                output_path.exists()
-                and (not os.access(output_path, os.W_OK))
-            )
-
-            if not exists_and_read_only:
+            if not ecofuture_preproc.utils.is_path_existing_and_read_only(
+                path=output_path
+            ):
 
                 data = summarise_year_chips(
                     year_raw_path_info=year_raw_path_info,

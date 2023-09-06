@@ -3,7 +3,6 @@ import types
 import collections
 import contextlib
 import shutil
-import os
 
 import tqdm
 
@@ -58,24 +57,19 @@ def run(
 
             for chip_path_info in grid_ref_raw_path_info:
                 output_dir = prep_dir / str(chip_path_info.year)
-
                 output_dir.mkdir(exist_ok=True, parents=True)
-
                 output_path = output_dir / chip_path_info.path.name
 
-                exists_and_read_only = (
-                    output_path.exists()
-                    and (not os.access(output_path, os.W_OK))
-                )
-
-                if not exists_and_read_only:
+                if not ecofuture_preproc.utils.is_path_existing_and_read_only(
+                    path=output_path
+                ):
                     shutil.copy2(
                         src=chip_path_info.path,
                         dst=output_path,
                     )
 
-                if protect:
-                    ecofuture_preproc.utils.protect_path(path=output_path)
+                    if protect:
+                        ecofuture_preproc.utils.protect_path(path=output_path)
 
             progress_bar.update()
 

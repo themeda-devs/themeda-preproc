@@ -1,6 +1,5 @@
 import pathlib
 import shutil
-import os
 
 import ecofuture_preproc.source
 import ecofuture_preproc.utils
@@ -21,15 +20,11 @@ def run(
 
         output_dir = prep_dir / str(chip_year)
         output_dir.mkdir(exist_ok=True, parents=True)
-
         output_path = output_dir / f"{source_name.value}_{chip_year}.tif"
 
-        exists_and_read_only = (
-            output_path.exists()
-            and (not os.access(output_path, os.W_OK))
-        )
-
-        if not exists_and_read_only:
+        if not ecofuture_preproc.utils.is_path_existing_and_read_only(
+            path=output_path
+        ):
             shutil.copy2(
                 src=chip_path,
                 dst=output_path,

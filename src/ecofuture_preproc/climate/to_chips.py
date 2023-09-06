@@ -1,6 +1,5 @@
 import pathlib
 import contextlib
-import os
 
 import xarray as xr
 
@@ -83,12 +82,9 @@ def run(
                     / f"{source_name.value}_roi_{roi_name.value}_{year}_{grid_ref}.tif"
                 )
 
-                exists_and_read_only = (
-                    output_path.exists()
-                    and (not os.access(output_path, os.W_OK))
-                )
-
-                if not exists_and_read_only:
+                if not ecofuture_preproc.utils.is_path_existing_and_read_only(
+                    path=output_path
+                ):
 
                     converted_chip = convert_chip(
                         climate_chip=climate_chip,
@@ -97,8 +93,8 @@ def run(
 
                     converted_chip.rio.to_raster(raster_path=output_path)
 
-                if protect:
-                    ecofuture_preproc.utils.protect_path(path=output_path)
+                    if protect:
+                        ecofuture_preproc.utils.protect_path(path=output_path)
 
                 progress_bar.update()
 

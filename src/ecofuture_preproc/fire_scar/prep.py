@@ -1,5 +1,4 @@
 import pathlib
-import os
 import types
 import typing
 import pickle
@@ -36,12 +35,9 @@ def run(
 
         output_path = output_dir / f"{source_name.value}_{year}.pkl"
 
-        exists_and_read_only = (
-            output_path.exists()
-            and (not os.access(output_path, os.W_OK))
-        )
-
-        if not exists_and_read_only:
+        if not ecofuture_preproc.utils.is_path_existing_and_read_only(
+            path=output_path
+        ):
 
             year_data = process_year(
                 source_name=source_name,

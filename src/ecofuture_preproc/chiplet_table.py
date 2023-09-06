@@ -2,7 +2,6 @@ import typing
 import contextlib
 import collections
 import pathlib
-import os
 import types
 
 import numpy as np
@@ -34,7 +33,9 @@ def run(
     )
 
     # if it already exists and is protected, bail
-    if table_path.exists() and not os.access(table_path, os.W_OK):
+    if ecofuture_preproc.utils.is_path_existing_and_read_only(
+        path=table_path
+    ):
         print(f"Path {table_path} exists and is protected; skipping")
         return
 
