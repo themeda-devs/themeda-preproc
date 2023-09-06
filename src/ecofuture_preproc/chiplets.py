@@ -4,6 +4,7 @@ import multiprocessing
 import functools
 
 import numpy as np
+import numpy.typing as npt
 
 import xarray as xr
 
@@ -294,3 +295,55 @@ def get_chiplet_from_packet(
         chiplet = packet.sel(x=x, y=y)
 
     return chiplet
+
+
+def convert_chiplet_to_data_array(
+    chiplet: npt.NDArray,
+    metadata: dict[str, typing.Any],
+    pad_size_pix: int,
+    base_size_pix: int = 160,
+    crs: int = 3577,
+    nodata: typing.Union[int, float] = 0,
+    new_resolution: typing.Optional[typing.Union[int, float]] = None,
+) -> xr.DataArray:
+
+    # first, remove any padding from the raw data
+    chiplet = chiplet[
+        pad_size_pix:(base_size_pix + pad_size_pix),
+        pad_size_pix:(base_size_pix + pad_size_pix),
+    ]
+
+    (n_y, n_x) = chiplet.shape
+
+    if not ((n_x == n_y) and n_x == base_size_pix):
+        raise ValueError("Unexpected chiplet dimensions")
+
+    # this goes from the index space of the *chip* to coordinates
+    transform = get_transform_from_row(row=metadata)
+
+    i_chip_x = np.arange(
+        metadata["chip_i_x_base"],
+        metadata["chip_i_x_base"] + base_size_pix,
+    )
+    i_chip_y = np.arange(
+        metadata["chip_i_y_base"],
+        metadata["chip_i_y_base"] + base_size_pix,
+    )
+
+    i_xy = np.row_stack((i_chip_x + 0.5, i_chip_y + 0.5))
+
+    (x, y) = transform * i_xy
+
+    data = xr.DataArray(
+        data=chiplet,
+        dims=("y", "x"),
+        coords={"x": x, "y": y},
+    )
+
+    data.rio.set_crs(input_crs=crs, inplace=True)
+    data.rio.set_nodata(input_nodata=nodata, inplace=True)
+
+    if new_resolution is not None:
+        data = data.rio.reproject(dst_crs=crs, resolution=new_resolution)
+
+    return data
