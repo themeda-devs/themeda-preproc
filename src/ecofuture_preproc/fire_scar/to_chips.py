@@ -36,7 +36,6 @@ def run(
     ref_chips = ecofuture_preproc.land_cover.utils.load_reference_chips(
         base_output_dir=base_output_dir,
         roi_name=roi_name,
-        # cache=False,
     )
 
     years = sorted(
