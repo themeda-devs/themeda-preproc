@@ -4,6 +4,7 @@ import types
 import xarray as xr
 
 import ecofuture_preproc.chips
+import ecofuture_preproc.roi
 
 
 def load_reference_chips(
