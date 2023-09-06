@@ -41,6 +41,7 @@ DATA_SOURCE_NODATA = types.MappingProxyType(
     }
 )
 
+# this is for the chiplets numpy array
 DATA_SOURCE_DTYPE = types.MappingProxyType(
     {
         DataSourceName("land_cover"): np.uint8,
