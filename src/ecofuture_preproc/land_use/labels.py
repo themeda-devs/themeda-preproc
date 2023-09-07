@@ -61,3 +61,55 @@ def get_relabel_lut() -> npt.NDArray[np.uint8]:
             relabel_lut[orig_label] = new_label
 
     return relabel_lut
+
+
+def relabel_chip(
+    chip: xr.DataArray,
+    relabel_lut: npt.NDArray[np.uint8],
+    inplace: bool = True,
+) -> xr.DataArray:
+
+    if not inplace:
+        chip = chip.copy()
+
+    # need to manually replace the 'nodata' value with zero
+    chip = xr.where(
+        cond=chip == chip.rio.nodata,
+        x=0,
+        y=chip,
+    )
+
+    chip.data = relabel_lut[chip.data]
+
+    return chip
+
+    if (chip == SENTINEL_VAL).any():
+        raise ValueError("Unexpected relabelling; sentinel value observed")
+
+    return chip
+
+
+def get_lu_code_lut(attr_table_path: pathlib.Path) -> npt.NDArray[np.uint16]:
+    """
+    Converter from the 'Value' field, stored in the GeoTIFF raster images, to the
+    land use code, stored in an attribute table that is exported from ArcCatalog.
+    """
+
+    # should be much larger than required, but to be safe
+    lut = np.ones(5000, dtype=np.uint16) * SENTINEL_VAL
+
+    with attr_table_path.open(newline="", encoding="ascii") as handle:
+        reader = csv.DictReader(f=handle)
+        for row in reader:
+
+            value = ecofuture_preproc.utils.num_str_to_int(num_str=row["VALUE"])
+            lu_code = ecofuture_preproc.utils.num_str_to_int(num_str=row["LU_CODE"])
+
+            if (value < 0 or lu_code < 0):
+                raise ValueError(f"Unexpected labels: {value}, {lu_code}")
+
+            lut[value] = lu_code
+
+    lut[0] = 0
+
+    return lut

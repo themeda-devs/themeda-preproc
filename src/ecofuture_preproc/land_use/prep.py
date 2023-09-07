@@ -1,6 +1,8 @@
 import pathlib
 import shutil
 
+import xarray as xr
+
 import ecofuture_preproc.source
 import ecofuture_preproc.utils
 import ecofuture_preproc.land_cover.utils
@@ -25,13 +27,42 @@ def run(
         if not ecofuture_preproc.utils.is_path_existing_and_read_only(
             path=output_path
         ):
-            shutil.copy2(
-                src=chip_path,
-                dst=output_path,
-            )
 
-        if protect:
-            ecofuture_preproc.utils.protect_path(path=output_path)
+            # for the files between 1992 and 2005, we have had to export from
+            # ArcCatalog, which doesn't exported the land use codes we are after
+            # we need to convert from the 'value' stored in the tif file into
+            # the land use code based on a LUT
+            if chip_path.name.startswith("lu"):
+               chip = convert_chip_value_to_land_use_code(chip_path=chip_path)
+               chip.rio.to_raster(raster_path=output_path)
+
+            # otherwise, we can just copy the file
+            else:
+                shutil.copy2(
+                    src=chip_path,
+                    dst=output_path,
+                )
+
+            if protect:
+                ecofuture_preproc.utils.protect_path(path=output_path)
+
+
+def convert_chip_value_to_land_use_code(
+    chip_path: pathlib.Path
+) -> xr.DataArray:
+
+    lu_code_lut = ecofuture_preproc.land_use.labels.get_lu_code_lut(
+        attr_table_path=chip_path.with_suffix(".txt")
+    )
+
+    chip = ecofuture_preproc.chips.read_chip(path=chip_path)
+
+    chip_converted = ecofuture_preproc.land_use.labels.relabel_chip(
+        chip=chip,
+        relabel_lut=lu_code_lut,
+    )
+
+    return chip_converted
 
 
 def get_year_from_chip_path(path: pathlib.Path) -> int:
