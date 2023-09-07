@@ -6,6 +6,7 @@ import xarray as xr
 import ecofuture_preproc.source
 import ecofuture_preproc.utils
 import ecofuture_preproc.land_cover.utils
+import ecofuture_preproc.land_use.labels
 
 
 def run(
