@@ -73,20 +73,21 @@ def relabel_chip(
         chip = chip.copy()
 
     # need to manually replace the 'nodata' value with zero
-    chip = xr.where(
+    converted_chip = xr.where(
         cond=chip == chip.rio.nodata,
         x=0,
         y=chip,
     )
 
-    chip.data = relabel_lut[chip.data]
+    converted_chip.data = relabel_lut[converted_chip.data]
 
-    return chip
-
-    if (chip == SENTINEL_VAL).any():
+    if (converted_chip == SENTINEL_VAL).any():
         raise ValueError("Unexpected relabelling; sentinel value observed")
 
-    return chip
+    converted_chip.rio.set_crs(input_crs=chip.rio.crs, inplace=True)
+    converted_chip.rio.set_nodata(input_nodata=0, inplace=True)
+
+    return converted_chip
 
 
 def get_lu_code_lut(attr_table_path: pathlib.Path) -> npt.NDArray[np.uint16]:
