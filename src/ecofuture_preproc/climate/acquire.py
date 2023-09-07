@@ -5,6 +5,7 @@ years and months.
 
 import pathlib
 import contextlib
+import typing
 
 import siphon.catalog
 
@@ -20,6 +21,10 @@ def run(
     protect: bool = True,
     show_progress: bool = True,
 ) -> None:
+
+    # only consider this and subsequent years
+    start_year: typing.Final = 1988
+
     output_dir = base_output_dir / "raw" / source_name.value
 
     catalog_url = "https://dapds00.nci.org.au/thredds/catalog.xml"
@@ -41,6 +46,10 @@ def run(
     for year, year_data in catalog.catalog_refs.items():
         if len(year) != 4 or not year.isnumeric():
             raise ValueError(f"Unexpected year ({year})")
+
+        # skip if the year is earlier than we're interested in
+        if int(year) < start_year:
+            continue
 
         year_catalog = year_data.follow()
 
