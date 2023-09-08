@@ -2,6 +2,47 @@
 
 [[_TOC_]]
 
+## Usage
+
+Most external interaction with this package will be related to the final stage of the pre-preprocessing: the chiplets.
+
+### Chiplet data loading
+
+For loading the chiplets for a given year and data source, the relevant function is `ecofuture_preproc.chiplets.load_chiplets`.
+This returns a 3D memmapped numpy array, where the first dimension is the chiplet instance, the second dimension is the vertical spatial dimension, and the third dimension is the horizontal spatial dimension.
+Because the variable is memmapped, there is no memory cost to loading the chiplets until individual items are accessed.
+
+For example, the chiplets for the land use data source from 1996 can be loaded by something like:
+
+```python
+chiplets = ecofuture_preproc.chiplets.load_chiplets(
+    source_name=ecofuture_preproc.source.DataSourceName("land_use"),
+    year=1996,
+    roi_name=ecofuture_preproc.roi.ROIName("savanna"),
+    base_size_pix=160,
+    pad_size_pix=32,
+    base_output_dir=pathlib.Path("~/data").expanduser(),
+)
+```
+
+### Chiplet metadata access
+
+To access the chiplets of interest within the loaded chiplet data structure, we need to know the properties of each chiplet index.
+That information is obtained by loading the appropriate metadata table, using the `ecofuture_preproc.chiplet_table.load_table` function.
+For example:
+
+```python
+table = ecofuture_preproc.chiplet_table.load_table(
+    roi_name=ecofuture_preproc.roi.ROIName("savanna"),
+    base_output_dir=pathlib.Path("~/data").expanduser(),
+    pad_size_pix=32,
+)
+```
+
+This returns a Polars `DataFrame` tabular representation, in which each row corresponds to a chiplet instance in the data array (with the specific index captured in the `index` column).
+By selecting and filtering within this table, the indices of interest can be obtained and then used to index into the chiplet data array.
+
+
 ## Approach
 
 The pre-processing of the data associated with each data source occurs within four sequential stages: acquisition, preparation, chip conversion, and chiplet conversion.

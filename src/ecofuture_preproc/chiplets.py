@@ -20,6 +20,7 @@ import ecofuture_preproc.source
 import ecofuture_preproc.roi
 import ecofuture_preproc.chips
 import ecofuture_preproc.packet
+import ecofuture_preproc.chiplet_table
 
 
 def form_chiplets(
@@ -179,7 +180,6 @@ def form_year_chiplets(
 
 
 def load_chiplets(
-    table: pl.dataframe.frame.DataFrame,
     source_name: ecofuture_preproc.source.DataSourceName,
     year: int,
     roi_name: ecofuture_preproc.roi.ROIName,
@@ -187,6 +187,12 @@ def load_chiplets(
     pad_size_pix: int,
     base_output_dir: pathlib.Path,
 ) -> np.memmap:  # type: ignore
+
+    table = ecofuture_preproc.chiplet_table.load_table(
+        roi_name=roi_name,
+        base_output_dir=base_output_dir,
+        pad_size_pix=pad_size_pix,
+    )
 
     chiplet_path = get_chiplet_path(
         source_name=source_name,
