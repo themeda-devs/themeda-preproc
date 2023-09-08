@@ -94,4 +94,3 @@ def get_year_from_chip_path(path: pathlib.Path) -> int:
     year_i = int(year_f)
 
     return year_i
-
