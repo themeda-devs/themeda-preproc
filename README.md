@@ -56,3 +56,21 @@ As the canonical source, the land cover chips need to be converted from the prep
 Those fire scar instance shapes that intersect with the land cover chip are then rasterised based on the spatial properties of the chip, and then aggregated (summed) over fire scar instances.
 
 
+### Chiplet conversion
+
+The final stage involves creating a set of 'chiplets' for each year for each data source, where a chiplet is a small spatial region of interest - typically with a base size of 160 x 160 pixels.
+The chiplets for a given data source are stored inside a single numpy array per year, saved in `data/chiplets/roi_${ROI_NAME}/pad_${PAD_SIZE_PIX}/${DATA_SOURCE}`.
+The 'padding' refers to the region shared by chiplets with neighbouring spatial locations; rather than tiling the space without overlap, the boundary of each chiplet is extended by `${PAD_SIZE_PIX}` number of pixels.
+A chiplet is considered valid if it has any spatial overlap with the named ROI, without considering any padded regions.
+
+There is some data-source specificity to the chiplet conversion process:
+
+* Land cover: The value of each pixel is relabelled from the Level 4 classification of Digital Earth Australia into a custom re-classification.
+The lookup table for this re-labelling is found in the `resources/relabel` directory of this package.
+Additionally, the pixels classified as 'water' can be re-labelled as 'ocean' of the pixel lies outside of a ROI (called 'australia') that has coastal boundaries.
+* Land use: Similar to the land cover data, the land use classifications are re-labelled to a custom classification system.
+* Rain, Tmax: Just a direct transformation to chiplets.
+* Elevation: Just a direct transformation to chiplets.
+* Fire scar early, fire scar late: Just a direct transformation to chiplets.
+
+
