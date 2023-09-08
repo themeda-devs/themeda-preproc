@@ -1,5 +1,7 @@
 # Ecofuture pre-processing
 
+[[_TOC_]]
+
 ## Approach
 
 The pre-processing of the data associated with each data source occurs within four sequential stages: acquisition, preparation, chip conversion, and chiplet conversion.
