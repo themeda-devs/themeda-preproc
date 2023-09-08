@@ -36,8 +36,8 @@ DATA_SOURCE_NODATA = types.MappingProxyType(
         DataSourceName("rain"): np.nan,
         DataSourceName("elevation"): np.nan,
         DataSourceName("land_use"): 0,
-        #DataSourceName("fire_scar_early"): "fire_scar",
-        #DataSourceName("fire_scar_late"): "fire_scar",
+        DataSourceName("fire_scar_early"): 0,
+        DataSourceName("fire_scar_late"): 0,
     }
 )
 
@@ -49,7 +49,7 @@ DATA_SOURCE_DTYPE = types.MappingProxyType(
         DataSourceName("rain"): np.float16,
         DataSourceName("elevation"): np.float16,
         DataSourceName("land_use"): np.uint8,
-        #DataSourceName("fire_scar_early"): "fire_scar",
-        #DataSourceName("fire_scar_late"): "fire_scar",
+        DataSourceName("fire_scar_early"): np.uint8,
+        DataSourceName("fire_scar_late"): np.uint8,
     }
 )

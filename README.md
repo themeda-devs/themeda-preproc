@@ -2,7 +2,9 @@
 
 ## Approach
 
-The pre-processing of the data associated with each data source occurs within four sequential stages.
+The pre-processing of the data associated with each data source occurs within four sequential stages: acquisition, preparation, chip conversion, and chiplet conversion.
+Each data source handler has a directory in the package, containing files implementing each of these steps: `acquire.py`, `prep.py`, `to_chips.py`, and `to_chips.py`.
+Note that Rain and Tmax data sources are both processed through a common `climate` handler, and the two fire scar data sources (early and late) are processed through a common `fire_scar` handler.
 
 These four stages are supported by two additional steps:
 
@@ -11,11 +13,15 @@ These four stages are supported by two additional steps:
 This stage involves converting a ROI description from a GeoJSON file into a `shapely`-based representation with a Coordinate Reference System (CRS) of the Australian Albers (3577) projection.
 The GeoJSON files are stored within the `resources/roi` directory of this package, and the prepared ROI files are written to the `data/roi` directory.
 
+See `roi.py` in the package for details.
+
 ### Chiplet table preparation
 
 This stage involves creating a tabular representation of the metadata for each of the 'chiplet' representations, which are the final form of the data that are used in subsequent analyses.
 The set of chiplets, and hence the chiplet tables, depend on the ROI used and the padding size used in the chiplet formation.
 The resulting tables are stored in a parquet file within `data/chiplet_table/roi_${ROI_NAME}/pad_${PAD_SIZE_PIX}/`.
+
+See `chiplet_table.py` in the package for details.
 
 ### Acquisition
 
@@ -69,8 +75,6 @@ There is some data-source specificity to the chiplet conversion process:
 The lookup table for this re-labelling is found in the `resources/relabel` directory of this package.
 Additionally, the pixels classified as 'water' can be re-labelled as 'ocean' of the pixel lies outside of a ROI (called 'australia') that has coastal boundaries.
 * Land use: Similar to the land cover data, the land use classifications are re-labelled to a custom classification system.
-* Rain, Tmax: Just a direct transformation to chiplets.
-* Elevation: Just a direct transformation to chiplets.
+* Rain, Tmax: Just a direct transformation to chiplets, with a conversion to 16-bit floating-point values.
+* Elevation: Just a direct transformation to chiplets, with a conversion to 16-bit floating-point values.
 * Fire scar early, fire scar late: Just a direct transformation to chiplets.
-
-
