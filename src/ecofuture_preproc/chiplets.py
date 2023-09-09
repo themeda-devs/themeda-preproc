@@ -159,10 +159,16 @@ def form_year_chiplets(
 
         # do relabellin'
         if relabeller is not None:
-            chiplet = relabeller(
-                chiplet,
-                row["partial_roi_overlap"],
-            )
+            try:
+                chiplet = relabeller(
+                    chiplet,
+                    row["partial_roi_overlap"],
+                )
+            except ValueError:
+                print(f"Error in year {year}")
+                print(f"Error with chiplet: {row}")
+                print(f"Index: {row['index']}")
+                raise
 
         chiplets[row["index"], ...] = chiplet.values
 
