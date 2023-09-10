@@ -66,8 +66,10 @@ The pre-processing steps are executed via the `ecofuture_preproc` command; for e
 poetry run ecofuture_preproc --help
 ```
 
+To see all the steps required to run through the complete pipeline, see `run.sh` in the root directory of the package.
+
 > **Warning**
-The pre-processing operations can consume a lot of RAM and CPU resources.
+The pre-processing operations can consume a lot of RAM, CPU, and storage resources.
 
 ### Approach
 
