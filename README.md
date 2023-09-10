@@ -2,7 +2,23 @@
 
 [[_TOC_]]
 
-## Usage
+## Installation
+
+This package requires Python 3.9+ and Poetry.
+First, clone the repository to a local directory:
+```bash
+git clone https://gitlab.unimelb.edu.au/mdap/ecofuture-preproc
+```
+Then change into the package directory and setup Poetry to use a new virtual environment:
+```bash
+poetry env use $(which python)
+```
+Then install the dependencies (optionally include the `--with=dev,interactive` argument if involved in package development):
+```bash
+poetry install
+```
+
+## Using the pre-processing output
 
 Most external interaction with this package will be related to the final stage of the pre-preprocessing: the chiplets.
 
@@ -43,11 +59,24 @@ This returns a Polars `DataFrame` tabular representation, in which each row corr
 By selecting and filtering within this table, the indices of interest can be obtained and then used to index into the chiplet data array.
 
 
+## Running the pre-processing
+
+The pre-processing steps are executed via the `ecofuture_preproc` command; for example:
+```bash
+poetry run ecofuture_preproc --help
+```
+
+> **Warning**
+The pre-processing operations can consume a lot of RAM and CPU resources.
+
 ## Approach
 
 The pre-processing of the data associated with each data source occurs within four sequential stages: acquisition, preparation, chip conversion, and chiplet conversion.
 Each data source handler has a directory in the package, containing files implementing each of these steps: `acquire.py`, `prep.py`, `to_chips.py`, and `to_chips.py`.
-Note that Rain and Tmax data sources are both processed through a common `climate` handler, and the two fire scar data sources (early and late) are processed through a common `fire_scar` handler.
+The steps are executed by passing the appropriate step name as a positional argument to `ecofuture_preproc`.
+
+> **Note**
+Rain and Tmax data sources are both processed through a common `climate` handler, and the two fire scar data sources (early and late) are processed through a common `fire_scar` handler.
 
 These four stages are supported by two additional steps:
 
@@ -58,6 +87,11 @@ The GeoJSON files are stored within the `resources/roi` directory of this packag
 
 See `roi.py` in the package for details.
 
+An example execution:
+```bash
+poetry run ecofuture_preproc roi_prep -roi_name savanna
+```
+
 ### Chiplet table preparation
 
 This stage involves creating a tabular representation of the metadata for each of the 'chiplet' representations, which are the final form of the data that are used in subsequent analyses.
@@ -66,6 +100,10 @@ The resulting tables are stored in a parquet file within `data/chiplet_table/roi
 
 See `chiplet_table.py` in the package for details.
 
+An example execution:
+```bash
+poetry run ecofuture_preproc chiplet_table_prep -roi_name savanna -pad_size_pix 32
+```
 ### Acquisition
 
 This stage relates to the `data/raw/${DATASOURCE}` directory.
@@ -80,6 +118,11 @@ Its acquisition stage requires manual copying of the data into the relevant dire
 The ArcCatalog application is used to manually export the raster data into GeoTIFF format into the relevant directory.
 The attribute tables are also exported via ArcCatalog, as plain text files.
 
+An example execution:
+```bash
+poetry run ecofuture_preproc acquire -source_name rain
+```
+
 ### Preparation
 
 In this stage, the raw data for each data source are 'prepared' and placed into the `data/prep/${DATA_SOURCE}/${YYYY}` directory.
@@ -91,6 +134,10 @@ What is involved in 'preparation' varies across data sources, but the main idea 
 * Elevation: The chip is simply assigned a year (2011) and copied over.
 * Fire scar early, fire scar late: The raw shape files are split based on their season (before or after the end of June), and the shape files are converted into geometry objects and saved in pickled format.
 
+An example execution:
+```bash
+poetry run ecofuture_preproc prep -source_name land_cover
+```
 
 ### Chip conversion
 
@@ -104,6 +151,10 @@ As the canonical source, the land cover chips need to be converted from the prep
 * Fire scar early, fire scar late: Within a year and land cover chip, the shapes for each fire scar instance are first tested for intersection with the spatial coverage of the land cover chip.
 Those fire scar instance shapes that intersect with the land cover chip are then rasterised based on the spatial properties of the chip, and then aggregated (summed) over fire scar instances.
 
+An example execution:
+```bash
+poetry run ecofuture_preproc to_chips -source_name tmax -roi_name savanna
+```
 
 ### Chiplet conversion
 
@@ -121,3 +172,12 @@ Additionally, the pixels classified as 'water' can be re-labelled as 'ocean' of 
 * Rain, Tmax: Just a direct transformation to chiplets, with a conversion to 16-bit floating-point values.
 * Elevation: Just a direct transformation to chiplets, with a conversion to 16-bit floating-point values.
 * Fire scar early, fire scar late: Just a direct transformation to chiplets.
+
+An example execution:
+```bash
+poetry run ecofuture_preproc to_chiplets -source_name fire_scar_early -roi_name savanna -pad_size_pix 32
+```
+
+## Authors
+
+Staff at the [Melbourne Data Analytics Platform (MDAP)](https://mdap.unimelb.edu.au/), University of Melbourne.
