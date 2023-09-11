@@ -69,7 +69,10 @@ def run(
                 )
 
                 # and save
-                data.rio.to_raster(raster_path=output_path)
+                data.rio.to_raster(
+                    raster_path=output_path,
+                    compress="lzw",
+                )
 
                 data.close()
 

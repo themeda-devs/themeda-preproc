@@ -91,7 +91,10 @@ def run(
                         dea_chip=base_chip,
                     )
 
-                    chip.rio.to_raster(raster_path=output_path)
+                    chip.rio.to_raster(
+                        raster_path=output_path,
+                        compress="lzw",
+                    )
 
                     if protect:
                         ecofuture_preproc.utils.protect_path(path=output_path)

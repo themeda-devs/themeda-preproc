@@ -74,7 +74,6 @@ def run(
             # load the climate chip
             land_use_chip = ecofuture_preproc.chips.read_chip(
                 path=land_use_chip_path,
-                load_data=True,
                 masked=True,
             )
 
@@ -94,7 +93,10 @@ def run(
                         dea_chip=base_chip,
                     )
 
-                    converted_chip.rio.to_raster(raster_path=output_path)
+                    converted_chip.rio.to_raster(
+                        raster_path=output_path,
+                        compress="lzw",
+                    )
 
                     if protect:
                         ecofuture_preproc.utils.protect_path(path=output_path)
@@ -112,10 +114,10 @@ def convert_chip(
 
     interp_method = rasterio.enums.Resampling.nearest
 
-    land_use_chip_resampled = land_use_chip.rio.reproject_match(
-        match_data_array=dea_chip,
-        resample=interp_method,
-    )
+    land_use_chip_resampled = land_use_chip.odc.reproject(
+        how=dea_chip.odc.geobox,
+        resampling=interp_method,
+    ).compute()
 
     land_use_chip_resampled = xr.where(
         cond=land_use_chip_resampled.isnull(),

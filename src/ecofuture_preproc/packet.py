@@ -30,6 +30,7 @@ def form_packet(
             for chip_path in paths
         ],
         fill_value=fill_value,
+        combine_attrs="drop_conflicts",
     )
 
 

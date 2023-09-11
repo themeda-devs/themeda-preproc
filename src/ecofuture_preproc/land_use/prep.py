@@ -35,7 +35,10 @@ def run(
             # the land use code based on a LUT
             if chip_path.name.startswith("lu"):
                chip = convert_chip_value_to_land_use_code(chip_path=chip_path)
-               chip.rio.to_raster(raster_path=output_path)
+               chip.rio.to_raster(
+                   raster_path=output_path,
+                   compress="lzw",
+               )
 
             # otherwise, we can just copy the file
             else:

@@ -8,8 +8,6 @@ import numpy.typing as npt
 
 import xarray as xr
 
-import dask.config
-
 import polars as pl
 
 import affine
@@ -280,7 +278,6 @@ def get_chiplet_from_packet(
     chip_i_to_coords_transform: affine.Affine,
     base_size_pix: int,
     pad_size_pix: int,
-    large_chunk_ok: bool = True,
 ) -> xr.DataArray:
     i_x = (
         np.arange(
@@ -301,10 +298,7 @@ def get_chiplet_from_packet(
 
     (x, y) = chip_i_to_coords_transform * i_xy
 
-    with dask.config.set(
-        **{"array.slicing.split_large_chunks": not large_chunk_ok}
-    ):
-        chiplet = packet.sel(x=x, y=y)
+    chiplet = packet.sel(x=x, y=y)
 
     return chiplet
 

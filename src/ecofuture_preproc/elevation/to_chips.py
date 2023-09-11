@@ -69,7 +69,7 @@ def run(
         # load the DEM chip
         dem_chip = ecofuture_preproc.chips.read_chip(
             path=dem_chip_path,
-            load_data=True,
+            chunks="auto",
             masked=True,
         )
 
@@ -89,7 +89,10 @@ def run(
                     dea_chip=base_chip,
                 )
 
-                converted_chip.rio.to_raster(raster_path=output_path)
+                converted_chip.rio.to_raster(
+                    raster_path=output_path,
+                    compress="lzw",
+                )
 
                 if protect:
                     ecofuture_preproc.utils.protect_path(path=output_path)
@@ -104,9 +107,9 @@ def convert_chip(
 
     interp_method = rasterio.enums.Resampling.bilinear
 
-    dem_chip_resampled = dem_chip.rio.reproject_match(
-        match_data_array=dea_chip,
-        resample=interp_method,
-    )
+    dem_chip_resampled = dem_chip.odc.reproject(
+        how=dea_chip.odc.geobox,
+        resampling=interp_method,
+    ).compute()
 
     return dem_chip_resampled

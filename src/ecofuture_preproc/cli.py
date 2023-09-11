@@ -10,6 +10,16 @@ import ecofuture_preproc.source
 
 
 def main() -> None:
+
+    # silence the dask chunks message
+    # array.slicing.split_large_chunks
+    os.environ[
+        "DASK_"
+        + "ARRAY__"
+        + "SLICING__"
+        + "SPLIT_LARGE_CHUNKS"
+    ] = "false"
+
     parser = argparse.ArgumentParser(
         description="Pre-processing for the Ecofuture project",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,

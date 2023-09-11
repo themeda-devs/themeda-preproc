@@ -89,9 +89,13 @@ def run(
                     converted_chip = convert_chip(
                         climate_chip=climate_chip,
                         dea_chip=base_chip,
+                        source_name=source_name,
                     )
 
-                    converted_chip.rio.to_raster(raster_path=output_path)
+                    converted_chip.rio.to_raster(
+                        raster_path=output_path,
+                        compress="lzw",
+                    )
 
                     if protect:
                         ecofuture_preproc.utils.protect_path(path=output_path)
@@ -102,13 +106,19 @@ def run(
 def convert_chip(
     climate_chip: xr.DataArray,
     dea_chip: xr.DataArray,
+    source_name: ecofuture_preproc.source.DataSourceName,
 ) -> xr.DataArray:
 
     interp_method = rasterio.enums.Resampling.bilinear
 
-    climate_chip_resampled = climate_chip.rio.reproject_match(
-        match_data_array=dea_chip,
-        resample=interp_method,
-    )
+    climate_chip_resampled = climate_chip.odc.reproject(
+        how=dea_chip.odc.geobox,
+        resampling=interp_method,
+    ).compute()
+
+    climate_chip_resampled.rio.set_crs(input_crs=dea_chip.rio.crs, inplace=True)
+
+    nodata_val = ecofuture_preproc.source.DATA_SOURCE_NODATA[source_name]
+    climate_chip_resampled.rio.set_nodata(input_nodata=nodata_val, inplace=True)
 
     return climate_chip_resampled
