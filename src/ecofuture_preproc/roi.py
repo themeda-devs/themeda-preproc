@@ -83,7 +83,12 @@ class RegionOfInterest:
         within: bool = self.shape.within(other=other_roi.shape)
         return within
 
-    def prepare(self, src_crs: int = 4326, dst_crs: int = 3577) -> None:
+    def prepare(
+        self,
+        src_crs: int = 4326,
+        dst_crs: int = 3577,
+        save: bool = True,
+    ) -> None:
         """
         Loads a spatial region-of-interest from a GeoJSON file, optionally converts the
         projection, and formats the region as a `shapely` Polygon.
@@ -122,12 +127,16 @@ class RegionOfInterest:
         # might speed up calls that use the geometry
         shapely.prepare(geometry=region)
 
-        self.shape_path.parent.mkdir(parents=True, exist_ok=True)
+        if save:
+            self.shape_path.parent.mkdir(parents=True, exist_ok=True)
 
-        with self.shape_path.open("wb") as handle:
-            pickle.dump(region, handle)
+            with self.shape_path.open("wb") as handle:
+                pickle.dump(region, handle)
 
-        self.load()
+            self.load()
+
+        else:
+            self._shape = region
 
     def load(self) -> None:
         with self.shape_path.open("rb") as handle:

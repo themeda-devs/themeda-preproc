@@ -349,7 +349,12 @@ def convert_chiplet_to_data_array(
     data.rio.set_crs(input_crs=crs, inplace=True)
     data.rio.set_nodata(input_nodata=nodata, inplace=True)
 
+    data = data.odc.assign_crs(crs=data.rio.crs)
+
     if new_resolution is not None:
-        data = data.rio.reproject(dst_crs=crs, resolution=new_resolution)
+        data = data.odc.reproject(
+            how=data.odc.crs,
+            resolution=new_resolution,
+        )
 
     return data

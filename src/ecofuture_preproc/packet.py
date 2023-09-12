@@ -4,6 +4,7 @@ Lazily load a collection of chips (a 'packet' of chips...).
 
 import pathlib
 import typing
+import tempfile
 
 import numpy.typing as npt
 
@@ -62,7 +63,23 @@ def form_packet_from_chiplets(
         )
 
         if chunks is not None:
-            data_array = data_array.chunk(chunks=chunks)
+
+            # doesn't seem right, but I don't know a better way of doing this!
+
+            try:
+                temp_file = tempfile.NamedTemporaryFile(suffix=".tif")
+
+                data_array.rio.to_raster(raster_path=temp_file.name)
+
+                data_array.close()
+
+                data_array = ecofuture_preproc.chips.read_chip(
+                    path=temp_file.name,
+                    chunks=chunks,
+                )
+
+            finally:
+                temp_file.close()
 
         data_arrays.append(data_array)
 
