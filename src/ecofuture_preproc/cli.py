@@ -92,11 +92,16 @@ def main() -> None:
         help="Convert the data to a chiplet representation",
     )
 
+    chiplets_to_geotiff_parser = subparsers.add_parser(
+        "chiplets_to_geotiff",
+        help="Convert the chiplet array data to GeoTIFF representations",
+    )
     for parser_needing_roi_name in [
         roi_parser,
         to_chips_parser,
         to_chiplets_parser,
         chiplet_table_parser,
+        chiplets_to_geotiff_parser,
     ]:
         parser_needing_roi_name.add_argument(
             "-roi_name",
@@ -110,6 +115,7 @@ def main() -> None:
         prep_parser,
         to_chips_parser,
         to_chiplets_parser,
+        chiplets_to_geotiff_parser,
     ]:
         parser_needing_source_name.add_argument(
             "-source_name",
@@ -121,6 +127,7 @@ def main() -> None:
     for parser_needing_base_size_pix in [
         chiplet_table_parser,
         to_chiplets_parser,
+        chiplets_to_geotiff_parser,
     ]:
         parser_needing_base_size_pix.add_argument(
             "-base_size_pix",
@@ -131,6 +138,7 @@ def main() -> None:
     for parser_needing_pad_size_pix in [
         chiplet_table_parser,
         to_chiplets_parser,
+        chiplets_to_geotiff_parser,
     ]:
         parser_needing_pad_size_pix.add_argument(
             "-pad_size_pix",
@@ -147,6 +155,8 @@ def main() -> None:
         runner_str = "ecofuture_preproc.roi"
     elif args.command == "chiplet_table_prep":
         runner_str = "ecofuture_preproc.chiplet_table"
+    elif args.command == "chiplets_to_geotiff":
+        runner_str = "ecofuture_preproc.chiplet_geotiff"
     else:
         handler_name = ecofuture_preproc.source.DATA_SOURCE_HANDLER[args.source_name]
         runner_str = f"ecofuture_preproc.{handler_name}.{args.command}"
