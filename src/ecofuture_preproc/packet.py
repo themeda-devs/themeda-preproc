@@ -83,6 +83,8 @@ def form_packet_from_chiplets(
 
         data_arrays.append(data_array)
 
+    return data_arrays
+
     packet = xr.combine_by_coords(
         data_objects=data_arrays,
         fill_value=fill_value,
