@@ -23,18 +23,16 @@ def form_packet(
     fill_value: typing.Union[float, int],
     chunks: typing.Optional[typing.Union[dict[str, int], bool, str]] = "auto",
 ) -> xr.DataArray:
-    return xr.combine_by_coords(
-        data_objects=[
-            ecofuture_preproc.chips.read_chip(
-                path=chip_path,
-                chunks=chunks,
-                load_data=False,
-            )
-            for chip_path in paths
-        ],
+
+    data = read_files(paths=paths, chunks=chunks)
+
+    data_array = xr.combine_by_coords(
+        data_objects=data,
         fill_value=fill_value,
         combine_attrs="drop_conflicts",
     )
+
+    return data_array
 
 
 def read_files(
@@ -53,86 +51,3 @@ def read_files(
         ]
 
     return [future.result() for future in futures]
-
-
-async def form_packet_async(
-    paths: list[pathlib.Path],
-    fill_value: typing.Union[float, int],
-    chunks: typing.Optional[typing.Union[dict[str, int], bool, str]] = "auto",
-) -> xr.DataArray:
-
-    data = await asyncio.gather(
-        *[
-            ecofuture_preproc.chips.read_chip(
-                path=chip_path,
-                chunks=chunks,
-                load_data=False,
-            )
-            for chip_path in paths
-        ]
-    )
-
-    data_array = xr.combine_by_coords(
-        data_objects=data,
-        fill_value=fill_value,
-        combine_attrs="drop_conflicts",
-    )
-
-    return data_array
-
-def form_packet_from_chiplets(
-    chiplets: npt.NDArray,
-    table: polars.dataframe.frame.DataFrame,
-    fill_value: typing.Union[int, float],
-    pad_size_pix: int,
-    base_size_pix: int = 160,
-    crs: int = 3577,
-    chunks: typing.Optional[typing.Union[dict[str, int], bool, str]] = "auto",
-    new_resolution: typing.Optional[typing.Union[int, float]] = None,
-) -> xr.DataArray:
-
-    data_arrays: list[xr.DataArray] = []
-
-    for entry in table.iter_rows(named=True):
-
-        chiplet = chiplets[entry["index"], ...]
-
-        data_array = ecofuture_preproc.chiplets.convert_chiplet_to_data_array(
-            chiplet=chiplet,
-            metadata=entry,
-            pad_size_pix=pad_size_pix,
-            base_size_pix=base_size_pix,
-            crs=crs,
-            nodata=fill_value,
-            new_resolution=new_resolution,
-        )
-
-        if chunks is not None:
-
-            # doesn't seem right, but I don't know a better way of doing this!
-
-            try:
-                temp_file = tempfile.NamedTemporaryFile(suffix=".tif")
-
-                data_array.rio.to_raster(raster_path=temp_file.name)
-
-                data_array.close()
-
-                data_array = ecofuture_preproc.chips.read_chip(
-                    path=temp_file.name,
-                    chunks=chunks,
-                )
-
-            finally:
-                temp_file.close()
-
-        data_arrays.append(data_array)
-
-    return data_arrays
-
-    packet = xr.combine_by_coords(
-        data_objects=data_arrays,
-        fill_value=fill_value,
-    )
-
-    return packet

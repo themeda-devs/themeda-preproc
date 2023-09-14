@@ -2,6 +2,8 @@ import pathlib
 import functools
 import multiprocessing
 
+import xarray as xr
+
 import polars as pl
 
 import tqdm
@@ -89,21 +91,29 @@ def convert_year_chiplets(
         base_output_dir=base_output_dir,
     )
 
+    chip_xys = table.select(["chip_grid_ref_x_base", "chip_grid_ref_y_base"]).unique()
+
     progress_bar = tqdm.tqdm(
         iterable=None,
-        total=len(table),
+        total=len(chip_xys),
         disable=not show_progress,
         position=progress_bar_position,
         desc=str(year),
         leave=True,
     )
 
-    for row in table.iter_rows(named=True):
+    for chip_xy_row in chip_xys.iter_rows(named=True):
+
+        table_rows = table.filter(
+            (pl.col("chip_grid_ref_x_base") == chip_xy_row["chip_grid_ref_x_base"])
+            & (pl.col("chip_grid_ref_y_base") == chip_xy_row["chip_grid_ref_y_base"])
+        )
 
         output_path = get_chiplet_geotiff_path(
             source_name=source_name,
             year=year,
-            index=row["index"],
+            chip_x=chip_xy_row["chip_grid_ref_x_base"],
+            chip_y=chip_xy_row["chip_grid_ref_y_base"],
             roi_name=roi_name,
             base_output_dir=base_output_dir,
         )
@@ -112,23 +122,38 @@ def convert_year_chiplets(
             path=output_path
         ):
 
-            chiplet = chiplets[row["index"], ...]
+            data_arrays = []
 
-            data_array = ecofuture_preproc.chiplets.convert_chiplet_to_data_array(
-                chiplet=chiplet,
-                metadata=row,
-                pad_size_pix=pad_size_pix,
-                base_size_pix=base_size_pix,
-                crs=crs,
-                nodata=nodata,
+            for row in table_rows.iter_rows(named=True):
+
+                chiplet = chiplets[row["index"], ...]
+
+                data_array = ecofuture_preproc.chiplets.convert_chiplet_to_data_array(
+                    chiplet=chiplet,
+                    metadata=row,
+                    pad_size_pix=pad_size_pix,
+                    base_size_pix=base_size_pix,
+                    crs=crs,
+                    nodata=nodata,
+                )
+
+                data_arrays.append(data_array)
+
+            data = xr.combine_by_coords(
+                data_objects=data_arrays,
+                fill_value=nodata,
+                combine_attrs="drop_conflicts",
             )
 
-            data_array.rio.to_raster(
+            data.rio.to_raster(
                 raster_path=output_path,
                 compress="lzw",
             )
 
-            data_array.close()
+            data.close()
+
+            for data_array in data_arrays:
+                data_array.close()
 
             if protect:
                 ecofuture_preproc.utils.protect_path(path=output_path)
@@ -139,7 +164,8 @@ def convert_year_chiplets(
 def get_chiplet_geotiff_path(
     source_name: ecofuture_preproc.source.DataSourceName,
     year: int,
-    index: int,
+    chip_x: int,
+    chip_y: int,
     roi_name: ecofuture_preproc.roi.ROIName,
     base_output_dir: pathlib.Path,
 ) -> pathlib.Path:
@@ -158,7 +184,7 @@ def get_chiplet_geotiff_path(
         chiplet_geotiff_dir
         / (
             f"chiplets_{source_name.value}_{year}_"
-            + f"roi_{roi_name.value}_index_{index}.tif"
+            + f"roi_{roi_name.value}_x{chip_x}y{chip_y}.tif"
         )
     )
 
