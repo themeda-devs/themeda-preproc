@@ -4,15 +4,11 @@ Lazily load a collection of chips (a 'packet' of chips...).
 
 import pathlib
 import typing
-import tempfile
-import asyncio
-import concurrent
-
-import numpy.typing as npt
+import concurrent.futures
 
 import xarray as xr
 
-import polars
+import rioxarray.merge
 
 import ecofuture_preproc.chips
 import ecofuture_preproc.chiplets
@@ -20,16 +16,20 @@ import ecofuture_preproc.chiplets
 
 def form_packet(
     paths: list[pathlib.Path],
-    fill_value: typing.Union[float, int],
     chunks: typing.Optional[typing.Union[dict[str, int], bool, str]] = "auto",
+    new_resolution: typing.Optional[typing.Union[int, float]] = None,
 ) -> xr.DataArray:
+
+    if new_resolution is not None:
+        res = (new_resolution,) * 2
+    else:
+        res = None
 
     data = read_files(paths=paths, chunks=chunks)
 
-    data_array = xr.combine_by_coords(
-        data_objects=data,
-        fill_value=fill_value,
-        combine_attrs="drop_conflicts",
+    data_array = rioxarray.merge.merge_arrays(
+        dataarrays=data,
+        res=res,
     )
 
     return data_array

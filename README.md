@@ -21,6 +21,7 @@ poetry install
 ## Using the pre-processing output
 
 Most external interaction with this package will be related to the final stage of the pre-preprocessing: the chiplets.
+Note that most functions for interacting with this data ask for a `base_output_dir` argument; this is the root directory of all the data, that contains directories like `chiplets`, `chiplet_table`, `chips`, etc.
 
 ### Chiplet data loading
 
@@ -35,7 +36,6 @@ chiplets = ecofuture_preproc.chiplets.load_chiplets(
     source_name=ecofuture_preproc.source.DataSourceName("land_use"),
     year=1996,
     roi_name=ecofuture_preproc.roi.ROIName("savanna"),
-    base_size_pix=160,
     pad_size_pix=32,
     base_output_dir=pathlib.Path("~/data").expanduser(),
 )
@@ -160,7 +160,7 @@ poetry run ecofuture_preproc to_chips -source_name tmax -roi_name savanna
 
 #### Chiplet conversion
 
-The final stage involves creating a set of 'chiplets' for each year for each data source, where a chiplet is a small spatial region of interest - typically with a base size of 160 x 160 pixels.
+This stage involves creating a set of 'chiplets' for each year for each data source, where a chiplet is a small spatial region of interest - typically with a base size of 160 x 160 pixels.
 The chiplets for a given data source are stored inside a single numpy array per year, saved in `data/chiplets/roi_${ROI_NAME}/pad_${PAD_SIZE_PIX}/${DATA_SOURCE}`.
 The 'padding' refers to the region shared by chiplets with neighbouring spatial locations; rather than tiling the space without overlap, the boundary of each chiplet is extended by `${PAD_SIZE_PIX}` number of pixels.
 A chiplet is considered valid if it has any spatial overlap with the named ROI, without considering any padded regions.
@@ -179,6 +179,18 @@ An example execution:
 ```bash
 poetry run ecofuture_preproc to_chiplets -source_name fire_scar_early -roi_name savanna -pad_size_pix 32
 ```
+
+#### Conversion of chiplets to GeoTIFF gridded chips
+
+Although the above representation of the chiplets is best suited for loading into a neural network model, it is easier to otherwise interrogate the chiplet data if it is stored in GeoTIFF format.
+Hence, this step forms GeoTIFF files for each of the grid references in the common chip space (i.e., the output of the `to_chips` step).
+Note that this assumes that chiplets with a padding size of 0 have been created.
+
+An example execution:
+```bash
+poetry run ecofuture_preproc chiplets_to_geotiff -source_name land_cover -roi_name savanna
+```
+
 
 ## Authors
 

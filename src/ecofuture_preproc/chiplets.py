@@ -197,9 +197,9 @@ def load_chiplets(
     source_name: ecofuture_preproc.source.DataSourceName,
     year: int,
     roi_name: ecofuture_preproc.roi.ROIName,
-    base_size_pix: int,
     pad_size_pix: int,
     base_output_dir: pathlib.Path,
+    base_size_pix: int = 160,
 ) -> np.memmap:  # type: ignore
 
     table = ecofuture_preproc.chiplet_table.load_table(
