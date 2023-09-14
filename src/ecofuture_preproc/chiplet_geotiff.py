@@ -2,6 +2,8 @@ import pathlib
 import functools
 import multiprocessing
 
+import numpy as np
+
 import xarray as xr
 
 import polars as pl
@@ -149,6 +151,9 @@ def convert_year_chiplets(
             data.rio.set_nodata(input_nodata=nodata, inplace=True)
 
             data = data.odc.assign_crs(crs=data.rio.crs)
+
+            if data.dtype == np.float16:
+                data = data.astype(np.float32)
 
             data.rio.to_raster(
                 raster_path=output_path,
