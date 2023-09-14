@@ -145,6 +145,11 @@ def convert_year_chiplets(
                 combine_attrs="drop_conflicts",
             )
 
+            data.rio.set_crs(input_crs=crs, inplace=True)
+            data.rio.set_nodata(input_nodata=nodata, inplace=True)
+
+            data = data.odc.assign_crs(crs=data.rio.crs)
+
             data.rio.to_raster(
                 raster_path=output_path,
                 compress="lzw",

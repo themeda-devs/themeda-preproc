@@ -9,6 +9,7 @@ import concurrent.futures
 import xarray as xr
 
 import rioxarray.merge
+import rasterio.enums
 
 import ecofuture_preproc.chips
 import ecofuture_preproc.chiplets
@@ -18,19 +19,23 @@ def form_packet(
     paths: list[pathlib.Path],
     chunks: typing.Optional[typing.Union[dict[str, int], bool, str]] = "auto",
     new_resolution: typing.Optional[typing.Union[int, float]] = None,
+    nodata: typing.Optional[typing.Union[int, float]] = None,
+    resampling: rasterio.enums.Resampling = rasterio.enums.Resampling.nearest,
 ) -> xr.DataArray:
-
-    if new_resolution is not None:
-        res = (new_resolution,) * 2
-    else:
-        res = None
 
     data = read_files(paths=paths, chunks=chunks)
 
     data_array = rioxarray.merge.merge_arrays(
         dataarrays=data,
-        res=res,
+        nodata=nodata,
     )
+
+    if new_resolution is not None:
+        data_array = data_array.odc.reproject(
+            how=data_array.odc.crs,
+            resolution=new_resolution,
+            resampling=resampling,
+        )
 
     return data_array
 

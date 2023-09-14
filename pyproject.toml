@@ -81,6 +81,7 @@ module = [
         "geojson",
         "shapely",
         "rasterio",
+        "rasterio.enums",
 	"siphon",
 	"siphon.catalog",
 	"affine",
