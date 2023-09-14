@@ -96,6 +96,7 @@ def main() -> None:
         "chiplets_to_geotiff",
         help="Convert the chiplet array data to GeoTIFF representations",
     )
+
     for parser_needing_roi_name in [
         roi_parser,
         to_chips_parser,

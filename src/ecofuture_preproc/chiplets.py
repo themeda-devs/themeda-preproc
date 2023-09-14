@@ -2,6 +2,7 @@ import pathlib
 import typing
 import multiprocessing
 import functools
+import dataclasses
 
 import numpy as np
 import numpy.typing as npt
@@ -19,6 +20,15 @@ import ecofuture_preproc.roi
 import ecofuture_preproc.chips
 import ecofuture_preproc.packet
 import ecofuture_preproc.chiplet_table
+
+
+@dataclasses.dataclass(frozen=True)
+class ChipletFilenameInfo:
+    path: pathlib.Path
+    roi_name: ecofuture_preproc.roi.ROIName
+    source_name: ecofuture_preproc.source.DataSourceName
+    pad_size_pix: int
+    year: int
 
 
 def form_chiplets(
@@ -259,6 +269,26 @@ def get_chiplet_path(
 
     return chiplet_path
 
+
+def parse_chiplet_filename(filename: pathlib.Path) -> ChipletFilenameInfo:
+
+    components = filename.stem.split("_")
+
+    pad_size_pix = int(components.pop())
+    assert components.pop() == "pad"
+    roi_name = ecofuture_preproc.roi.ROIName(components.pop())
+    assert components.pop() == "roi"
+    year = int(components.pop())
+    assert components[0] == "chiplets"
+    source_name = ecofuture_preproc.source.DataSourceName("_".join(components[1:]))
+
+    return ChipletFilenameInfo(
+        path=filename,
+        roi_name=roi_name,
+        source_name=source_name,
+        year=year,
+        pad_size_pix=pad_size_pix,
+    )
 
 
 def get_transform_from_row(row: dict[str, typing.Any]) -> affine.Affine:

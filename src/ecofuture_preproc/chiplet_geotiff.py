@@ -1,7 +1,6 @@
 import pathlib
 import functools
 import multiprocessing
-import typing
 
 import polars as pl
 
@@ -36,15 +35,16 @@ def run(
         base_output_dir
         / "chiplets"
         / f"roi_{roi_name.value}"
-        / "pad_{pad_size_pix}"
+        / f"pad_{pad_size_pix}"
         / source_name.value
     )
 
-    years = [
-        int(chiplet_year_path.name)
-        for chiplet_year_path in sorted(chiplet_base_dir.glob("*"))
-        if chiplet_year_path.is_dir()
+    chiplets_file_info = [
+        ecofuture_preproc.chiplets.parse_chiplet_filename(filename=chiplet_path)
+        for chiplet_path in sorted(chiplet_base_dir.glob("*.npy"))
     ]
+
+    years = sorted([chiplet_file_info.year for chiplet_file_info in chiplets_file_info])
 
     func = functools.partial(
         convert_year_chiplets,
@@ -57,7 +57,10 @@ def run(
         show_progress=show_progress,
     )
 
-    with multiprocessing.Pool(processes=cores) as pool:
+    # see https://pola-rs.github.io/polars-book/user-guide/misc/multiprocessing/
+    mp = multiprocessing.get_context(method="spawn")
+
+    with mp.Pool(processes=cores) as pool:
         progress_bars = pool.starmap(func, enumerate(years), chunksize=1)
 
     for progress_bar in progress_bars:
@@ -74,7 +77,7 @@ def convert_year_chiplets(
     base_size_pix: int,
     protect: bool,
     show_progress: bool,
-) -> tqdm.std.tqdm[typing.Any]:
+) -> tqdm.std.tqdm:  # type: ignore
 
     pad_size_pix = 0
     crs = 3577
@@ -123,7 +126,10 @@ def convert_year_chiplets(
                 nodata=nodata,
             )
 
-            data_array.rio.to_raster(raster_path=output_path)
+            data_array.rio.to_raster(
+                raster_path=output_path,
+                compress="lzw",
+            )
 
             data_array.close()
 
