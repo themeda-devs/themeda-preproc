@@ -61,10 +61,7 @@ def run(
     mp = multiprocessing.get_context(method="spawn")
 
     with mp.Pool(processes=cores) as pool:
-        progress_bars = pool.starmap(func, enumerate(years), chunksize=1)
-
-    for progress_bar in progress_bars:
-        progress_bar.close()
+        pool.starmap(func, enumerate(years), chunksize=1)
 
 
 def convert_year_chiplets(
@@ -77,7 +74,7 @@ def convert_year_chiplets(
     base_size_pix: int,
     protect: bool,
     show_progress: bool,
-) -> tqdm.std.tqdm:  # type: ignore
+) -> None:
 
     pad_size_pix = 0
     crs = 3577
@@ -137,8 +134,6 @@ def convert_year_chiplets(
                 ecofuture_preproc.utils.protect_path(path=output_path)
 
         progress_bar.update()
-
-    return progress_bar
 
 
 def get_chiplet_geotiff_path(
