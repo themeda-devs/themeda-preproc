@@ -130,7 +130,7 @@ def form_year_chiplets(
 
     packet = ecofuture_preproc.packet.form_packet(
         paths=chip_paths,
-        fill_value=ecofuture_preproc.source.DATA_SOURCE_NODATA[source_name],
+        nodata=ecofuture_preproc.source.DATA_SOURCE_NODATA[source_name],
     )
 
     chiplets = np.memmap(
