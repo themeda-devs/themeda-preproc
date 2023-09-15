@@ -18,6 +18,32 @@ Then install the dependencies (optionally include the `--with=dev,interactive` a
 poetry install
 ```
 
+### Visualisation support
+
+Unfortunately, it is a bit trickier to install the package with support for creating the visualisations and requires a bit of manual installation.
+
+First, install the listed `vis` dependencies:
+```bash
+poetry install --with=vis
+```
+
+Then install the necessary system packages (see the [requirements for building `veusz` from source](https://github.com/veusz/veusz/blob/master/INSTALL.md#installing-from-source)) - the details of which depend on your operating system.
+
+Then create a build directory, download the `veusz` source code, and extract:
+```bash
+# assuming in `code/ecofuture_preproc`
+cd ../..
+mkdir build
+cd build
+wget https://github.com/veusz/veusz/archive/refs/tags/veusz-3.6.2.zip
+unzip veusz-3.6.2.zip
+cd veusz-veusz-3.6.2
+```
+and then build and install:
+```bash
+poetry --directory=../../code/ecofuture_preproc run pip install .
+```
+
 ## Using the pre-processing output
 
 Most external interaction with this package will be related to the final stage of the pre-preprocessing: the chiplets.

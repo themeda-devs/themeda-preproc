@@ -32,7 +32,7 @@ xarray = "^2023.8.0"
 polars = "^0.18.15"
 affine = "^2.4.0"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 pytest = "^6.2.5"
 black = "23.7.0"
 mypy = "^1.3.0"
@@ -41,6 +41,8 @@ types-tqdm = "^4.65.0.1"
 boto3-stubs = {extras = ["s3"], version = "^1.26.161"}
 types-requests = "^2.31.0.1"
 types-pyyaml = "^6.0.12.10"
+fawltydeps = "^0.12.1"
+mdv = {git = "http://github.com/axiros/terminal_markdown_viewer"}
 
 [tool.poetry.group.interactive.dependencies]
 ipython = "^8.14.0"
@@ -48,9 +50,8 @@ jupyter = "^1.0.0"
 pyqt5 = "^5.15.9"
 matplotlib = "^3.7.2"
 
-[tool.poetry.group.dev.dependencies]
-fawltydeps = "^0.12.1"
-mdv = {git = "http://github.com/axiros/terminal_markdown_viewer"}
+[tool.poetry.group.vis.dependencies]
+sip = "^6.7.11"
 
 [tool.poetry.scripts]
 ecofuture_preproc = "ecofuture_preproc.cli:main"

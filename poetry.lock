@@ -2805,6 +2805,17 @@ dev = ["pre-commit", "tox"]
 testing = ["pytest", "pytest-benchmark"]
 
 [[package]]
+name = "ply"
+version = "3.11"
+description = "Python Lex & Yacc"
+optional = false
+python-versions = "*"
+files = [
+    {file = "ply-3.11-py2.py3-none-any.whl", hash = "sha256:096f9b8350b65ebd2fd1346b12452efe5b9607f7482813ffca50c22722a807ce"},
+    {file = "ply-3.11.tar.gz", hash = "sha256:00c7c1aaa88358b9c765b6d3000c6eec0ba42abca5351b095321aef446081da3"},
+]
+
+[[package]]
 name = "polars"
 version = "0.18.15"
 description = "Blazingly fast DataFrame library"
@@ -3808,6 +3819,26 @@ docs = ["matplotlib", "numpydoc (==1.1.*)", "sphinx", "sphinx-book-theme", "sphi
 test = ["pytest", "pytest-cov"]
 
 [[package]]
+name = "sip"
+version = "6.7.11"
+description = "A Python bindings generator for C/C++ libraries"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "sip-6.7.11-cp37-abi3-macosx_10_9_universal2.whl", hash = "sha256:878ef9d5c9da4bb2a65bb10a919319d2253c05f3b40ee2cd1ae730e2069ec8f3"},
+    {file = "sip-6.7.11-cp37-abi3-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:2fac5ac506cd90e5c46a709368599b574a507e28c5491947db20819c5ce37ace"},
+    {file = "sip-6.7.11-cp37-abi3-win32.whl", hash = "sha256:12fc8c680f527bb1b5240b6ac9019efe69b0be7643e2a3c400a61b991bfed0c9"},
+    {file = "sip-6.7.11-cp37-abi3-win_amd64.whl", hash = "sha256:1f2cbdbff2350e876f2a23c88b360f2979cad6c855a4d1aaff3ccb91afc11ec2"},
+    {file = "sip-6.7.11.tar.gz", hash = "sha256:f0dc3287a0b172e5664931c87847750d47e4fdcda4fe362b514af8edd655b469"},
+]
+
+[package.dependencies]
+packaging = "*"
+ply = "*"
+setuptools = "*"
+tomli = {version = "*", markers = "python_version < \"3.11\""}
+
+[[package]]
 name = "siphon"
 version = "0.9"
 description = "A collection of Python utilities for interacting with the Unidata technology stack."
@@ -4255,4 +4286,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9,<3.12"
-content-hash = "6cf3fa9f40adfc8223ab4809e027a078f9920722bad679195ab3d1fa9733e7c6"
+content-hash = "697c223846dceb9519d22b257bcacc9842eeedeaa151776c621acd1677362b08"
