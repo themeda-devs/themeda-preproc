@@ -26,24 +26,6 @@ class ChipPathInfo:
     path: pathlib.Path
 
 
-async def read_chip_async(
-    path: pathlib.Path,
-    load_data: bool = False,
-    chunks: typing.Optional[typing.Union[dict[str, int], bool, str]] = None,
-    variable: typing.Optional[typing.Union[str, tuple[str, ...]]] = None,
-    masked: bool = False,
-    cache: bool = True,
-) -> xr.DataArray:
-    return read_chip(
-        path=path,
-        load_data=load_data,
-        chunks=chunks,
-        variable=variable,
-        masked=masked,
-        cache=cache,
-    )
-
-
 def read_chip(
     path: pathlib.Path,
     load_data: bool = False,

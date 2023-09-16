@@ -52,6 +52,7 @@ matplotlib = "^3.7.2"
 
 [tool.poetry.group.vis.dependencies]
 sip = "^6.7.11"
+distro = "^1.8.0"
 
 [tool.poetry.scripts]
 ecofuture_preproc = "ecofuture_preproc.cli:main"
@@ -87,6 +88,8 @@ module = [
 	"siphon.catalog",
 	"affine",
 	"fiona",
+	"veusz",
+	"veusz.embed",
 ]
 ignore_missing_imports = true
 

@@ -3,6 +3,8 @@ import types
 
 import numpy as np
 
+import rasterio.enums
+
 
 class DataSourceName(enum.Enum):
     LAND_COVER = "land_cover"
@@ -51,5 +53,17 @@ DATA_SOURCE_DTYPE = types.MappingProxyType(
         DataSourceName("land_use"): np.uint8,
         DataSourceName("fire_scar_early"): np.uint8,
         DataSourceName("fire_scar_late"): np.uint8,
+    }
+)
+
+DATA_SOURCE_RESAMPLERS = types.MappingProxyType(
+    {
+        DataSourceName("land_cover"): rasterio.enums.Resampling.nearest,
+        DataSourceName("tmax"): rasterio.enums.Resampling.bilinear,
+        DataSourceName("rain"): rasterio.enums.Resampling.bilinear,
+        DataSourceName("elevation"): rasterio.enums.Resampling.bilinear,
+        DataSourceName("land_use"): rasterio.enums.Resampling.nearest,
+        DataSourceName("fire_scar_early"): rasterio.enums.Resampling.nearest,
+        DataSourceName("fire_scar_late"): rasterio.enums.Resampling.nearest,
     }
 )

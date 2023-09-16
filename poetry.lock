@@ -1159,6 +1159,17 @@ files = [
 ]
 
 [[package]]
+name = "distro"
+version = "1.8.0"
+description = "Distro - an OS platform information API"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "distro-1.8.0-py3-none-any.whl", hash = "sha256:99522ca3e365cac527b44bde033f64c6945d90eb9f769703caaec52b09bbd3ff"},
+    {file = "distro-1.8.0.tar.gz", hash = "sha256:02e111d1dc6a50abb8eed6bf31c3e48ed8b0830d1ea2a1b78c61765c2513fdd8"},
+]
+
+[[package]]
 name = "exceptiongroup"
 version = "1.1.3"
 description = "Backport of PEP 654 (exception groups)"
@@ -4286,4 +4297,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9,<3.12"
-content-hash = "697c223846dceb9519d22b257bcacc9842eeedeaa151776c621acd1677362b08"
+content-hash = "182ebc0f5f977b8470d26b1f00fd9beb35569d316f85a08995fba39179cadb6c"
