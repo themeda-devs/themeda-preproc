@@ -3,8 +3,6 @@
 import pathlib
 import typing
 
-import numpy as np
-
 import xarray as xr
 
 import veusz.embed
@@ -47,7 +45,7 @@ def plot_years(
 
     embed.WaitForClose()
 
-    return embed
+    # return embed
 
 
 def render_year(
@@ -120,7 +118,7 @@ def render_year(
     x_axis.hide.val = y_axis.hide.val = True
 
     if customiser is not None:
-        customiser(embed=embed, page=page, packet=packet)
+        customiser(embed, page, packet)
 
 
 def get_packet(

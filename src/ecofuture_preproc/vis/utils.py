@@ -40,7 +40,7 @@ class ColourMap:
             entry_colour = entry.colour
 
             if len(entry_colour) == 3:
-                entry_colour = typing.cast(RGBType, entry_colour) + (255,)
+                entry_colour = (*typing.cast(RGBType, entry_colour), 255)
 
             entry_colour = typing.cast(RGBAType, entry_colour)
 

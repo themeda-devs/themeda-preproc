@@ -4,14 +4,11 @@ import multiprocessing
 
 import numpy as np
 
-import xarray as xr
-
 import rioxarray.merge
 
 import polars as pl
 
 import tqdm
-
 
 import ecofuture_preproc.roi
 import ecofuture_preproc.chiplets
