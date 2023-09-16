@@ -1,13 +1,74 @@
 
 import pathlib
 import typing
+import typing_extensions
 import platform
 import importlib.resources
 import ast
+import dataclasses
 
 import distro
 
 import veusz.embed
+
+
+RGBType: typing_extensions.TypeAlias = tuple[int, int, int]
+RGBAType: typing_extensions.TypeAlias = tuple[int, int, int, int]
+
+
+@dataclasses.dataclass
+class ColourMapEntry:
+    label: str
+    value: int
+    colour: typing.Union[RGBType, RGBAType]
+
+
+@dataclasses.dataclass
+class ColourMap:
+    name: str
+    entries: list[ColourMapEntry]
+
+    def as_veusz_colourmap(self) -> list[RGBAType]:
+
+        cmap = [
+            (0, 0, 0, 0)
+            for _ in range(256)
+        ]
+
+        for entry in self.entries:
+
+            entry_colour = entry.colour
+
+            if len(entry_colour) == 3:
+                entry_colour = typing.cast(RGBType, entry_colour) + (255,)
+
+            entry_colour = typing.cast(RGBAType, entry_colour)
+
+            cmap[entry.value] = entry_colour
+
+        return cmap
+
+
+def hex_to_rgb(
+    colour: str
+) -> RGBAType:
+
+    if not colour.startswith("#"):
+        raise ValueError("Expecting the hex code to start with #")
+
+    hex_chars = list(colour[1:])
+
+    rgba_vals = tuple(
+        int("".join(hex_pair), 16)
+        for hex_pair in zip(hex_chars[::2], hex_chars[1::2])
+    )
+
+    if len(rgba_vals) == 3:
+        rgba_vals += (255,)
+
+    rgba = typing.cast(RGBAType, rgba_vals)
+
+    return rgba
 
 
 def set_veusz_style(
@@ -86,3 +147,36 @@ def set_veusz_style(
             method = getattr(embed, command)
 
             method(*args)
+
+
+def set_margins(
+    widget: veusz.embed.WidgetNode,
+    margins: typing.Optional[dict[str, str]] = None,
+    null_absent: bool = False,
+) -> None:
+
+    side_lut = {
+        "L": "left",
+        "R": "right",
+        "T": "top",
+        "B": "bottom",
+        "I": "internal",
+    }
+
+    null_margins = {side: "0cm" for side in side_lut}
+
+    if margins is None:
+        margins = null_margins
+
+    if null_absent:
+        margins = {**null_margins, **margins}
+
+    for (side, margin) in margins.items():
+
+        try:
+            widget_margin = getattr(widget, f"{side_lut[side]:s}Margin")
+        except AttributeError:
+            assert side == "I"
+            continue
+
+        widget_margin.val = margin

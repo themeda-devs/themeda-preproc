@@ -43,6 +43,8 @@ def run(
 
     embed.WaitForClose()
 
+    return embed
+
 
 def render_year(
     embed: veusz.embed.Embedded,
@@ -50,11 +52,67 @@ def render_year(
     source_name: ecofuture_preproc.source.DataSourceName,
     chiplets_path: pathlib.Path,
     resolution: typing.Union[float, int],
-):
+    packet: typing.Optional[xr.DataArray] = None,
+) -> None:
+
+    if packet is None:
+        packet = get_packet(
+            year=year,
+            source_name=source_name,
+            chiplets_path=chiplets_path,
+            resolution=resolution,
+        )
+
+    packet = packet.sortby(variables="y")
 
     page = embed.Root.Add("page")
     page.width.val = "15cm"
     page.height.val = "15cm"
+
+    label = page.Add("label")
+
+    source_name_label = source_name.value.replace("_", " ").title()
+    label.label.val = f"{source_name_label} ({year})"
+    label.alignVert.val = "top"
+    label.xPos.val = 0.01
+    label.yPos.val = 0.99
+
+    graph = page.Add("graph", autoadd=False)
+
+    
+
+    graph.aspect.val = packet.sizes["x"] / packet.sizes["y"]
+
+    x_axis = graph.Add("axis")
+    y_axis = graph.Add("axis")
+
+    data_name = f"{source_name.value}_{year}"
+
+    embed.SetData2D(
+        name=data_name,
+        data=packet.values,
+        xcent=packet.x.values,
+        ycent=packet.y.values,
+    )
+
+    img_name = f"{data_name}_img"
+
+    img = graph.Add("image", name=img_name)
+    img.data.val = data_name
+    img.colorMap.val = f"{source_name.value}_cmap"
+
+    x_axis.MinorTicks.hide.val = y_axis.MinorTicks.hide.val = True
+    x_axis.TickLabels.format.val = y_axis.TickLabels.format.val = "%d"
+
+    graph.Background.color.val = "#b9b9b9"
+    graph.Background.style.val = "6% dense"
+
+    x_axis.lowerPosition.val = y_axis.lowerPosition.val = 0.0
+    x_axis.upperPosition.val = y_axis.upperPosition.val = 1.0
+
+    x_axis.max.val = 1.75e6
+
+    x_axis.hide.val = y_axis.hide.val = True
 
 
 def get_packet(
@@ -66,12 +124,14 @@ def get_packet(
 
     paths = sorted((chiplets_path / str(year)).glob("*.tif"))
 
+    nodata = ecofuture_preproc.source.DATA_SOURCE_SENTINEL[source_name]
+
     resampling = ecofuture_preproc.source.DATA_SOURCE_RESAMPLERS[source_name]
 
     packet = ecofuture_preproc.packet.form_packet(
         paths=paths,
         new_resolution=resolution,
-        nodata=np.nan,
+        nodata=nodata,
         resampling=resampling,
     )
 

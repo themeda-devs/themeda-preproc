@@ -6,6 +6,8 @@ import numpy as np
 
 import xarray as xr
 
+import rioxarray.merge
+
 import polars as pl
 
 import tqdm
@@ -141,10 +143,9 @@ def convert_year_chiplets(
 
                 data_arrays.append(data_array)
 
-            data = xr.combine_by_coords(
-                data_objects=data_arrays,
-                fill_value=nodata,
-                combine_attrs="drop_conflicts",
+            data = rioxarray.merge.merge_arrays(
+                dataarrays=data_arrays,
+                nodata=ecofuture_preproc.source.DATA_SOURCE_SENTINEL[source_name],
             )
 
             data.rio.set_crs(input_crs=crs, inplace=True)

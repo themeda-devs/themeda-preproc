@@ -43,6 +43,18 @@ DATA_SOURCE_NODATA = types.MappingProxyType(
     }
 )
 
+DATA_SOURCE_SENTINEL = types.MappingProxyType(
+    {
+        DataSourceName("land_cover"): 255,
+        DataSourceName("tmax"): np.nan,
+        DataSourceName("rain"): np.nan,
+        DataSourceName("elevation"): np.nan,
+        DataSourceName("land_use"): 255,
+        DataSourceName("fire_scar_early"): 255,
+        DataSourceName("fire_scar_late"): 255,
+    }
+)
+
 # this is for the chiplets numpy array
 DATA_SOURCE_DTYPE = types.MappingProxyType(
     {
