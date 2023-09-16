@@ -14,10 +14,14 @@ import ecofuture_preproc.roi
 import ecofuture_preproc.vis.utils
 
 
-def run(
+def plot_years(
     source_name: ecofuture_preproc.source.DataSourceName,
     roi_name: ecofuture_preproc.roi.ROIName,
     base_output_dir: pathlib.Path,
+    customiser: typing.Callable[
+        [veusz.embed.Embedded, veusz.embed.WidgetNode, xr.DataArray],
+        None
+    ],
     protect: bool = True,
     resolution: typing.Optional[typing.Union[float, int]] = 1_000,
     headless: bool = True,
@@ -52,6 +56,10 @@ def render_year(
     source_name: ecofuture_preproc.source.DataSourceName,
     chiplets_path: pathlib.Path,
     resolution: typing.Union[float, int],
+    customiser: typing.Callable[
+        [veusz.embed.Embedded, veusz.embed.WidgetNode, xr.DataArray],
+        None
+    ],
     packet: typing.Optional[xr.DataArray] = None,
 ) -> None:
 
@@ -67,7 +75,7 @@ def render_year(
 
     page = embed.Root.Add("page")
     page.width.val = "15cm"
-    page.height.val = "15cm"
+    page.height.val = "10cm"
 
     label = page.Add("label")
 
@@ -79,9 +87,9 @@ def render_year(
 
     graph = page.Add("graph", autoadd=False)
 
-    
-
     graph.aspect.val = packet.sizes["x"] / packet.sizes["y"]
+
+    ecofuture_preproc.vis.utils.set_margins(widget=graph, null_absent=True)
 
     x_axis = graph.Add("axis")
     y_axis = graph.Add("axis")
@@ -99,13 +107,10 @@ def render_year(
 
     img = graph.Add("image", name=img_name)
     img.data.val = data_name
-    img.colorMap.val = f"{source_name.value}_cmap"
+    #img.colorMap.val = f"{source_name.value}_cmap"
 
     x_axis.MinorTicks.hide.val = y_axis.MinorTicks.hide.val = True
     x_axis.TickLabels.format.val = y_axis.TickLabels.format.val = "%d"
-
-    graph.Background.color.val = "#b9b9b9"
-    graph.Background.style.val = "6% dense"
 
     x_axis.lowerPosition.val = y_axis.lowerPosition.val = 0.0
     x_axis.upperPosition.val = y_axis.upperPosition.val = 1.0
@@ -113,6 +118,9 @@ def render_year(
     x_axis.max.val = 1.75e6
 
     x_axis.hide.val = y_axis.hide.val = True
+
+    if customiser is not None:
+        customiser(embed=embed, page=page, packet=packet)
 
 
 def get_packet(
