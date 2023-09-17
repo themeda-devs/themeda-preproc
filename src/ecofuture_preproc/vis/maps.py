@@ -9,6 +9,7 @@ import veusz.embed
 
 import ecofuture_preproc.source
 import ecofuture_preproc.roi
+import ecofuture_preproc.packet
 import ecofuture_preproc.vis.utils
 
 
@@ -45,7 +46,7 @@ def plot_years(
 
     embed.WaitForClose()
 
-    # return embed
+    return embed
 
 
 def render_year(
