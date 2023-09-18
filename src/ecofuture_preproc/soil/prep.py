@@ -14,6 +14,7 @@ def run(
     if source_name not in [
         ecofuture_preproc.source.DataSourceName.SOIL_ECE,
         ecofuture_preproc.source.DataSourceName.SOIL_DEPTH,
+        ecofuture_preproc.source.DataSourceName.SOIL_CLAY,
     ]:
         raise ValueError("Unexpected source name")
 
@@ -26,6 +27,9 @@ def run(
     elif source_name == ecofuture_preproc.source.DataSourceName.SOIL_ECE:
         filename = "ECE_000_005_EV_N_P_AU_NAT_C_20140801.tif"
         year = 2014
+    elif source_name == ecofuture_preproc.source.DataSourceName.SOIL_CLAY:
+        filename = "CLY_000_005_EV_N_P_AU_TRN_N_20210902.tif"
+        year = 2021
 
     raw_chip_path = raw_dir / filename
 

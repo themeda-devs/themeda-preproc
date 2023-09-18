@@ -16,6 +16,7 @@ class DataSourceName(enum.Enum):
     FIRE_SCAR_LATE = "fire_scar_late"
     SOIL_ECE = "soil_ece"
     SOIL_DEPTH = "soil_depth"
+    SOIL_CLAY = "soil_clay"
 
     def __str__(self) -> str:
         return str(self.value)
@@ -32,6 +33,7 @@ DATA_SOURCE_HANDLER = types.MappingProxyType(
         DataSourceName("fire_scar_late"): "fire_scar",
         DataSourceName("soil_ece"): "soil",
         DataSourceName("soil_depth"): "soil",
+        DataSourceName("soil_clay"): "soil",
     }
 )
 
@@ -46,6 +48,7 @@ DATA_SOURCE_NODATA = types.MappingProxyType(
         DataSourceName("fire_scar_late"): 0,
         DataSourceName("soil_ece"): np.nan,
         DataSourceName("soil_depth"): np.nan,
+        DataSourceName("soil_clay"): np.nan,
     }
 )
 
@@ -60,6 +63,7 @@ DATA_SOURCE_SENTINEL = types.MappingProxyType(
         DataSourceName("fire_scar_late"): 255,
         DataSourceName("soil_ece"): np.nan,
         DataSourceName("soil_depth"): np.nan,
+        DataSourceName("soil_clay"): np.nan,
     }
 )
 
@@ -75,6 +79,7 @@ DATA_SOURCE_DTYPE = types.MappingProxyType(
         DataSourceName("fire_scar_late"): np.uint8,
         DataSourceName("soil_ece"): np.float16,
         DataSourceName("soil_depth"): np.float16,
+        DataSourceName("soil_clay"): np.float16,
     }
 )
 
@@ -89,5 +94,6 @@ DATA_SOURCE_RESAMPLERS = types.MappingProxyType(
         DataSourceName("fire_scar_late"): rasterio.enums.Resampling.nearest,
         DataSourceName("soil_ece"): rasterio.enums.Resampling.bilinear,
         DataSourceName("soil_depth"): rasterio.enums.Resampling.bilinear,
+        DataSourceName("soil_clay"): rasterio.enums.Resampling.bilinear,
     }
 )
