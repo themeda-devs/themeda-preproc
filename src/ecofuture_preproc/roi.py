@@ -7,11 +7,7 @@ import typing
 import importlib.resources
 import pickle
 
-import numpy as np
-import numpy.typing as npt
-
 import shapely
-import pyproj
 
 import ecofuture_preproc.utils
 
@@ -104,24 +100,10 @@ class RegionOfInterest:
             ) from err
 
         if src_crs != dst_crs:
-            transformer = pyproj.Transformer.from_crs(
-                crs_from=src_crs,
-                crs_to=dst_crs,
-                always_xy=True,
-            )
-
-            def shapely_transform(points: npt.NDArray[float]) -> npt.NDArray[float]:
-                return np.column_stack(
-                    transformer.transform(
-                        xx=points[:, 0],
-                        yy=points[:, 1],
-                        errcheck=True,
-                    )
-                )
-
-            region = shapely.transform(
-                geometry=region,
-                transformation=shapely_transform,
+            region = ecofuture_preproc.utils.transform_shape(
+                src_crs=src_crs,
+                dst_crs=dst_crs,
+                shape=region,
             )
 
         # might speed up calls that use the geometry

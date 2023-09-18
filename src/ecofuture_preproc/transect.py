@@ -5,6 +5,7 @@ import xarray as xr
 import shapely
 
 import ecofuture_preproc.roi
+import ecofuture_preproc.utils
 
 
 @dataclasses.dataclass
@@ -16,6 +17,12 @@ class PointLatLon:
 def get_natt_coords(
     roi: ecofuture_preproc.roi.RegionOfInterest,
 ) -> xr.Dataset:
+
+    roi_shape_latlon = ecofuture_preproc.utils.transform_shape(
+        src_crs=3577,
+        dst_crs=4326,
+        shape=roi.shape,
+    )
 
     natt_start = PointLatLon(
         longitude=130.8410469,
@@ -34,7 +41,7 @@ def get_natt_coords(
         ],
     )
 
-    natt_roi_points = roi.shape.intersection(other=natt)
+    natt_roi_points = roi_shape_latlon.intersection(other=natt)
 
     (natt_left, natt_bottom, natt_right, natt_top) = natt_roi_points.bounds
 

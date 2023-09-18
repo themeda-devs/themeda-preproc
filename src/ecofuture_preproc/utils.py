@@ -2,7 +2,47 @@ import pathlib
 import typing
 import os
 
+import numpy as np
+import numpy.typing as npt
+
 import requests
+
+import pyproj
+import shapely
+
+
+def get_shape_transformer(
+    src_crs: int,
+    dst_crs: int,
+) -> pyproj.transformer.Transformer:
+
+    return pyproj.Transformer.from_crs(
+        crs_from=src_crs,
+        crs_to=dst_crs,
+        always_xy=True,
+    )
+
+
+def transform_shape(
+    src_crs: int,
+    dst_crs: int,
+    shape: shapely.Geometry,
+    transformer: typing.Optional[pyproj.transformer.Transformer] = None,
+) -> shapely.Geometry:
+
+    if transformer is None:
+        transformer = get_shape_transformer(src_crs=src_crs, dst_crs=dst_crs)
+
+    def shapely_transform(points: npt.NDArray[float]) -> npt.NDArray[float]:
+        return np.column_stack(
+            transformer.transform(
+                xx=points[:, 0],
+                yy=points[:, 1],
+                errcheck=True,
+            )
+        )
+
+    return shapely.transform(geometry=shape, transformation=shapely_transform)
 
 
 def is_path_existing_and_read_only(path: pathlib.Path) -> bool:
