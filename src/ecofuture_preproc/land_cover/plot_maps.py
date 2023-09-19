@@ -1,6 +1,7 @@
 import csv
 import pathlib
 import importlib.resources
+import typing
 
 import numpy as np
 
@@ -37,7 +38,7 @@ def run(
 def customiser(
     embed: veusz.embed.Embedded,
     page: veusz.embed.WidgetNode,
-    packet: xr.DataArray,
+    packet: xr.DataArray,  # noqa
 ) -> None:
 
     (img_widget, *_) = page.WalkWidgets(widgettype="image")

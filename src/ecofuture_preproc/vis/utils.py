@@ -180,3 +180,20 @@ def set_margins(
             continue
 
         widget_margin.val = margin
+
+
+def get_n_pages(embed: veusz.embed.Embedded) -> int:
+    """Returns the number of pages in a veusz figure."""
+
+    n_pages = len(list(embed.Root.WalkWidgets(widgettype="page")))
+
+    return n_pages
+
+
+def get_page_list(embed: veusz.embed.Embedded) -> list[int]:
+    """Returns a list with the pages in a veusz figure. Useful for passing as
+    the `page` argument to `embed.Export`."""
+
+    n_pages = get_n_pages(embed=embed)
+
+    return list(range(n_pages))

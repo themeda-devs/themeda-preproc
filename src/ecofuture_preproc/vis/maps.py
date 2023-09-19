@@ -22,7 +22,7 @@ def plot_years(
         None
     ],
     protect: bool = True,
-    resolution: typing.Optional[typing.Union[float, int]] = 1_000,
+    resolution: typing.Union[float, int] = 1_000,
     headless: bool = True,
 ) -> None:
 
@@ -32,6 +32,20 @@ def plot_years(
         / f"roi_{roi_name.value}"
         / source_name.value
     )
+
+    output_path = (
+        base_output_dir
+        / f"roi_{roi_name.value}"
+        / source_name.value
+        / f"{source_name.value}_maps.pdf"
+    )
+
+    if ecofuture_preproc.utils.is_path_existing_and_read_only(
+        path=output_path,
+    ):
+        return
+
+    output_path.parent.mkdir(exist_ok=True, parents=True)
 
     years = sorted(
         [
@@ -44,9 +58,30 @@ def plot_years(
     embed = veusz.embed.Embedded(hidden=headless)
     ecofuture_preproc.vis.utils.set_veusz_style(embed=embed)
 
+    for year in years:
+
+        render_year(
+            embed=embed,
+            year=year,
+            source_name=source_name,
+            chiplets_path=chiplets_path,
+            resolution=resolution,
+            customiser=customiser,
+        )
+
     embed.WaitForClose()
 
-    return embed
+    embed.Save(
+        str(output_path.with_suffix(".vsz"))
+    )
+    embed.Export(
+        str(output_path),
+        page=ecofuture_preproc.utils.get_page_list(embed=embed),
+    )
+
+    if protect:
+        ecofuture_preproc.utils.protect_path(path=output_path)
+        ecofuture_preproc.utils.protect_path(path=output_path.with_suffix(".vsz"))
 
 
 def render_year(
@@ -120,6 +155,10 @@ def render_year(
 
     if customiser is not None:
         customiser(embed, page, packet)
+
+    packet.close()
+
+    del packet
 
 
 def get_packet(
