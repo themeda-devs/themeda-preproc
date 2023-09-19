@@ -97,12 +97,18 @@ def main() -> None:
         help="Convert the chiplet array data to GeoTIFF representations",
     )
 
+    plot_maps_parser = subparsers.add_parser(
+        "plot_maps",
+        help="Plot a map of the data source for each year",
+    )
+
     for parser_needing_roi_name in [
         roi_parser,
         to_chips_parser,
         to_chiplets_parser,
         chiplet_table_parser,
         chiplets_to_geotiff_parser,
+        plot_maps_parser,
     ]:
         parser_needing_roi_name.add_argument(
             "-roi_name",
@@ -117,6 +123,7 @@ def main() -> None:
         to_chips_parser,
         to_chiplets_parser,
         chiplets_to_geotiff_parser,
+        plot_maps_parser,
     ]:
         parser_needing_source_name.add_argument(
             "-source_name",
@@ -145,6 +152,24 @@ def main() -> None:
             "-pad_size_pix",
             type=int,
             default=32,
+        )
+
+    for parser_needing_resolution in [
+        plot_maps_parser
+    ]:
+        parser_needing_resolution.add_argument(
+            "-resolution",
+            type=float,
+            default=1000.0,
+        )
+
+    for parser_needing_headless in [
+        plot_maps_parser
+    ]:
+        parser_needing_headless.add_argument(
+            "--headless",
+            action=argparse.BooleanOptionalAction,
+            default=True,
         )
 
     args = parser.parse_args()
