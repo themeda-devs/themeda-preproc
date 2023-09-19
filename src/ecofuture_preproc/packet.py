@@ -23,7 +23,13 @@ def form_packet(
     resampling: rasterio.enums.Resampling = rasterio.enums.Resampling.nearest,
 ) -> xr.DataArray:
 
-    data = read_files(paths=paths, chunks=chunks)
+    data = [
+        ecofuture_preproc.chips.read_chip(
+            path=path,
+            chunks=chunks,
+        )
+        for path in paths
+    ]
 
     data_array = rioxarray.merge.merge_arrays(
         dataarrays=data,
@@ -51,6 +57,7 @@ def read_files(
                 ecofuture_preproc.chips.read_chip,
                 path=path,
                 chunks=chunks,
+                lock=True,
             )
             for path in paths
         ]

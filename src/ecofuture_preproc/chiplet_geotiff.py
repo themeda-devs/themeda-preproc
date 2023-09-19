@@ -138,6 +138,11 @@ def convert_year_chiplets(
                     nodata=nodata,
                 )
 
+                if ecofuture_preproc.source.DATA_SOURCE_DTYPE[source_name] == (
+                    np.float16
+                ):
+                    data_array = data_array.astype(np.float32)
+
                 data_arrays.append(data_array)
 
             data = rioxarray.merge.merge_arrays(

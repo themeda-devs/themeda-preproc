@@ -35,6 +35,7 @@ def plot_years(
 
     output_path = (
         base_output_dir
+        / "plot_maps"
         / f"roi_{roi_name.value}"
         / source_name.value
         / f"{source_name.value}_maps.pdf"
@@ -76,7 +77,7 @@ def plot_years(
     )
     embed.Export(
         str(output_path),
-        page=ecofuture_preproc.utils.get_page_list(embed=embed),
+        page=ecofuture_preproc.vis.utils.get_page_list(embed=embed),
     )
 
     if protect:

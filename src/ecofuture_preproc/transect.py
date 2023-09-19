@@ -1,5 +1,9 @@
 import dataclasses
 
+import numpy as np
+
+import scipy.spatial.distance
+
 import xarray as xr
 
 import shapely
@@ -43,20 +47,58 @@ def get_natt_coords(
 
     natt_roi_points = roi_shape_latlon.intersection(other=natt)
 
-    (natt_left, natt_bottom, natt_right, natt_top) = natt_roi_points.bounds
+    (*_, natt_roi_segment) = natt_roi_points.geoms
+
+    ((natt_start_lon, natt_end_lon), (natt_start_lat, natt_end_lat)) = (
+        natt_roi_segment.xy
+    )
 
     transect_start = PointLatLon(
-        longitude=natt_left,
-        latitude=natt_top,
+        longitude=natt_start_lon,
+        latitude=natt_start_lat,
     )
     transect_end = PointLatLon(
-        longitude=natt_right,
-        latitude=natt_bottom,
+        longitude=natt_end_lon,
+        latitude=natt_end_lat,
     )
 
-    # TODO
-    # - convert transect points to Albers
-    # - make gridded points along transect
-    # - make DataArrays for indexing into the packet
+    (transect_start_albers, transect_end_albers) = (
+        ecofuture_preproc.utils.transform_shape(
+            src_crs=4326,
+            dst_crs=3577,
+            shape=shapely.Point(transect_point.longitude, transect_point.latitude),
+        )
+        for transect_point in [transect_start, transect_end]
+    )
 
-    return (transect_start, transect_end)
+    transect_length = scipy.spatial.distance.euclidean(
+        u=[transect_start_albers.x, transect_start_albers.y],
+        v=[transect_end_albers.x, transect_end_albers.y],
+    )
+
+    pixel_length = 25
+
+    n_points = round(transect_length / pixel_length)
+
+    points = np.linspace(
+        start=[transect_start_albers.x, transect_start_albers.y],
+        stop=[transect_end_albers.x, transect_end_albers.y],
+        num=n_points,
+        endpoint=True,
+    )
+
+    x = xr.DataArray(
+        data=points[:, 0],
+        dims="transect",
+    )
+    y = xr.DataArray(
+        data=points[:, 1],
+        dims="transect",
+    )
+
+    xy = xr.Dataset(
+        {"x": x, "y": y},
+    )
+
+    return xy
+

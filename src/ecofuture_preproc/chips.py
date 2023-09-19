@@ -33,6 +33,7 @@ def read_chip(
     variable: typing.Optional[typing.Union[str, tuple[str, ...]]] = None,
     masked: bool = False,
     cache: bool = True,
+    lock: typing.Optional[bool] = None,
 ) -> xr.DataArray:
     "Reads a chip file from disk"
 
@@ -44,6 +45,7 @@ def read_chip(
             variable=variable,
             masked=masked,
             cache=cache,
+            lock=lock,
         )
 
     if not isinstance(handle, xr.DataArray):
