@@ -95,9 +95,12 @@ def form_year_chiplets(
         typing.Callable[[xr.DataArray, bool], xr.DataArray]
     ] = None,
     load_chips_masked: bool = False,
-    lock: typing.Optional[
-        typing.Union[multiprocessing.synchronize.Lock, contextlib.nullcontext]
-    ] = None,  # type: ignore
+    lock: typing.Optional[  # type: ignore
+        typing.Union[
+            multiprocessing.synchronize.Lock,
+            contextlib.nullcontext,
+        ]
+    ] = None,
 ) -> None:
     if lock is None:
         lock = contextlib.nullcontext()

@@ -16,7 +16,13 @@ def plot_years(
     roi_name: ecofuture_preproc.roi.ROIName,
     base_output_dir: pathlib.Path,
     customiser: typing.Callable[
-        [veusz.embed.Embedded, veusz.embed.WidgetNode, xr.DataArray], None
+        [
+            veusz.embed.Embedded,
+            veusz.embed.WidgetNode,
+            xr.DataArray,
+            ecofuture_preproc.source.DataSourceName,
+            int,
+        ], None
     ],
     protect: bool = True,
     resolution: typing.Union[float, int] = 1_000,
@@ -51,7 +57,7 @@ def plot_years(
     embed = veusz.embed.Embedded(hidden=headless)
     ecofuture_preproc.vis.utils.set_veusz_style(embed=embed)
 
-    for year in years[:2]:
+    for year in years:
         render_year(
             embed=embed,
             year=year,
@@ -81,7 +87,13 @@ def render_year(
     chiplets_path: pathlib.Path,
     resolution: typing.Union[float, int],
     customiser: typing.Callable[
-        [veusz.embed.Embedded, veusz.embed.WidgetNode, xr.DataArray], None
+        [
+            veusz.embed.Embedded,
+            veusz.embed.WidgetNode,
+            xr.DataArray,
+            ecofuture_preproc.source.DataSourceName,
+            int,
+        ], None
     ],
     packet: typing.Optional[xr.DataArray] = None,
 ) -> None:
@@ -142,7 +154,7 @@ def render_year(
     x_axis.hide.val = y_axis.hide.val = True
 
     if customiser is not None:
-        customiser(embed, page, packet)
+        customiser(embed, page, packet, source_name, year)
 
     packet.close()
 

@@ -96,6 +96,8 @@ module = [
 	"scipy",
 	"scipy.spatial",
 	"scipy.spatial.distance",
+	"matplotlib",
+	"matplotlib.colormaps",
 ]
 ignore_missing_imports = true
 

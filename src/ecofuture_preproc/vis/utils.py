@@ -27,7 +27,7 @@ class ColourMap:
     name: str
     entries: list[ColourMapEntry]
 
-    def as_veusz_colourmap(self) -> list[RGBAType]:
+    def as_veusz_colourmap(self, stepped: bool = False) -> list[RGBAType]:
         cmap = [(0, 0, 0, 0) for _ in range(256)]
 
         for entry in self.entries:
@@ -39,6 +39,9 @@ class ColourMap:
             entry_colour = typing.cast(RGBAType, entry_colour)
 
             cmap[entry.value] = entry_colour
+
+        if stepped:
+            cmap.insert(0, (-1, 0, 0, 0))
 
         return cmap
 
