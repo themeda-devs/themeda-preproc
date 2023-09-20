@@ -77,8 +77,8 @@ def run(
                         dst=output_path,
                     )
 
-                if protect:
-                    ecofuture_preproc.utils.protect_path(path=output_path)
+                    if protect:
+                        ecofuture_preproc.utils.protect_path(path=output_path)
 
             progress_bar.update()
 

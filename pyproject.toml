@@ -61,6 +61,7 @@ ecofuture_preproc = "ecofuture_preproc.cli:main"
 
 [tool.mypy]
 plugins = "numpy.typing.mypy_plugin"
+exclude = "tests"
 # corresponding to --strict
 warn_unused_configs = true
 disallow_any_generics = true

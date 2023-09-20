@@ -48,7 +48,9 @@ def run(
                 if path.name.endswith("level4.tif"):
                     local_path = output_dir / path.name
 
-                    if not local_path.exists():
+                    if not ecofuture_preproc.utils.is_path_existing_and_read_only(
+                        path=local_path
+                    ):
                         to_download[item["Key"]] = local_path
 
         with contextlib.closing(
