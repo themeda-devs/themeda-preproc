@@ -17,24 +17,33 @@ import ecofuture_preproc.chiplets
 
 def form_packet(
     paths: list[pathlib.Path],
+    form_via_rioxarray: bool,
     chunks: typing.Optional[typing.Union[dict[str, int], bool, str]] = "auto",
     new_resolution: typing.Optional[typing.Union[int, float]] = None,
     nodata: typing.Optional[typing.Union[int, float]] = None,
     resampling: rasterio.enums.Resampling = rasterio.enums.Resampling.nearest,
+    load_chips_masked: bool = False,
 ) -> xr.DataArray:
 
     data = [
         ecofuture_preproc.chips.read_chip(
             path=path,
             chunks=chunks,
+            masked=load_chips_masked,
         )
         for path in paths
     ]
 
-    data_array = rioxarray.merge.merge_arrays(
-        dataarrays=data,
-        nodata=nodata,
-    )
+    if form_via_rioxarray:
+        data_array = rioxarray.merge.merge_arrays(
+            dataarrays=data,
+            nodata=nodata,
+        )
+    else:
+        data_array = xr.combine_by_coords(
+            data_objects=data,
+            combine_attrs="drop_conflicts",
+        )
 
     if new_resolution is not None:
         data_array = data_array.odc.reproject(

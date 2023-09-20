@@ -39,4 +39,5 @@ def run(
         protect=protect,
         cores=cores,
         show_progress=show_progress,
+        load_chips_masked=True,
     )

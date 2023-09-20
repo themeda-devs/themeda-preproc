@@ -44,6 +44,7 @@ def form_chiplets(
         typing.Callable[[xr.DataArray, bool], xr.DataArray]
     ] = None,
     show_progress: bool = True,
+    load_chips_masked: bool = False,
 ) -> None:
 
     source_chip_dir = (
@@ -70,11 +71,11 @@ def form_chiplets(
         protect=protect,
         show_progress=show_progress,
         relabeller=relabeller,
+        load_chips_masked=load_chips_masked,
     )
 
     with multiprocessing.Pool(processes=cores) as pool:
         pool.starmap(func, enumerate(years), chunksize=1)
-
 
 
 def form_year_chiplets(
@@ -91,6 +92,7 @@ def form_year_chiplets(
     relabeller: typing.Optional[
         typing.Callable[[xr.DataArray, bool], xr.DataArray]
     ] = None,
+    load_chips_masked: bool = False,
 ) -> None:
 
     progress_bar = tqdm.tqdm(
@@ -130,7 +132,9 @@ def form_year_chiplets(
 
     packet = ecofuture_preproc.packet.form_packet(
         paths=chip_paths,
+        form_via_rioxarray=False,  # doesn't require loading into memory
         nodata=ecofuture_preproc.source.DATA_SOURCE_NODATA[source_name],
+        load_chips_masked=load_chips_masked,
     )
 
     chiplets = np.memmap(

@@ -32,6 +32,7 @@ xarray = "^2023.8.0"
 polars = "^0.18.15"
 affine = "^2.4.0"
 scipy = "^1.11.2"
+typing-extensions = "^4.8.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^6.2.5"

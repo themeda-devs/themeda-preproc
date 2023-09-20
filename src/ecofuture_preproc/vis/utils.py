@@ -1,13 +1,13 @@
 
 import pathlib
 import typing
-import typing_extensions
 import platform
 import importlib.resources
 import ast
 import dataclasses
 
 import distro
+import typing_extensions
 
 import veusz.embed
 

@@ -59,7 +59,7 @@ def plot_years(
     embed = veusz.embed.Embedded(hidden=headless)
     ecofuture_preproc.vis.utils.set_veusz_style(embed=embed)
 
-    for year in years:
+    for year in years[:2]:
 
         render_year(
             embed=embed,
@@ -177,6 +177,7 @@ def get_packet(
 
     packet = ecofuture_preproc.packet.form_packet(
         paths=paths,
+        form_via_rioxarray=True,
         new_resolution=resolution,
         nodata=nodata,
         resampling=resampling,

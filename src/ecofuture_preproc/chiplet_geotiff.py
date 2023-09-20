@@ -82,6 +82,8 @@ def convert_year_chiplets(
     pad_size_pix = 0
     crs = 3577
     nodata = ecofuture_preproc.source.DATA_SOURCE_NODATA[source_name]
+    if ecofuture_preproc.source.DATA_SOURCE_DTYPE[source_name] == np.float16:
+        nodata = np.float32(nodata)
 
     chiplets = ecofuture_preproc.chiplets.load_chiplets(
         source_name=source_name,
@@ -154,9 +156,6 @@ def convert_year_chiplets(
             data.rio.set_nodata(input_nodata=nodata, inplace=True)
 
             data = data.odc.assign_crs(crs=data.rio.crs)
-
-            if data.dtype == np.float16:
-                data = data.astype(np.float32)
 
             data.rio.to_raster(
                 raster_path=output_path,
