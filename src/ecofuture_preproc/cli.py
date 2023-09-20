@@ -36,7 +36,7 @@ def main() -> None:
         "-cores",
         type=int,
         required=False,
-        default=multiprocessing.cpu_count() - 1,
+        default=4,
         help="Number of cores to use with multiprocessing",
     )
 
