@@ -31,7 +31,7 @@ Then install the necessary system packages (see the [requirements for building `
 
 Then create a build directory, download the `veusz` source code, and extract:
 ```bash
-# assuming in `code/ecofuture_preproc`
+# assuming in `code/ecofuture-preproc`
 cd ../..
 mkdir build
 cd build
