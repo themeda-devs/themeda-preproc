@@ -111,6 +111,7 @@ skip-string-normalization = false
 skip-magic-trailing-comma = false
 
 [tool.ruff]
+exclude = ["tests"]
 select = [
         "E",  # error
         "F",  # pyflakes

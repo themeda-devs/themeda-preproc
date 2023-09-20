@@ -48,7 +48,6 @@ def run(
         )
     ) as progress_bar:
         for year_raw_path_info in raw_chip_path_info.values():
-
             if not is_year_valid(year_raw_chip_path_info=year_raw_path_info):
                 continue
 
@@ -62,7 +61,6 @@ def run(
             if not ecofuture_preproc.utils.is_path_existing_and_read_only(
                 path=output_path
             ):
-
                 data = summarise_year_chips(
                     year_raw_path_info=year_raw_path_info,
                     source_name=source_name,
@@ -86,7 +84,6 @@ def summarise_year_chips(
     year_raw_path_info: list[ChipPathInfo],
     source_name: ecofuture_preproc.source.DataSourceName,
 ) -> xr.DataArray:
-
     year_chips = [
         ecofuture_preproc.chips.read_chip(
             path=chip_path_info.path,
@@ -135,7 +132,6 @@ def summarise_year_chips(
 
 
 def is_year_valid(year_raw_chip_path_info: list[ChipPathInfo]) -> bool:
-
     months = sorted(
         [chip_path_info.month for chip_path_info in year_raw_chip_path_info]
     )
@@ -146,7 +142,6 @@ def is_year_valid(year_raw_chip_path_info: list[ChipPathInfo]) -> bool:
 
 
 def parse_chip_path(path: pathlib.Path) -> ChipPathInfo:
-
     (head, _, source_name, monthly, yearmonth) = path.stem.split("_")
 
     if head != "ANUClimate" or monthly != "monthly" or path.suffix != ".nc":

@@ -21,7 +21,6 @@ def run(
     protect: bool = True,
     show_progress: bool = True,
 ) -> None:
-
     # only consider this and subsequent years
     start_year: typing.Final = 1988
 

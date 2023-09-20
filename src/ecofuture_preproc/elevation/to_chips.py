@@ -22,7 +22,6 @@ def run(
     protect: bool = True,
     show_progress: bool = True,
 ) -> None:
-
     prep_dir = base_output_dir / "prep" / source_name.value
 
     chip_dir = base_output_dir / "chips" / f"roi_{roi_name.value}" / source_name.value
@@ -51,20 +50,13 @@ def run(
             disable=not show_progress,
         )
     ) as progress_bar:
-
         chip_dir = chip_dir / str(year)
         chip_dir.mkdir(exist_ok=True, parents=True)
 
-        dem_chip_path = (
-            prep_dir
-            / str(year)
-            / f"{source_name.value}_{year}.tif"
-        )
+        dem_chip_path = prep_dir / str(year) / f"{source_name.value}_{year}.tif"
 
         if not dem_chip_path.exists():
-            raise ValueError(
-                f"Expected the chip to exist at {dem_chip_path}"
-            )
+            raise ValueError(f"Expected the chip to exist at {dem_chip_path}")
 
         # load the DEM chip
         dem_chip = ecofuture_preproc.chips.read_chip(
@@ -73,8 +65,7 @@ def run(
             masked=True,
         )
 
-        for (grid_ref, base_chip) in ref_chips.items():
-
+        for grid_ref, base_chip in ref_chips.items():
             output_path = (
                 chip_dir
                 / f"{source_name.value}_roi_{roi_name.value}_{year}_{grid_ref}.tif"
@@ -83,7 +74,6 @@ def run(
             if not ecofuture_preproc.utils.is_path_existing_and_read_only(
                 path=output_path
             ):
-
                 converted_chip = convert_chip(
                     dem_chip=dem_chip,
                     dea_chip=base_chip,
@@ -104,7 +94,6 @@ def convert_chip(
     dem_chip: xr.DataArray,
     dea_chip: xr.DataArray,
 ) -> xr.DataArray:
-
     interp_method = rasterio.enums.Resampling.bilinear
 
     dem_chip_resampled = dem_chip.odc.reproject(

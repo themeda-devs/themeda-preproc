@@ -25,7 +25,6 @@ def run(
     protect: bool = True,
     show_progress: bool = True,
 ) -> None:
-
     prep_dir = base_output_dir / "prep" / source_name.value
 
     chip_dir = base_output_dir / "chips" / f"roi_{roi_name.value}" / source_name.value
@@ -54,16 +53,12 @@ def run(
             disable=not show_progress,
         )
     ) as progress_bar:
-
         for year in years:
-
             year_chip_dir = chip_dir / str(year)
             year_chip_dir.mkdir(exist_ok=True, parents=True)
 
             land_use_chip_path = (
-                prep_dir
-                / str(year)
-                / f"{source_name.value}_{year}.tif"
+                prep_dir / str(year) / f"{source_name.value}_{year}.tif"
             )
 
             if not land_use_chip_path.exists():
@@ -77,8 +72,7 @@ def run(
                 masked=True,
             )
 
-            for (grid_ref, base_chip) in ref_chips.items():
-
+            for grid_ref, base_chip in ref_chips.items():
                 output_path = (
                     year_chip_dir
                     / f"{source_name.value}_roi_{roi_name.value}_{year}_{grid_ref}.tif"
@@ -87,7 +81,6 @@ def run(
                 if not ecofuture_preproc.utils.is_path_existing_and_read_only(
                     path=output_path
                 ):
-
                     converted_chip = convert_chip(
                         land_use_chip=land_use_chip,
                         dea_chip=base_chip,
@@ -108,7 +101,6 @@ def convert_chip(
     land_use_chip: xr.DataArray,
     dea_chip: xr.DataArray,
 ) -> xr.DataArray:
-
     source_name = ecofuture_preproc.source.DataSourceName("land_use")
     nodata_val = ecofuture_preproc.source.DATA_SOURCE_NODATA[source_name]
 

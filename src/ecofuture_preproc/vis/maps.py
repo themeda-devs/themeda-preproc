@@ -1,5 +1,3 @@
-
-
 import pathlib
 import typing
 
@@ -18,14 +16,12 @@ def plot_years(
     roi_name: ecofuture_preproc.roi.ROIName,
     base_output_dir: pathlib.Path,
     customiser: typing.Callable[
-        [veusz.embed.Embedded, veusz.embed.WidgetNode, xr.DataArray],
-        None
+        [veusz.embed.Embedded, veusz.embed.WidgetNode, xr.DataArray], None
     ],
     protect: bool = True,
     resolution: typing.Union[float, int] = 1_000,
     headless: bool = True,
 ) -> None:
-
     chiplets_path = (
         base_output_dir
         / "chiplets_geotiff"
@@ -49,18 +45,13 @@ def plot_years(
     output_path.parent.mkdir(exist_ok=True, parents=True)
 
     years = sorted(
-        [
-            int(path.name)
-            for path in chiplets_path.glob("*")
-            if path.is_dir()
-        ]
+        [int(path.name) for path in chiplets_path.glob("*") if path.is_dir()]
     )
 
     embed = veusz.embed.Embedded(hidden=headless)
     ecofuture_preproc.vis.utils.set_veusz_style(embed=embed)
 
     for year in years[:2]:
-
         render_year(
             embed=embed,
             year=year,
@@ -72,9 +63,7 @@ def plot_years(
 
     embed.WaitForClose()
 
-    embed.Save(
-        str(output_path.with_suffix(".vsz"))
-    )
+    embed.Save(str(output_path.with_suffix(".vsz")))
     embed.Export(
         str(output_path),
         page=ecofuture_preproc.vis.utils.get_page_list(embed=embed),
@@ -92,12 +81,10 @@ def render_year(
     chiplets_path: pathlib.Path,
     resolution: typing.Union[float, int],
     customiser: typing.Callable[
-        [veusz.embed.Embedded, veusz.embed.WidgetNode, xr.DataArray],
-        None
+        [veusz.embed.Embedded, veusz.embed.WidgetNode, xr.DataArray], None
     ],
     packet: typing.Optional[xr.DataArray] = None,
 ) -> None:
-
     if packet is None:
         packet = get_packet(
             year=year,
@@ -142,7 +129,7 @@ def render_year(
 
     img = graph.Add("image", name=img_name)
     img.data.val = data_name
-    #img.colorMap.val = f"{source_name.value}_cmap"
+    # img.colorMap.val = f"{source_name.value}_cmap"
 
     x_axis.MinorTicks.hide.val = y_axis.MinorTicks.hide.val = True
     x_axis.TickLabels.format.val = y_axis.TickLabels.format.val = "%d"
@@ -168,7 +155,6 @@ def get_packet(
     chiplets_path: pathlib.Path,
     resolution: typing.Union[float, int],
 ) -> xr.DataArray:
-
     paths = sorted((chiplets_path / str(year)).glob("*.tif"))
 
     nodata = ecofuture_preproc.source.DATA_SOURCE_SENTINEL[source_name]

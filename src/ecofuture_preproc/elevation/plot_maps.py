@@ -23,7 +23,6 @@ def run(
     resolution: typing.Optional[typing.Union[float, int]] = 1_000,
     headless: bool = True,
 ) -> None:
-
     ecofuture_preproc.vis.maps.plot_years(
         source_name=source_name,
         roi_name=roi_name,
@@ -33,6 +32,7 @@ def run(
         resolution=resolution,
         headless=headless,
     )
+
 
 def customiser(
     embed: veusz.embed.Embedded,

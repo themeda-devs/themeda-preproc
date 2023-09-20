@@ -26,7 +26,6 @@ def relabel_chiplet(
     coastal_roi: ecofuture_preproc.roi.RegionOfInterest,
     inplace: bool = True,
 ) -> xr.DataArray:
-
     if not inplace:
         chiplet = chiplet.copy()
 
@@ -35,19 +34,14 @@ def relabel_chiplet(
     # if some of the pixels are not inside the ROI, we need to potentially do
     # some additional re-labelling
     if partial_roi_overlap:
-
         # relabelling is only on water classifications, so we can skip if there
         # aren't any water pixels
         is_water_pixel = np.any(
-            [
-                chiplet == water_label
-                for water_label in WATER_LABELS
-            ],
+            [chiplet == water_label for water_label in WATER_LABELS],
             axis=0,
         )
 
         if np.any(is_water_pixel):
-
             # OK, so we have pixels that are water
             # we need to work out whether they are in the ocean or are inland
 
@@ -55,8 +49,9 @@ def relabel_chiplet(
 
             # rasterise the coastal ROI and convert to a boolean mask
             is_outside_roi = (
-                chiplet.rio.set_nodata(input_nodata=255, inplace=False)
-                .rio.clip(geometries=[coastal_roi.shape], drop=False)
+                chiplet.rio.set_nodata(input_nodata=255, inplace=False).rio.clip(
+                    geometries=[coastal_roi.shape], drop=False
+                )
             ) == 255
 
             # we care if it is both outside the ROI and is classified as water
@@ -79,7 +74,6 @@ def relabel_chiplet(
 
 
 def get_relabel_lut() -> npt.NDArray[np.uint8]:
-
     csv_path = pathlib.Path(
         str(
             importlib.resources.files("ecofuture_preproc.resources.relabel").joinpath(
@@ -93,13 +87,11 @@ def get_relabel_lut() -> npt.NDArray[np.uint8]:
     with csv_path.open(newline="", encoding="latin") as handle:
         reader = csv.DictReader(f=handle)
         for row in reader:
-
             dea_level_4 = ecofuture_preproc.utils.num_str_to_int(num_str=row["level4"])
             new_label = ecofuture_preproc.utils.num_str_to_int(num_str=row["LCNS_n"])
 
-            if (
-                (dea_level_4 < 0 or new_label < 0)
-                or (dea_level_4 > 127 or new_label > 255)
+            if (dea_level_4 < 0 or new_label < 0) or (
+                dea_level_4 > 127 or new_label > 255
             ):
                 raise ValueError(f"Unexpected labels: {dea_level_4}, {new_label}")
 

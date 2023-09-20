@@ -1,4 +1,3 @@
-
 import pathlib
 import typing
 import platform
@@ -29,14 +28,9 @@ class ColourMap:
     entries: list[ColourMapEntry]
 
     def as_veusz_colourmap(self) -> list[RGBAType]:
-
-        cmap = [
-            (0, 0, 0, 0)
-            for _ in range(256)
-        ]
+        cmap = [(0, 0, 0, 0) for _ in range(256)]
 
         for entry in self.entries:
-
             entry_colour = entry.colour
 
             if len(entry_colour) == 3:
@@ -49,18 +43,14 @@ class ColourMap:
         return cmap
 
 
-def hex_to_rgb(
-    colour: str
-) -> RGBAType:
-
+def hex_to_rgb(colour: str) -> RGBAType:
     if not colour.startswith("#"):
         raise ValueError("Expecting the hex code to start with #")
 
     hex_chars = list(colour[1:])
 
     rgba_vals = tuple(
-        int("".join(hex_pair), 16)
-        for hex_pair in zip(hex_chars[::2], hex_chars[1::2])
+        int("".join(hex_pair), 16) for hex_pair in zip(hex_chars[::2], hex_chars[1::2])
     )
 
     if len(rgba_vals) == 3:
@@ -73,10 +63,9 @@ def hex_to_rgb(
 
 def set_veusz_style(
     embed: veusz.embed.Embedded,
-    font: typing.Optional[typing.Union[str, dict[str, str]]] =  None,
+    font: typing.Optional[typing.Union[str, dict[str, str]]] = None,
     font_size_mod: typing.Union[int, float] = 0,
 ) -> None:
-
     style_path = pathlib.Path(
         str(
             importlib.resources.files("ecofuture_preproc.resources.vis").joinpath(
@@ -96,7 +85,6 @@ def set_veusz_style(
         font_family = font
 
     elif isinstance(font, dict):
-
         font_family = None
 
         if "windows" in font and platform.system() == "Windows":
@@ -114,14 +102,12 @@ def set_veusz_style(
         style_lines = style_file.readlines()
 
     for style_line in style_lines:
-
         style_line = style_line.strip()
 
         if font is not None:
             style_line = style_line.replace("Arial", font_family)
 
         if "size" in style_line:
-
             (param, value) = style_line.split(", ")
 
             if "pt" in value:
@@ -132,7 +118,6 @@ def set_veusz_style(
                 style_line = ", ".join((param, value))
 
         if style_line.startswith("Set"):
-
             assert style_line.endswith(")")
 
             style_line = style_line[:-1]
@@ -140,8 +125,7 @@ def set_veusz_style(
             (command, args) = style_line.split("(", maxsplit=1)
 
             args = [
-                ast.literal_eval(arg.strip())
-                for arg in args.split(",", maxsplit=1)
+                ast.literal_eval(arg.strip()) for arg in args.split(",", maxsplit=1)
             ]
 
             method = getattr(embed, command)
@@ -154,7 +138,6 @@ def set_margins(
     margins: typing.Optional[dict[str, str]] = None,
     null_absent: bool = False,
 ) -> None:
-
     side_lut = {
         "L": "left",
         "R": "right",
@@ -171,8 +154,7 @@ def set_margins(
     if null_absent:
         margins = {**null_margins, **margins}
 
-    for (side, margin) in margins.items():
-
+    for side, margin in margins.items():
         try:
             widget_margin = getattr(widget, f"{side_lut[side]:s}Margin")
         except AttributeError:

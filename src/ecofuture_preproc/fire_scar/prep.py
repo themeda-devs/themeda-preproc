@@ -17,28 +17,20 @@ def run(
     base_output_dir: pathlib.Path,
     protect: bool = True,
 ) -> None:
-
     raw_dir = base_output_dir / "raw" / "fire_scar" / "Fire_scars_1989_2023"
     prep_dir = base_output_dir / "prep" / source_name.value
 
     raw_year_paths = types.MappingProxyType(
-        {
-            get_year_from_path(path=path): path
-            for path in sorted(raw_dir.glob("*.shp"))
-        }
+        {get_year_from_path(path=path): path for path in sorted(raw_dir.glob("*.shp"))}
     )
 
-    for (year, raw_year_path) in raw_year_paths.items():
-
+    for year, raw_year_path in raw_year_paths.items():
         output_dir = prep_dir / str(year)
         output_dir.mkdir(exist_ok=True, parents=True)
 
         output_path = output_dir / f"{source_name.value}_{year}.pkl"
 
-        if not ecofuture_preproc.utils.is_path_existing_and_read_only(
-            path=output_path
-        ):
-
+        if not ecofuture_preproc.utils.is_path_existing_and_read_only(path=output_path):
             year_data = process_year(
                 source_name=source_name,
                 path=raw_year_path,
@@ -52,7 +44,6 @@ def run(
 
 
 def get_year_from_path(path: pathlib.Path) -> int:
-
     if not path.suffix == ".shp":
         raise ValueError("Expected suffix to be .shp")
 
@@ -75,13 +66,10 @@ def process_year(
     source_name: ecofuture_preproc.source.DataSourceName,
     path: pathlib.Path,
 ) -> list[odc.geo.geom.Geometry]:
-
     geoms = []
 
     with fiona.open(fp=path) as handle:
-
         for entry in handle:
-
             season = get_season_of_entry(entry=entry)
 
             if not source_name.value.endswith(season):
@@ -101,7 +89,6 @@ def process_year(
 
 
 def get_season_of_entry(entry: fiona.model.Feature) -> str:
-
     if "DATE" in entry.properties:
         date_str = entry.properties["DATE"]
 
@@ -137,7 +124,6 @@ def geom_from_shape(
     src_crs: fiona.crs.CRS,
     dst_crs: typing.Optional[int] = 3577,
 ) -> odc.geo.geom.Geometry:
-
     if entry.geometry.type == "Polygon":
         (outer, *inners) = entry.geometry.coordinates
         geom = odc.geo.geom.polygon(

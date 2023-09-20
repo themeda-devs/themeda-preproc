@@ -21,7 +21,6 @@ class PointLatLon:
 def get_natt_coords(
     roi: ecofuture_preproc.roi.RegionOfInterest,
 ) -> xr.Dataset:
-
     roi_shape_latlon = ecofuture_preproc.utils.transform_shape(
         src_crs=3577,
         dst_crs=4326,
@@ -49,9 +48,10 @@ def get_natt_coords(
 
     (*_, natt_roi_segment) = natt_roi_points.geoms
 
-    ((natt_start_lon, natt_end_lon), (natt_start_lat, natt_end_lat)) = (
-        natt_roi_segment.xy
-    )
+    (
+        (natt_start_lon, natt_end_lon),
+        (natt_start_lat, natt_end_lat),
+    ) = natt_roi_segment.xy
 
     transect_start = PointLatLon(
         longitude=natt_start_lon,
@@ -101,4 +101,3 @@ def get_natt_coords(
     )
 
     return xy
-

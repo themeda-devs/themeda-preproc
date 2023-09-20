@@ -33,9 +33,7 @@ def run(
     )
 
     # if it already exists and is protected, bail
-    if ecofuture_preproc.utils.is_path_existing_and_read_only(
-        path=table_path
-    ):
+    if ecofuture_preproc.utils.is_path_existing_and_read_only(path=table_path):
         print(f"Path {table_path} exists and is protected; skipping")
         return
 

@@ -10,7 +10,6 @@ def run(
     base_output_dir: pathlib.Path,
     protect: bool = True,
 ) -> None:
-
     if source_name not in [
         ecofuture_preproc.source.DataSourceName.SOIL_ECE,
         ecofuture_preproc.source.DataSourceName.SOIL_DEPTH,
@@ -40,10 +39,7 @@ def run(
     output_dir.mkdir(exist_ok=True, parents=True)
     output_path = output_dir / f"{source_name.value}_{year}.tif"
 
-    if not ecofuture_preproc.utils.is_path_existing_and_read_only(
-        path=output_path
-    ):
-
+    if not ecofuture_preproc.utils.is_path_existing_and_read_only(path=output_path):
         shutil.copy2(
             src=raw_chip_path,
             dst=output_path,

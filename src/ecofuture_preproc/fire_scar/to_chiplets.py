@@ -16,7 +16,6 @@ def run(
     protect: bool = True,
     show_progress: bool = True,
 ) -> None:
-
     table = ecofuture_preproc.chiplet_table.load_table(
         base_output_dir=base_output_dir,
         roi_name=roi_name,

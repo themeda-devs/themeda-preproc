@@ -15,7 +15,6 @@ def get_shape_transformer(
     src_crs: int,
     dst_crs: int,
 ) -> pyproj.transformer.Transformer:
-
     return pyproj.Transformer.from_crs(
         crs_from=src_crs,
         crs_to=dst_crs,
@@ -29,7 +28,6 @@ def transform_shape(
     shape: shapely.Geometry,
     transformer: typing.Optional[pyproj.transformer.Transformer] = None,
 ) -> shapely.Geometry:
-
     if transformer is None:
         transformer = get_shape_transformer(src_crs=src_crs, dst_crs=dst_crs)
 
@@ -46,10 +44,7 @@ def transform_shape(
 
 
 def is_path_existing_and_read_only(path: pathlib.Path) -> bool:
-    return (
-        path.exists()
-        and (not os.access(path, os.W_OK))
-    )
+    return path.exists() and (not os.access(path, os.W_OK))
 
 
 def num_str_to_int(num_str: str) -> int:

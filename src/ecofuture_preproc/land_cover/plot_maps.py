@@ -23,7 +23,6 @@ def run(
     resolution: typing.Optional[typing.Union[float, int]] = 1_000,
     headless: bool = True,
 ) -> None:
-
     ecofuture_preproc.vis.maps.plot_years(
         source_name=source_name,
         roi_name=roi_name,
@@ -40,7 +39,6 @@ def customiser(
     page: veusz.embed.WidgetNode,
     packet: xr.DataArray,  # noqa
 ) -> None:
-
     (img_widget, *_) = page.WalkWidgets(widgettype="image")
 
     name_prefix = img_widget.name.removesuffix("_img")
@@ -126,7 +124,6 @@ def customiser(
 
 
 def get_colour_map() -> ecofuture_preproc.vis.utils.ColourMap:
-
     csv_path = pathlib.Path(
         str(
             importlib.resources.files("ecofuture_preproc.resources.relabel").joinpath(
@@ -140,15 +137,12 @@ def get_colour_map() -> ecofuture_preproc.vis.utils.ColourMap:
     with csv_path.open(newline="", encoding="latin") as handle:
         reader = csv.DictReader(f=handle)
         for row in reader:
-
             if all(row_val == "" for row_val in row.values()):
                 continue
 
             value = ecofuture_preproc.utils.num_str_to_int(num_str=row["LCNS_n"])
             label = row["LCNS_label"]
-            colour = ecofuture_preproc.vis.utils.hex_to_rgb(
-                colour=row["LCNS_HexCol"]
-            )
+            colour = ecofuture_preproc.vis.utils.hex_to_rgb(colour=row["LCNS_HexCol"])
             entries.append(
                 ecofuture_preproc.vis.utils.ColourMapEntry(
                     label=label,

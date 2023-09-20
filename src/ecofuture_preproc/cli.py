@@ -10,15 +10,9 @@ import ecofuture_preproc.source
 
 
 def main() -> None:
-
     # silence the dask chunks message
     # array.slicing.split_large_chunks
-    os.environ[
-        "DASK_"
-        + "ARRAY__"
-        + "SLICING__"
-        + "SPLIT_LARGE_CHUNKS"
-    ] = "false"
+    os.environ["DASK_" + "ARRAY__" + "SLICING__" + "SPLIT_LARGE_CHUNKS"] = "false"
 
     parser = argparse.ArgumentParser(
         description="Pre-processing for the Ecofuture project",
@@ -154,18 +148,14 @@ def main() -> None:
             default=32,
         )
 
-    for parser_needing_resolution in [
-        plot_maps_parser
-    ]:
+    for parser_needing_resolution in [plot_maps_parser]:
         parser_needing_resolution.add_argument(
             "-resolution",
             type=float,
             default=1000.0,
         )
 
-    for parser_needing_headless in [
-        plot_maps_parser
-    ]:
+    for parser_needing_headless in [plot_maps_parser]:
         parser_needing_headless.add_argument(
             "--headless",
             action=argparse.BooleanOptionalAction,

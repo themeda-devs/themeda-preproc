@@ -21,7 +21,6 @@ def relabel_chiplet(
     relabel_lut: npt.NDArray[np.uint8],
     inplace: bool = True,
 ) -> xr.DataArray:
-
     if not inplace:
         chiplet = chiplet.copy()
 
@@ -34,7 +33,6 @@ def relabel_chiplet(
 
 
 def get_relabel_lut() -> npt.NDArray[np.uint8]:
-
     csv_path = pathlib.Path(
         str(
             importlib.resources.files("ecofuture_preproc.resources.relabel").joinpath(
@@ -48,13 +46,11 @@ def get_relabel_lut() -> npt.NDArray[np.uint8]:
     with csv_path.open(newline="", encoding="utf-8-sig") as handle:
         reader = csv.DictReader(f=handle)
         for row in reader:
-
             orig_label = ecofuture_preproc.utils.num_str_to_int(num_str=row["Value"])
             new_label = ecofuture_preproc.utils.num_str_to_int(num_str=row["NewValue"])
 
-            if (
-                (orig_label < 0 or new_label < 0)
-                or (orig_label > 663 or new_label > 12)
+            if (orig_label < 0 or new_label < 0) or (
+                orig_label > 663 or new_label > 12
             ):
                 raise ValueError(f"Unexpected labels: {orig_label}, {new_label}")
 
@@ -68,7 +64,6 @@ def relabel_chip(
     relabel_lut: npt.NDArray[np.uint8],
     inplace: bool = True,
 ) -> xr.DataArray:
-
     if not inplace:
         chip = chip.copy()
 
@@ -102,11 +97,10 @@ def get_lu_code_lut(attr_table_path: pathlib.Path) -> npt.NDArray[np.uint16]:
     with attr_table_path.open(newline="", encoding="ascii") as handle:
         reader = csv.DictReader(f=handle)
         for row in reader:
-
             value = ecofuture_preproc.utils.num_str_to_int(num_str=row["VALUE"])
             lu_code = ecofuture_preproc.utils.num_str_to_int(num_str=row["LU_CODE"])
 
-            if (value < 0 or lu_code < 0):
+            if value < 0 or lu_code < 0:
                 raise ValueError(f"Unexpected labels: {value}, {lu_code}")
 
             lut[value] = lu_code

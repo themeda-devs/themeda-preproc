@@ -22,7 +22,6 @@ def run(
     protect: bool = True,
     show_progress: bool = True,
 ) -> None:
-
     prep_dir = base_output_dir / "prep" / source_name.value
 
     chip_dir = base_output_dir / "chips" / f"roi_{roi_name.value}" / source_name.value
@@ -51,17 +50,11 @@ def run(
             disable=not show_progress,
         )
     ) as progress_bar:
-
         for year in years:
-
             year_chip_dir = chip_dir / str(year)
             year_chip_dir.mkdir(exist_ok=True, parents=True)
 
-            climate_chip_path = (
-                prep_dir
-                / str(year)
-                / f"{source_name.value}_{year}.tif"
-            )
+            climate_chip_path = prep_dir / str(year) / f"{source_name.value}_{year}.tif"
 
             if not climate_chip_path.exists():
                 raise ValueError(
@@ -75,8 +68,7 @@ def run(
                 masked=True,
             )
 
-            for (grid_ref, base_chip) in ref_chips.items():
-
+            for grid_ref, base_chip in ref_chips.items():
                 output_path = (
                     year_chip_dir
                     / f"{source_name.value}_roi_{roi_name.value}_{year}_{grid_ref}.tif"
@@ -85,7 +77,6 @@ def run(
                 if not ecofuture_preproc.utils.is_path_existing_and_read_only(
                     path=output_path
                 ):
-
                     converted_chip = convert_chip(
                         climate_chip=climate_chip,
                         dea_chip=base_chip,
@@ -108,7 +99,6 @@ def convert_chip(
     dea_chip: xr.DataArray,
     source_name: ecofuture_preproc.source.DataSourceName,
 ) -> xr.DataArray:
-
     interp_method = rasterio.enums.Resampling.bilinear
 
     climate_chip_resampled = climate_chip.odc.reproject(

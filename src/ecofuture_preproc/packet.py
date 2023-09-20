@@ -4,7 +4,6 @@ Lazily load a collection of chips (a 'packet' of chips...).
 
 import pathlib
 import typing
-import concurrent.futures
 
 import xarray as xr
 
@@ -24,7 +23,6 @@ def form_packet(
     resampling: rasterio.enums.Resampling = rasterio.enums.Resampling.nearest,
     load_chips_masked: bool = False,
 ) -> xr.DataArray:
-
     data = [
         ecofuture_preproc.chips.read_chip(
             path=path,
@@ -53,22 +51,3 @@ def form_packet(
         )
 
     return data_array
-
-
-def read_files(
-    paths: list[pathlib.Path],
-    chunks: typing.Optional[typing.Union[dict[str, int], bool, str]] = "auto",
-) -> list[xr.DataArray]:
-
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [
-            executor.submit(
-                ecofuture_preproc.chips.read_chip,
-                path=path,
-                chunks=chunks,
-                lock=True,
-            )
-            for path in paths
-        ]
-
-    return [future.result() for future in futures]

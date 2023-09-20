@@ -48,12 +48,8 @@ def form_chiplets(
     show_progress: bool = True,
     load_chips_masked: bool = False,
 ) -> None:
-
     source_chip_dir = (
-        base_output_dir
-        / "chips"
-        / f"roi_{roi.name.value}"
-        / source_name.value
+        base_output_dir / "chips" / f"roi_{roi.name.value}" / source_name.value
     )
 
     years = [
@@ -63,7 +59,6 @@ def form_chiplets(
     ]
 
     with multiprocessing.Manager() as manager:
-
         lock = manager.Lock()
 
         func = functools.partial(
@@ -100,9 +95,10 @@ def form_year_chiplets(
         typing.Callable[[xr.DataArray, bool], xr.DataArray]
     ] = None,
     load_chips_masked: bool = False,
-    lock: typing.Optional[typing.Union[multiprocessing.synchronize.Lock, contextlib.nullcontext]] = None,  # type: ignore
+    lock: typing.Optional[
+        typing.Union[multiprocessing.synchronize.Lock, contextlib.nullcontext]
+    ] = None,  # type: ignore
 ) -> None:
-
     if lock is None:
         lock = contextlib.nullcontext()
 
@@ -137,9 +133,7 @@ def form_year_chiplets(
         base_output_dir=base_output_dir,
     )
 
-    if ecofuture_preproc.utils.is_path_existing_and_read_only(
-        path=output_path
-    ):
+    if ecofuture_preproc.utils.is_path_existing_and_read_only(path=output_path):
         return
 
     packet = ecofuture_preproc.packet.form_packet(
@@ -163,7 +157,6 @@ def form_year_chiplets(
     transforms: dict[ecofuture_preproc.chips.GridRef, affine.Affine] = {}
 
     for row in table.iter_rows(named=True):
-
         grid_ref = ecofuture_preproc.chips.GridRef(
             x=row["chip_grid_ref_x_base"],
             y=row["chip_grid_ref_y_base"],
@@ -218,7 +211,6 @@ def load_chiplets(
     base_output_dir: pathlib.Path,
     base_size_pix: int = 160,
 ) -> np.memmap:  # type: ignore
-
     table = ecofuture_preproc.chiplet_table.load_table(
         roi_name=roi_name,
         base_output_dir=base_output_dir,
@@ -252,7 +244,6 @@ def get_array_shape(
     base_size_pix: int,
     pad_size_pix: int,
 ) -> tuple[int, int, int]:
-
     shape = (len(table),) + ((base_size_pix + pad_size_pix * 2),) * 2
 
     return shape
@@ -265,7 +256,6 @@ def get_chiplet_path(
     pad_size_pix: int,
     base_output_dir: pathlib.Path,
 ) -> pathlib.Path:
-
     chiplet_dir: pathlib.Path = (
         base_output_dir
         / "chiplets"
@@ -276,19 +266,15 @@ def get_chiplet_path(
 
     chiplet_dir.mkdir(exist_ok=True, parents=True)
 
-    chiplet_path = (
-        chiplet_dir
-        / (
-            f"chiplets_{source_name.value}_{year}_"
-            + f"roi_{roi_name.value}_pad_{pad_size_pix}.npy"
-        )
+    chiplet_path = chiplet_dir / (
+        f"chiplets_{source_name.value}_{year}_"
+        + f"roi_{roi_name.value}_pad_{pad_size_pix}.npy"
     )
 
     return chiplet_path
 
 
 def parse_chiplet_filename(filename: pathlib.Path) -> ChipletFilenameInfo:
-
     components = filename.stem.split("_")
 
     pad_size_pix = int(components.pop())
@@ -309,7 +295,6 @@ def parse_chiplet_filename(filename: pathlib.Path) -> ChipletFilenameInfo:
 
 
 def get_transform_from_row(row: dict[str, typing.Any]) -> affine.Affine:
-
     return affine.Affine(
         **{
             letter: row[f"chip_transform_i_to_coords_coeff_{letter}"]
@@ -359,11 +344,10 @@ def convert_chiplet_to_data_array(
     nodata: typing.Union[int, float] = 0,
     new_resolution: typing.Optional[typing.Union[int, float]] = None,
 ) -> xr.DataArray:
-
     # first, remove any padding from the raw data
     chiplet = chiplet[
-        pad_size_pix:(base_size_pix + pad_size_pix),
-        pad_size_pix:(base_size_pix + pad_size_pix),
+        pad_size_pix : (base_size_pix + pad_size_pix),
+        pad_size_pix : (base_size_pix + pad_size_pix),
     ]
 
     (n_y, n_x) = chiplet.shape

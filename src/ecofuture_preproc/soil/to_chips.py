@@ -20,7 +20,6 @@ def run(
     protect: bool = True,
     show_progress: bool = True,
 ) -> None:
-
     prep_dir = base_output_dir / "prep" / source_name.value
 
     chip_dir = base_output_dir / "chips" / f"roi_{roi_name.value}" / source_name.value
@@ -49,20 +48,13 @@ def run(
             disable=not show_progress,
         )
     ) as progress_bar:
-
         chip_dir = chip_dir / str(year)
         chip_dir.mkdir(exist_ok=True, parents=True)
 
-        soil_chip_path = (
-            prep_dir
-            / str(year)
-            / f"{source_name.value}_{year}.tif"
-        )
+        soil_chip_path = prep_dir / str(year) / f"{source_name.value}_{year}.tif"
 
         if not soil_chip_path.exists():
-            raise ValueError(
-                f"Expected the chip to exist at {soil_chip_path}"
-            )
+            raise ValueError(f"Expected the chip to exist at {soil_chip_path}")
 
         soil_chip = ecofuture_preproc.chips.read_chip(
             path=soil_chip_path,
@@ -70,8 +62,7 @@ def run(
             masked=True,
         )
 
-        for (grid_ref, base_chip) in ref_chips.items():
-
+        for grid_ref, base_chip in ref_chips.items():
             output_path = (
                 chip_dir
                 / f"{source_name.value}_roi_{roi_name.value}_{year}_{grid_ref}.tif"
@@ -80,7 +71,6 @@ def run(
             if not ecofuture_preproc.utils.is_path_existing_and_read_only(
                 path=output_path
             ):
-
                 converted_chip = convert_chip(
                     soil_chip=soil_chip,
                     dea_chip=base_chip,
@@ -103,7 +93,6 @@ def convert_chip(
     dea_chip: xr.DataArray,
     source_name: ecofuture_preproc.source.DataSourceName,
 ) -> xr.DataArray:
-
     interp_method = ecofuture_preproc.source.DATA_SOURCE_RESAMPLERS[source_name]
 
     soil_chip_resampled = soil_chip.odc.reproject(

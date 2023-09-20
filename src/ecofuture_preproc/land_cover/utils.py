@@ -12,7 +12,6 @@ def load_reference_chips(
     roi_name: ecofuture_preproc.roi.ROIName,
     cache: bool = True,
 ) -> types.MappingProxyType[ecofuture_preproc.chips.GridRef, xr.DataArray]:
-
     base_chip_dir = base_output_dir / "chips" / f"roi_{roi_name.value}" / "land_cover"
 
     # work out which DEA chip year to use as the reference
@@ -28,7 +27,6 @@ def load_reference_chips(
     base_chips: dict[ecofuture_preproc.chips.GridRef, xr.DataArray] = {}
 
     for base_chip_path in sorted(chip_dir.glob("*.tif")):
-
         base_chip_path_info = parse_chip_path(path=base_chip_path)
 
         base_chip = ecofuture_preproc.chips.read_chip(path=base_chip_path, cache=cache)
