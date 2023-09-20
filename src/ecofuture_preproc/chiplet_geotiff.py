@@ -1,6 +1,9 @@
 import pathlib
 import functools
 import multiprocessing
+import multiprocessing.synchronize
+import contextlib
+import typing
 
 import numpy as np
 
@@ -49,22 +52,27 @@ def run(
 
     years = sorted([chiplet_file_info.year for chiplet_file_info in chiplets_file_info])
 
-    func = functools.partial(
-        convert_year_chiplets,
-        base_output_dir=base_output_dir,
-        source_name=source_name,
-        roi_name=roi_name,
-        table=table,
-        base_size_pix=base_size_pix,
-        protect=protect,
-        show_progress=show_progress,
-    )
-
     # see https://pola-rs.github.io/polars-book/user-guide/misc/multiprocessing/
     mp = multiprocessing.get_context(method="spawn")
 
-    with mp.Pool(processes=cores) as pool:
-        pool.starmap(func, enumerate(years), chunksize=1)
+    with mp.Manager() as manager:
+
+        lock = manager.Lock()
+
+        func = functools.partial(
+            convert_year_chiplets,
+            base_output_dir=base_output_dir,
+            source_name=source_name,
+            roi_name=roi_name,
+            table=table,
+            base_size_pix=base_size_pix,
+            protect=protect,
+            show_progress=show_progress,
+            lock=lock,
+        )
+
+        with mp.Pool(processes=cores) as pool:
+            pool.starmap(func, enumerate(years), chunksize=1)
 
 
 def convert_year_chiplets(
@@ -77,7 +85,11 @@ def convert_year_chiplets(
     base_size_pix: int,
     protect: bool,
     show_progress: bool,
+    lock: typing.Optional[typing.Union[multiprocessing.synchronize.Lock, contextlib.nullcontext]] = None,  # type:     ignore
 ) -> None:
+
+    if lock is None:
+        lock = contextlib.nullcontext()
 
     pad_size_pix = 0
     crs = 3577
@@ -96,14 +108,15 @@ def convert_year_chiplets(
 
     chip_xys = table.select(["chip_grid_ref_x_base", "chip_grid_ref_y_base"]).unique()
 
-    progress_bar = tqdm.tqdm(
-        iterable=None,
-        total=len(chip_xys),
-        disable=not show_progress,
-        position=progress_bar_position,
-        desc=str(year),
-        leave=True,
-    )
+    with lock:
+        progress_bar = tqdm.tqdm(
+            iterable=None,
+            total=len(chip_xys),
+            disable=not show_progress,
+            position=progress_bar_position,
+            desc=str(year),
+            leave=True,
+        )
 
     for chip_xy_row in chip_xys.iter_rows(named=True):
 
@@ -170,7 +183,8 @@ def convert_year_chiplets(
             if protect:
                 ecofuture_preproc.utils.protect_path(path=output_path)
 
-        progress_bar.update()
+        with lock:
+            progress_bar.update()
 
 
 def get_chiplet_geotiff_path(

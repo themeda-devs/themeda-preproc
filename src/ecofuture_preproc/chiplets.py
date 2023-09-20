@@ -1,8 +1,10 @@
 import pathlib
 import typing
 import multiprocessing
+import multiprocessing.synchronize
 import functools
 import dataclasses
+import contextlib
 
 import numpy as np
 import numpy.typing as npt
@@ -60,22 +62,27 @@ def form_chiplets(
         if year_path.is_dir()
     ]
 
-    func = functools.partial(
-        form_year_chiplets,
-        table=table,
-        source_name=source_name,
-        roi=roi,
-        base_size_pix=base_size_pix,
-        pad_size_pix=pad_size_pix,
-        base_output_dir=base_output_dir,
-        protect=protect,
-        show_progress=show_progress,
-        relabeller=relabeller,
-        load_chips_masked=load_chips_masked,
-    )
+    with multiprocessing.Manager() as manager:
 
-    with multiprocessing.Pool(processes=cores) as pool:
-        pool.starmap(func, enumerate(years), chunksize=1)
+        lock = manager.Lock()
+
+        func = functools.partial(
+            form_year_chiplets,
+            table=table,
+            source_name=source_name,
+            roi=roi,
+            base_size_pix=base_size_pix,
+            pad_size_pix=pad_size_pix,
+            base_output_dir=base_output_dir,
+            protect=protect,
+            show_progress=show_progress,
+            relabeller=relabeller,
+            load_chips_masked=load_chips_masked,
+            lock=lock,
+        )
+
+        with multiprocessing.Pool(processes=cores) as pool:
+            pool.starmap(func, enumerate(years), chunksize=1)
 
 
 def form_year_chiplets(
@@ -93,16 +100,21 @@ def form_year_chiplets(
         typing.Callable[[xr.DataArray, bool], xr.DataArray]
     ] = None,
     load_chips_masked: bool = False,
+    lock: typing.Optional[typing.Union[multiprocessing.synchronize.Lock, contextlib.nullcontext]] = None,  # type: ignore
 ) -> None:
 
-    progress_bar = tqdm.tqdm(
-        iterable=None,
-        total=len(table),
-        disable=not show_progress,
-        position=progress_bar_position,
-        desc=str(year),
-        leave=True,
-    )
+    if lock is None:
+        lock = contextlib.nullcontext()
+
+    with lock:
+        progress_bar = tqdm.tqdm(
+            iterable=None,
+            total=len(table),
+            disable=not show_progress,
+            position=progress_bar_position,
+            desc=str(year),
+            leave=True,
+        )
 
     chip_dir = (
         base_output_dir
@@ -184,7 +196,8 @@ def form_year_chiplets(
 
         chiplets[row["index"], ...] = chiplet.values
 
-        progress_bar.update()
+        with lock:
+            progress_bar.update()
 
     # write changes to disk
     chiplets.flush()
