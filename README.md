@@ -41,7 +41,7 @@ cd veusz-veusz-3.6.2
 ```
 and then build and install:
 ```bash
-poetry --directory=../../code/ecofuture_preproc run pip install .
+poetry -C ../../code/ecofuture-preproc run pip install .
 ```
 
 ## Using the pre-processing output
