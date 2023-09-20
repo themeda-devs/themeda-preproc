@@ -39,4 +39,5 @@ def run(
         cores=cores,
         show_progress=show_progress,
         load_chips_masked=True,
+        form_packet_via_rioxarray=True,
     )

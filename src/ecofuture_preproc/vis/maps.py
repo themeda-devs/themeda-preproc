@@ -69,7 +69,7 @@ def plot_years(
 
     embed.WaitForClose()
 
-    embed.Save(str(output_path.with_suffix(".vsz")))
+    #embed.Save(str(output_path.with_suffix(".vsz")))
     embed.Export(
         str(output_path),
         page=ecofuture_preproc.vis.utils.get_page_list(embed=embed),
@@ -77,7 +77,7 @@ def plot_years(
 
     if protect:
         ecofuture_preproc.utils.protect_path(path=output_path)
-        ecofuture_preproc.utils.protect_path(path=output_path.with_suffix(".vsz"))
+        #ecofuture_preproc.utils.protect_path(path=output_path.with_suffix(".vsz"))
 
 
 def render_year(

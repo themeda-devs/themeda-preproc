@@ -83,9 +83,9 @@ def convert_year_chiplets(
     base_size_pix: int,
     protect: bool,
     show_progress: bool,
-    lock: typing.Optional[
+    lock: typing.Optional[  # type: ignore
         typing.Union[multiprocessing.synchronize.Lock, contextlib.nullcontext]
-    ] = None,  # type: ignore
+    ] = None,
 ) -> None:
     if lock is None:
         lock = contextlib.nullcontext()

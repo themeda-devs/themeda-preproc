@@ -47,6 +47,7 @@ def form_chiplets(
     ] = None,
     show_progress: bool = True,
     load_chips_masked: bool = False,
+    form_packet_via_rioxarray: bool = True,
 ) -> None:
     source_chip_dir = (
         base_output_dir / "chips" / f"roi_{roi.name.value}" / source_name.value
@@ -74,6 +75,7 @@ def form_chiplets(
             relabeller=relabeller,
             load_chips_masked=load_chips_masked,
             lock=lock,
+            form_packet_via_rioxarray=form_packet_via_rioxarray,
         )
 
         with multiprocessing.Pool(processes=cores) as pool:
@@ -101,6 +103,7 @@ def form_year_chiplets(
             contextlib.nullcontext,
         ]
     ] = None,
+    form_packet_via_rioxarray: bool = False,
 ) -> None:
     if lock is None:
         lock = contextlib.nullcontext()
@@ -141,7 +144,7 @@ def form_year_chiplets(
 
     packet = ecofuture_preproc.packet.form_packet(
         paths=chip_paths,
-        form_via_rioxarray=False,  # doesn't require loading into memory
+        form_via_rioxarray=form_packet_via_rioxarray,
         nodata=ecofuture_preproc.source.DATA_SOURCE_NODATA[source_name],
         load_chips_masked=load_chips_masked,
     )
