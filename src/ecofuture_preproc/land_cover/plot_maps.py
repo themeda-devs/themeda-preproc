@@ -144,7 +144,7 @@ def get_colour_map() -> ecofuture_preproc.vis.utils.ColourMap:
             if all(row_val == "" for row_val in row.values()):
                 continue
 
-            value = num_str_to_int(num_str=row["LCNS_n"])
+            value = ecofuture_preproc.utils.num_str_to_int(num_str=row["LCNS_n"])
             label = row["LCNS_label"]
             colour = ecofuture_preproc.vis.utils.hex_to_rgb(
                 colour=row["LCNS_HexCol"]
@@ -163,10 +163,3 @@ def get_colour_map() -> ecofuture_preproc.vis.utils.ColourMap:
     )
 
     return cmap
-
-
-def num_str_to_int(num_str: str) -> int:
-    num = float(num_str)
-    if not num.is_integer():
-        raise ValueError(f"{num_str} is not an integer")
-    return int(num)

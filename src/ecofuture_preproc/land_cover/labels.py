@@ -9,6 +9,7 @@ import numpy.typing as npt
 import xarray as xr
 
 import ecofuture_preproc.roi
+import ecofuture_preproc.utils
 
 
 SENTINEL_VAL: typing.Final = 99
@@ -93,8 +94,8 @@ def get_relabel_lut() -> npt.NDArray[np.uint8]:
         reader = csv.DictReader(f=handle)
         for row in reader:
 
-            dea_level_4 = num_str_to_int(num_str=row["level4"])
-            new_label = num_str_to_int(num_str=row["LCNS_n"])
+            dea_level_4 = ecofuture_preproc.utils.num_str_to_int(num_str=row["level4"])
+            new_label = ecofuture_preproc.utils.num_str_to_int(num_str=row["LCNS_n"])
 
             if (
                 (dea_level_4 < 0 or new_label < 0)
@@ -105,10 +106,3 @@ def get_relabel_lut() -> npt.NDArray[np.uint8]:
             relabel_lut[dea_level_4] = new_label
 
     return relabel_lut
-
-
-def num_str_to_int(num_str: str) -> int:
-    num = float(num_str)
-    if not num.is_integer():
-        raise ValueError(f"{num_str} is not an integer")
-    return int(num)
