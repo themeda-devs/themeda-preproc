@@ -25,6 +25,11 @@ def run(
     )
 
     for year, raw_year_path in raw_year_paths.items():
+
+        # 2023 and beyond will be incomplete, at this point
+        if year >= 2023:
+            continue
+
         output_dir = prep_dir / str(year)
         output_dir.mkdir(exist_ok=True, parents=True)
 

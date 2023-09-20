@@ -96,17 +96,18 @@ To see all the steps required to run through the complete pipeline, see `run.sh`
 
 > **Warning**
 The pre-processing operations can consume a lot of RAM, CPU, and storage resources.
+You can use the `-cores` option to `ecofuture_preproc` to limit the use of multiprocessing in the chiplets conversion stages.
 
 ### Approach
 
-The pre-processing of the data associated with each data source occurs within four sequential stages: acquisition, preparation, chip conversion, and chiplet conversion.
-Each data source handler has a directory in the package, containing files implementing each of these steps: `acquire.py`, `prep.py`, `to_chips.py`, and `to_chips.py`.
+The pre-processing of the data associated with each data source occurs within six sequential stages: acquisition, preparation, chip conversion, chiplet conversion, conversion from chiplets to GeoTIFF files, and map-based visualisations.
+Each data source handler has a directory in the package, containing files implementing these steps: `acquire.py`, `prep.py`, `to_chips.py`, `to_chiplets.py`, and `plot_maps.py` (the conversion from chiplets to GeoTIFF files is the same across data sources and so is handled by `chiplet_geotiff.py`).
 The steps are executed by passing the appropriate step name as a positional argument to `ecofuture_preproc`.
 
 > **Note**
-Rain and Tmax data sources are both processed through a common `climate` handler, and the two fire scar data sources (early and late) are processed through a common `fire_scar` handler.
+Rain and Tmax data sources are both processed through a common `climate` handler, the two fire scar data sources (early and late) are processed through a common `fire_scar` handler, and the three soil data sources are processed through a common `soil` handler.
 
-These four stages are supported by two additional steps:
+These six stages are supported by two additional steps:
 
 #### Region of Interest (ROI) preparation
 
@@ -138,13 +139,14 @@ This stage relates to the `data/raw/${DATASOURCE}` directory.
 For most of the data sources, it involves downloading raw data over HTTPS or S3 protocols.
 There is typically little selection of data and files are kept in their native format and resolution as much as possible.
 
-There are two exceptions:
+There are three exceptions:
 
 1. The fire scar data is licensed and cannot be obtained through publicly-available storage.
 Its acquisition stage requires manual copying of the data into the relevant directory.
 1. Most of the years from the land use data source are, while publicly available, in a proprietary format (ArcGIS).
 The ArcCatalog application is used to manually export the raster data into GeoTIFF format into the relevant directory.
 The attribute tables are also exported via ArcCatalog, as plain text files.
+1. The soil data is publicly available but without readily-utilised APIs, so they are manually downloaded using the links specified in the `acquire.py` file.
 
 An example execution:
 ```bash
@@ -161,6 +163,7 @@ What is involved in 'preparation' varies across data sources, but the main idea 
 * Rain, Tmax: The raw monthly data is summarised into a single value per year, based on the mean (Tmax) or sum (Rain) operation, and years containing less than 12 months of data are culled.
 * Elevation: The chip is simply assigned a year (2011) and copied over.
 * Fire scar early, fire scar late: The raw shape files are split based on their season (before or after the end of June), and the shape files are converted into geometry objects and saved in pickled format.
+* Soil: The chips are simply assigned a year (clay: 2021, depth: 2019, ece: 2014) and copied over.
 
 An example execution:
 ```bash
@@ -178,6 +181,7 @@ As the canonical source, the land cover chips need to be converted from the prep
 * Elevation: The sole chip for this data source is resampled into the space of each land cover chip (using bilinear interpolation).
 * Fire scar early, fire scar late: Within a year and land cover chip, the shapes for each fire scar instance are first tested for intersection with the spatial coverage of the land cover chip.
 Those fire scar instance shapes that intersect with the land cover chip are then rasterised based on the spatial properties of the chip, and then aggregated (summed) over fire scar instances.
+* Soil: The chips for this data source is resampled into the space of each land cover chip (using bilinear interpolation).
 
 An example execution:
 ```bash
@@ -200,6 +204,7 @@ Additionally, the pixels classified as 'water' can be re-labelled as 'ocean' of 
 * Rain, Tmax: Just a direct transformation to chiplets, with a conversion to 16-bit floating-point values.
 * Elevation: Just a direct transformation to chiplets, with a conversion to 16-bit floating-point values.
 * Fire scar early, fire scar late: Just a direct transformation to chiplets.
+* Soil: Just a direct transformation to chiplets, with a conversion to 16-bit floating-point values.
 
 An example execution:
 ```bash
@@ -217,6 +222,14 @@ An example execution:
 poetry run ecofuture_preproc chiplets_to_geotiff -source_name land_cover -roi_name savanna
 ```
 
+#### Creating map visualisations
+
+The GeoTIFF files created in the previous step can be used to create visualisations where the data are represented in a map form, with a separate page for each year in the data source.
+
+An example execution:
+```bash
+poetry run ecofuture_preproc plot_maps -source_name soil_depth -roi_name savanna
+```
 
 ## Authors
 
