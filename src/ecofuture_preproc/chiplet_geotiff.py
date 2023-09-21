@@ -181,6 +181,9 @@ def convert_year_chiplets(
         with lock:
             progress_bar.update()
 
+    with lock:
+        progress_bar.close()
+
 
 def get_chiplet_geotiff_path(
     source_name: ecofuture_preproc.source.DataSourceName,

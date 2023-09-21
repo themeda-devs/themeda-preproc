@@ -207,6 +207,8 @@ def form_year_chiplets(
 
     packet.close()
 
+    with lock:
+        progress_bar.close()
 
 def load_chiplets(
     source_name: ecofuture_preproc.source.DataSourceName,
