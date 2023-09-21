@@ -3,7 +3,6 @@ import pathlib
 import os
 import importlib
 import inspect
-import multiprocessing
 
 import ecofuture_preproc.roi
 import ecofuture_preproc.source

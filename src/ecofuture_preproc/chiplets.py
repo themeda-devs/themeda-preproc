@@ -22,6 +22,7 @@ import ecofuture_preproc.roi
 import ecofuture_preproc.chips
 import ecofuture_preproc.packet
 import ecofuture_preproc.chiplet_table
+import ecofuture_preproc.utils
 
 
 @dataclasses.dataclass(frozen=True)
@@ -53,11 +54,7 @@ def form_chiplets(
         base_output_dir / "chips" / f"roi_{roi.name.value}" / source_name.value
     )
 
-    years = [
-        int(year_path.name)
-        for year_path in sorted(source_chip_dir.glob("*"))
-        if year_path.is_dir()
-    ]
+    years = ecofuture_preproc.utils.get_years_in_path(path=source_chip_dir)
 
     with multiprocessing.Manager() as manager:
         lock = manager.Lock()
@@ -208,6 +205,8 @@ def form_year_chiplets(
     if protect:
         ecofuture_preproc.utils.protect_path(path=output_path)
 
+    packet.close()
+
 
 def load_chiplets(
     source_name: ecofuture_preproc.source.DataSourceName,
@@ -347,7 +346,7 @@ def convert_chiplet_to_data_array(
     pad_size_pix: int,
     base_size_pix: int = 160,
     crs: int = 3577,
-    nodata: typing.Union[int, float] = 0,
+    nodata: typing.Union[int, float, np.float32] = 0,
     new_resolution: typing.Optional[typing.Union[int, float]] = None,
 ) -> xr.DataArray:
     # first, remove any padding from the raw data

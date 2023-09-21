@@ -3,8 +3,6 @@ import contextlib
 
 import xarray as xr
 
-import rasterio
-
 import odc.geo.xr  # noqa
 
 import tqdm
@@ -33,13 +31,7 @@ def run(
         roi_name=roi_name,
     )
 
-    years = sorted(
-        [
-            int(prep_year_dir.name)
-            for prep_year_dir in prep_dir.glob("*")
-            if prep_year_dir.is_dir() and len(prep_year_dir.name) == 4
-        ]
-    )
+    years = ecofuture_preproc.utils.get_years_in_path(path=prep_dir)
 
     n_total_conversions = len(years) * len(ref_chips)
 
@@ -99,7 +91,7 @@ def convert_chip(
     dea_chip: xr.DataArray,
     source_name: ecofuture_preproc.source.DataSourceName,
 ) -> xr.DataArray:
-    interp_method = rasterio.enums.Resampling.bilinear
+    interp_method = ecofuture_preproc.source.DATA_SOURCE_RESAMPLERS[source_name]
 
     climate_chip_resampled = climate_chip.odc.reproject(
         how=dea_chip.odc.geobox,

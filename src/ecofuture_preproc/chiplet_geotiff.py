@@ -17,6 +17,7 @@ import ecofuture_preproc.roi
 import ecofuture_preproc.chiplets
 import ecofuture_preproc.chiplet_table
 import ecofuture_preproc.source
+import ecofuture_preproc.utils
 
 
 def run(

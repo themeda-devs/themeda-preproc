@@ -10,7 +10,6 @@ import ecofuture_preproc.roi
 def load_reference_chips(
     base_output_dir: pathlib.Path,
     roi_name: ecofuture_preproc.roi.ROIName,
-    cache: bool = True,
 ) -> types.MappingProxyType[ecofuture_preproc.chips.GridRef, xr.DataArray]:
     base_chip_dir = base_output_dir / "chips" / f"roi_{roi_name.value}" / "land_cover"
 
@@ -29,7 +28,10 @@ def load_reference_chips(
     for base_chip_path in sorted(chip_dir.glob("*.tif")):
         base_chip_path_info = parse_chip_path(path=base_chip_path)
 
-        base_chip = ecofuture_preproc.chips.read_chip(path=base_chip_path, cache=cache)
+        base_chip = ecofuture_preproc.chips.read_chip(
+            path=base_chip_path,
+            chunks="auto",
+        )
 
         if base_chip_path_info.grid_ref in base_chips:
             raise ValueError("Unexpected grid ref duplication")

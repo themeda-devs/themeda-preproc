@@ -36,13 +36,7 @@ def run(
         roi_name=roi_name,
     )
 
-    years = sorted(
-        [
-            int(prep_year_dir.name)
-            for prep_year_dir in prep_dir.glob("*")
-            if prep_year_dir.is_dir() and len(prep_year_dir.name) == 4
-        ]
-    )
+    years = ecofuture_preproc.utils.get_years_in_path(path=prep_dir)
 
     n_total_conversions = len(years) * len(ref_chips)
 

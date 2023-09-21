@@ -32,7 +32,7 @@ def read_chip(
     chunks: typing.Optional[typing.Union[dict[str, int], bool, str]] = None,
     variable: typing.Optional[typing.Union[str, tuple[str, ...]]] = None,
     masked: bool = False,
-    cache: bool = True,
+    cache: typing.Optional[bool] = None,
     lock: typing.Optional[bool] = None,
 ) -> xr.DataArray:
     "Reads a chip file from disk"
@@ -57,6 +57,7 @@ def read_chip(
 
     if load_data:
         handle.load()
+        handle.close()
 
     return handle
 

@@ -11,6 +11,29 @@ import pyproj
 import shapely
 
 
+def get_years_in_path(
+    path: pathlib.Path,
+    error_if_no_years: bool = True,
+    error_if_other_files: bool = True,
+) -> list[int]:
+
+    years = []
+
+    for entry in sorted(path.glob("*")):
+
+        if not entry.is_dir():
+            if error_if_other_files:
+                raise ValueError(f"Found unexpected non-year path at {entry}")
+        else:
+            year = num_str_to_int(num_str=entry.name)
+            years.append(year)
+
+    if len(years) == 0 and error_if_no_years:
+        raise ValueError(f"No year directories found in {path}")
+
+    return years
+
+
 def get_shape_transformer(
     src_crs: int,
     dst_crs: int,
