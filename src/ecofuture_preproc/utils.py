@@ -25,8 +25,12 @@ def get_years_in_path(
             if error_if_other_files:
                 raise ValueError(f"Found unexpected non-year path at {entry}")
         else:
-            year = num_str_to_int(num_str=entry.name)
-            years.append(year)
+            try:
+                year = num_str_to_int(num_str=entry.name)
+                years.append(year)
+            except ValueError:
+                if error_if_other_files:
+                    raise
 
     if len(years) == 0 and error_if_no_years:
         raise ValueError(f"No year directories found in {path}")
