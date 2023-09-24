@@ -57,6 +57,8 @@ def plot_years(
     embed = veusz.embed.Embedded(hidden=headless)
     ecofuture_preproc.vis.utils.set_veusz_style(embed=embed)
 
+    #return embed
+
     for year in years:
         render_year(
             embed=embed,
@@ -69,7 +71,7 @@ def plot_years(
 
     embed.WaitForClose()
 
-    #embed.Save(str(output_path.with_suffix(".vsz")))
+    embed.Save(str(output_path.with_suffix(".vsz")))
     embed.Export(
         str(output_path),
         page=ecofuture_preproc.vis.utils.get_page_list(embed=embed),
@@ -123,7 +125,11 @@ def render_year(
 
     graph.aspect.val = packet.sizes["x"] / packet.sizes["y"]
 
-    ecofuture_preproc.vis.utils.set_margins(widget=graph, null_absent=True)
+    ecofuture_preproc.vis.utils.set_margins(
+        widget=graph,
+        margins={"R": "3.929cm"},
+        null_absent=True,
+    )
 
     x_axis = graph.Add("axis")
     y_axis = graph.Add("axis")
@@ -161,11 +167,49 @@ def render_year(
     del packet
 
 
+
+def generic_continuous_customiser(
+    embed: veusz.embed.Embedded,
+    page: veusz.embed.WidgetNode,
+    packet: xr.DataArray,
+    source_name: ecofuture_preproc.source.DataSourceName,
+    year: int,
+    cmap_name: str = "viridis",
+    cbar_label: str = ""
+) -> None:
+
+    (img_widget, *_) = page.WalkWidgets(widgettype="image")
+
+    img_widget.colorMap.val = cmap_name
+
+    name_prefix = img_widget.name.removesuffix("_img")
+
+    (graph, *_) = page.WalkWidgets(widgettype="graph")
+
+    cbar = graph.Add("colorbar")
+
+    cbar.image.val = img_widget.name
+    cbar.otherPosition.val = 1
+    cbar.TickLabels.offset.val = "4pt"
+    cbar.Border.hide.val = True
+    cbar.direction.val = "vertical"
+    cbar.horzManual.val = 1.1
+    cbar.Label.rotate.val = "180"
+    cbar.MinorTicks.hide.val = True
+    cbar.label.val = cbar_label
+    cbar.TickLabels.size.val = "6pt"
+    cbar.MajorTicks.length.val = "3pt"
+    cbar.MajorTicks.width.val = "0.5pt"
+    cbar.outerticks.val = True
+    cbar.horzPosn.val = "manual"
+
+
 def get_packet(
     year: int,
     source_name: ecofuture_preproc.source.DataSourceName,
     chiplets_path: pathlib.Path,
-    resolution: typing.Union[float, int],
+    resolution: typing.Optional[typing.Union[float, int]],
+    form_via_rioxarray: bool = True,
 ) -> xr.DataArray:
     paths = sorted((chiplets_path / str(year)).glob("*.tif"))
 
@@ -175,7 +219,7 @@ def get_packet(
 
     packet = ecofuture_preproc.packet.form_packet(
         paths=paths,
-        form_via_rioxarray=True,
+        form_via_rioxarray=form_via_rioxarray,
         new_resolution=resolution,
         nodata=nodata,
         resampling=resampling,
