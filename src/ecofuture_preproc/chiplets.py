@@ -4,7 +4,6 @@ import multiprocessing
 import multiprocessing.synchronize
 import functools
 import dataclasses
-import contextlib
 
 import numpy as np
 import numpy.typing as npt
@@ -57,7 +56,7 @@ def form_chiplets(
     years = ecofuture_preproc.utils.get_years_in_path(path=source_chip_dir)
 
     with multiprocessing.Manager() as manager:
-        lock = manager.Lock()
+        lock = manager.RLock()
 
         func = functools.partial(
             form_year_chiplets,
@@ -71,11 +70,14 @@ def form_chiplets(
             show_progress=show_progress,
             relabeller=relabeller,
             load_chips_masked=load_chips_masked,
-            lock=lock,
             form_packet_via_rioxarray=form_packet_via_rioxarray,
         )
 
-        with multiprocessing.Pool(processes=cores) as pool:
+        with multiprocessing.Pool(
+            processes=cores,
+            initializer=tqdm.tqdm.set_lock,
+            initargs=(lock,),
+        ) as pool:
             pool.starmap(func, enumerate(years), chunksize=1)
 
 
@@ -94,26 +96,18 @@ def form_year_chiplets(
         typing.Callable[[xr.DataArray, bool], xr.DataArray]
     ] = None,
     load_chips_masked: bool = False,
-    lock: typing.Optional[  # type: ignore
-        typing.Union[
-            multiprocessing.synchronize.Lock,
-            contextlib.nullcontext,
-        ]
-    ] = None,
     form_packet_via_rioxarray: bool = False,
 ) -> None:
-    if lock is None:
-        lock = contextlib.nullcontext()
 
-    with lock:
-        progress_bar = tqdm.tqdm(
-            iterable=None,
-            total=len(table),
-            disable=not show_progress,
-            position=progress_bar_position,
-            desc=str(year),
-            leave=True,
-        )
+    progress_bar = tqdm.tqdm(
+        iterable=None,
+        total=len(table),
+        disable=not show_progress,
+        position=progress_bar_position,
+        desc=str(year),
+        leave=False,
+        dynamic_ncols=True,
+    )
 
     chip_dir = (
         base_output_dir
@@ -192,8 +186,7 @@ def form_year_chiplets(
 
         chiplets[row["index"], ...] = chiplet.values
 
-        with lock:
-            progress_bar.update()
+        progress_bar.update()
 
     # write changes to disk
     chiplets.flush()
@@ -207,8 +200,7 @@ def form_year_chiplets(
 
     packet.close()
 
-    with lock:
-        progress_bar.close()
+    progress_bar.close()
 
 
 def load_chiplets(

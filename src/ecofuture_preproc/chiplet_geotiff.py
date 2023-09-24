@@ -2,8 +2,6 @@ import pathlib
 import functools
 import multiprocessing
 import multiprocessing.synchronize
-import contextlib
-import typing
 
 import numpy as np
 
@@ -88,8 +86,6 @@ def convert_year_chiplets(
     protect: bool,
     show_progress: bool,
 ) -> None:
-
-    lock = tqdm.tqdm.get_lock()
 
     pad_size_pix = 0
     crs = 3577

@@ -38,6 +38,8 @@ def customiser(
     embed: veusz.embed.Embedded,
     page: veusz.embed.WidgetNode,
     packet: xr.DataArray,  # noqa
+    source_name: ecofuture_preproc.source.DataSourceName,  # noqa
+    year: int,  # noqa
 ) -> None:
     (img_widget, *_) = page.WalkWidgets(widgettype="image")
 
