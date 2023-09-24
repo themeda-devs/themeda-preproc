@@ -58,13 +58,11 @@ def plot_years(
     embed = veusz.embed.Embedded(hidden=headless)
     ecofuture_preproc.vis.utils.set_veusz_style(embed=embed)
 
-    #return embed
-
     if set_minmax_across_years:
         min_val = None
         max_val = None
 
-    for year in years[:1]:
+    for year in years:
 
         packet = render_year(
             embed=embed,
