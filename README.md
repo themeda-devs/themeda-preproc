@@ -102,14 +102,14 @@ For unmonitored execution, you can use `--no-show_progress` to hide the progress
 
 ### Approach
 
-The pre-processing of the data associated with each data source occurs within six sequential stages: acquisition, preparation, chip conversion, chiplet conversion, conversion from chiplets to GeoTIFF files, and map-based visualisations.
-Each data source handler has a directory in the package, containing files implementing these steps: `acquire.py`, `prep.py`, `to_chips.py`, `to_chiplets.py`, and `plot_maps.py` (the conversion from chiplets to GeoTIFF files is the same across data sources and so is handled by `chiplet_geotiff.py`).
+The pre-processing of the data associated with each data source occurs within a set of sequential stages: acquisition, preparation, chip conversion, chiplet conversion, conversion from chiplets to GeoTIFF files, map-based visualisations, and extracting data along the Northern Australia Tropical Transect (NATT).
+Each data source handler has a directory in the package, containing files implementing these steps: `acquire.py`, `prep.py`, `to_chips.py`, `to_chiplets.py`, and `plot_maps.py` (the conversion from chiplets to GeoTIFF files and the NATT extraction is the same across data sources and so is handled by `chiplet_geotiff.py` and `transect.py`, respectively).
 The steps are executed by passing the appropriate step name as a positional argument to `ecofuture_preproc`.
 
 > **Note**
 Rain and Tmax data sources are both processed through a common `climate` handler, the two fire scar data sources (early and late) are processed through a common `fire_scar` handler, and the three soil data sources are processed through a common `soil` handler.
 
-These six stages are supported by two additional steps:
+These stages are supported by two additional steps:
 
 #### Region of Interest (ROI) preparation
 
@@ -231,6 +231,15 @@ The GeoTIFF files created in the previous step can be used to create visualisati
 An example execution:
 ```bash
 poetry run ecofuture_preproc plot_maps -source_name soil_depth -roi_name savanna
+```
+
+#### Transect extraction
+
+The GeoTIFF files are used to extract data along the coordinates of the NATT for all years of a given data source.
+
+An example execution:
+```bash
+poetry run ecofuture_preproc transect -source_name soil_ece -roi_name savanna
 ```
 
 ## Authors

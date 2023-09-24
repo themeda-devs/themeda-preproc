@@ -95,6 +95,11 @@ def main() -> None:
         help="Plot a map of the data source for each year",
     )
 
+    transect_parser = subparsers.add_parser(
+        "transect",
+        help="Extract data along the NATT",
+    )
+
     for parser_needing_roi_name in [
         roi_parser,
         to_chips_parser,
@@ -102,6 +107,7 @@ def main() -> None:
         chiplet_table_parser,
         chiplets_to_geotiff_parser,
         plot_maps_parser,
+        transect_parser,
     ]:
         parser_needing_roi_name.add_argument(
             "-roi_name",
@@ -117,6 +123,7 @@ def main() -> None:
         to_chiplets_parser,
         chiplets_to_geotiff_parser,
         plot_maps_parser,
+        transect_parser,
     ]:
         parser_needing_source_name.add_argument(
             "-source_name",
@@ -172,6 +179,8 @@ def main() -> None:
         runner_str = "ecofuture_preproc.chiplet_table"
     elif args.command == "chiplets_to_geotiff":
         runner_str = "ecofuture_preproc.chiplet_geotiff"
+    elif args.command == "transect":
+        runner_str = "ecofuture_preproc.transect"
     else:
         handler_name = ecofuture_preproc.source.DATA_SOURCE_HANDLER[args.source_name]
         runner_str = f"ecofuture_preproc.{handler_name}.{args.command}"

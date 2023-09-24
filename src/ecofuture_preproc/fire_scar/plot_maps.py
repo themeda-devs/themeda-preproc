@@ -142,12 +142,17 @@ def get_colour_map(
 
     # indicate stepped
     packet_values = packet.values.flatten()
-    max_val = int(np.max(packet_values[packet_values < 255]))
+    data_max_val = int(np.max(packet_values[packet_values < 255]))
 
-    if max_val > 2:
-        raise ValueError("Unexpected maximum")
+    if source_name == ecofuture_preproc.source.DataSourceName.FIRE_SCAR_EARLY:
+        max_val = 4
+    elif source_name == ecofuture_preproc.source.DataSourceName.FIRE_SCAR_LATE:
+        max_val = 2
+    else:
+        raise ValueError("Unexpected source")
 
-    max_val = 2
+    if data_max_val > max_val:
+        raise ValueError(f"Unexpected maximum ({data_max_val})")
 
     grey_cmap = matplotlib.colormaps["inferno"]
     grey_cmap = grey_cmap.resampled(lutsize=max_val + 1)

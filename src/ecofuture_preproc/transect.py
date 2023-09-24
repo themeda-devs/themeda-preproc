@@ -1,4 +1,5 @@
 import dataclasses
+import pathlib
 
 import numpy as np
 
@@ -10,12 +11,71 @@ import shapely
 
 import ecofuture_preproc.roi
 import ecofuture_preproc.utils
+import ecofuture_preproc.source
+import ecofuture_preproc.packet
 
 
 @dataclasses.dataclass
 class PointLatLon:
     latitude: float
     longitude: float
+
+
+def run(
+    source_name: ecofuture_preproc.source.DataSourceName,
+    roi_name: ecofuture_preproc.roi.ROIName,
+    base_output_dir: pathlib.Path,
+    protect: bool = True,
+) -> None:
+
+    roi = ecofuture_preproc.roi.RegionOfInterest(
+        roi_name=roi_name,
+        base_output_dir=base_output_dir,
+    )
+
+    natt_coords = get_natt_coords(roi=roi)
+
+    chiplet_base_dir = (
+        base_output_dir
+        / "chiplets_geotiff"
+        / f"roi_{roi_name.value}"
+        / source_name.value
+    )
+
+    years = ecofuture_preproc.utils.get_years_in_path(path=chiplet_base_dir)
+
+    transects = []
+
+    for year in years:
+
+        year_chiplet_base_dir = chiplet_base_dir / str(year)
+
+        chiplet_paths = sorted(year_chiplet_base_dir.glob("*.tif"))
+
+        packet = ecofuture_preproc.packet.get_packet(
+            paths=chiplet_paths,
+            form_via_rioxarray=True,
+            chunks=None,
+        )
+
+        transect = packet.sel(x=natt_coords.x, y=natt_coords.y)
+
+        transects.append(
+            xr.DataArray(
+                data=transect.values[np.newaxis, :],
+                dims=("year", "distance"),
+                coords={
+                    "year": np.array(year, ndmin=1),
+                    "distance": natt_coords.distance.values,
+                },
+            ),
+        )
+
+        transect.close()
+        packet.close()
+
+    return transects
+
 
 
 def get_natt_coords(
@@ -87,6 +147,19 @@ def get_natt_coords(
         endpoint=True,
     )
 
+    distances = xr.DataArray(
+        data=np.array(
+            [
+                scipy.spatial.distance.euclidean(
+                    u=points[0, :],
+                    v=points[i_point, :],
+                )
+                for i_point in range(n_points)
+            ]
+        ),
+        dims="transect",
+    )
+
     x = xr.DataArray(
         data=points[:, 0],
         dims="transect",
@@ -97,7 +170,7 @@ def get_natt_coords(
     )
 
     xy = xr.Dataset(
-        {"x": x, "y": y},
+        {"x": x, "y": y, "distance": distances},
     )
 
     return xy
