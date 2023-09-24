@@ -97,6 +97,8 @@ To see all the steps required to run through the complete pipeline, see `run.sh`
 > **Warning**
 The pre-processing operations can consume a lot of RAM, CPU, and storage resources.
 You can use the `-cores` option to `ecofuture_preproc` to limit the use of multiprocessing in the chiplets conversion stages.
+Note that progress bars don't work all that well under multiprocessing (see [this issue with `tqdm`](https://github.com/tqdm/tqdm/issues/1000)); the only workaround I have found is to clear each progress bar after it has finished.
+For unmonitored execution, you can use `--no-show_progress` to hide the progress bars.
 
 ### Approach
 

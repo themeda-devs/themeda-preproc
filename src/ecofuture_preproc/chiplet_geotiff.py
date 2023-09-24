@@ -56,7 +56,7 @@ def run(
     mp = multiprocessing.get_context(method="spawn")
 
     with mp.Manager() as manager:
-        lock = manager.Lock()
+        lock = manager.RLock()
 
         func = functools.partial(
             convert_year_chiplets,
@@ -67,10 +67,13 @@ def run(
             base_size_pix=base_size_pix,
             protect=protect,
             show_progress=show_progress,
-            lock=lock,
         )
 
-        with mp.Pool(processes=cores) as pool:
+        with mp.Pool(
+            processes=cores,
+            initializer=tqdm.tqdm.set_lock,
+            initargs=(lock,),
+        ) as pool:
             pool.starmap(func, enumerate(years), chunksize=1)
 
 
@@ -84,12 +87,9 @@ def convert_year_chiplets(
     base_size_pix: int,
     protect: bool,
     show_progress: bool,
-    lock: typing.Optional[  # type: ignore
-        typing.Union[multiprocessing.synchronize.Lock, contextlib.nullcontext]
-    ] = None,
 ) -> None:
-    if lock is None:
-        lock = contextlib.nullcontext()
+
+    lock = tqdm.tqdm.get_lock()
 
     pad_size_pix = 0
     crs = 3577
@@ -108,15 +108,15 @@ def convert_year_chiplets(
 
     chip_xys = table.select(["chip_grid_ref_x_base", "chip_grid_ref_y_base"]).unique()
 
-    with lock:
-        progress_bar = tqdm.tqdm(
-            iterable=None,
-            total=len(chip_xys),
-            disable=not show_progress,
-            position=progress_bar_position,
-            desc=str(year),
-            leave=True,
-        )
+    progress_bar = tqdm.tqdm(
+        iterable=None,
+        total=len(chip_xys),
+        disable=not show_progress,
+        position=progress_bar_position,
+        desc=str(year),
+        leave=False,
+        dynamic_ncols=True,
+    )
 
     for chip_xy_row in chip_xys.iter_rows(named=True):
         table_rows = table.filter(
@@ -178,11 +178,9 @@ def convert_year_chiplets(
             if protect:
                 ecofuture_preproc.utils.protect_path(path=output_path)
 
-        with lock:
-            progress_bar.update()
+        progress_bar.update()
 
-    with lock:
-        progress_bar.close()
+    progress_bar.close()
 
 
 def get_chiplet_geotiff_path(
