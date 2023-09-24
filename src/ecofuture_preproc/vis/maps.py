@@ -74,8 +74,8 @@ def plot_years(
         )
 
         if set_minmax_across_years:
-            packet_min = packet.min()
-            packet_max = packet.max()
+            packet_min = packet.min().item()
+            packet_max = packet.max().item()
 
             if min_val is None:
                 min_val = packet_min
@@ -86,6 +86,8 @@ def plot_years(
             max_val = max(max_val, packet_max)
 
         packet.close()
+
+        del packet
 
     if set_minmax_across_years:
 
