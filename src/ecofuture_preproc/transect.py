@@ -58,7 +58,11 @@ def run(
             chunks=None,
         )
 
-        transect = packet.sel(x=natt_coords.x, y=natt_coords.y)
+        transect = packet.sel(
+            x=natt_coords.x,
+            y=natt_coords.y,
+            method="nearest",
+        )
 
         transects.append(
             xr.DataArray(

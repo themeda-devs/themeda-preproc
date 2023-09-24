@@ -145,7 +145,7 @@ def get_colour_map(
     data_max_val = int(np.max(packet_values[packet_values < 255]))
 
     if source_name == ecofuture_preproc.source.DataSourceName.FIRE_SCAR_EARLY:
-        max_val = 4
+        max_val = 2
     elif source_name == ecofuture_preproc.source.DataSourceName.FIRE_SCAR_LATE:
         max_val = 2
     else:
