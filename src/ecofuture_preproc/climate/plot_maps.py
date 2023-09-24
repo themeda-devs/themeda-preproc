@@ -1,13 +1,6 @@
-import csv
 import pathlib
-import importlib.resources
 import typing
-
-import numpy as np
-
-import xarray as xr
-
-import veusz.embed
+import functools
 
 import ecofuture_preproc.roi
 import ecofuture_preproc.source
@@ -23,6 +16,19 @@ def run(
     resolution: typing.Optional[typing.Union[float, int]] = 1_000,
     headless: bool = True,
 ) -> None:
+
+    if source_name == ecofuture_preproc.source.DataSourceName.RAIN:
+        cbar_label = "Annual rainfall (mm)"
+    elif source_name == ecofuture_preproc.source.DataSourceName.TMAX:
+        cbar_label = "Average maximum temperature (^\circ C)"
+    else:
+        raise ValueError("Unexpected source")
+
+    customiser = functools.partial(
+        ecofuture_preproc.vis.maps.generic_continuous_customiser,
+        cbar_label=cbar_label,
+    )
+
     ecofuture_preproc.vis.maps.plot_years(
         source_name=source_name,
         roi_name=roi_name,
@@ -31,12 +37,5 @@ def run(
         protect=protect,
         resolution=resolution,
         headless=headless,
+        set_minmax_across_years=True,
     )
-
-
-def customiser(
-    embed: veusz.embed.Embedded,
-    page: veusz.embed.WidgetNode,
-    packet: xr.DataArray,  # noqa
-) -> None:
-    return

@@ -1,13 +1,6 @@
-import csv
 import pathlib
-import importlib.resources
 import typing
-
-import numpy as np
-
-import xarray as xr
-
-import veusz.embed
+import functools
 
 import ecofuture_preproc.roi
 import ecofuture_preproc.source
@@ -23,6 +16,12 @@ def run(
     resolution: typing.Optional[typing.Union[float, int]] = 1_000,
     headless: bool = True,
 ) -> None:
+
+    customiser = functools.partial(
+        ecofuture_preproc.vis.maps.generic_continuous_customiser,
+        cbar_label="Elevation (m)",
+    )
+
     ecofuture_preproc.vis.maps.plot_years(
         source_name=source_name,
         roi_name=roi_name,
@@ -32,11 +31,3 @@ def run(
         resolution=resolution,
         headless=headless,
     )
-
-
-def customiser(
-    embed: veusz.embed.Embedded,
-    page: veusz.embed.WidgetNode,
-    packet: xr.DataArray,  # noqa
-) -> None:
-    return
