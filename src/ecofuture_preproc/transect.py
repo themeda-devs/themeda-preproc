@@ -28,8 +28,17 @@ def run(
     protect: bool = True,
 ) -> None:
 
-    roi = ecofuture_preproc.roi.RegionOfInterest(
+    output_path = get_transect_path(
+        source_name=source_name,
         roi_name=roi_name,
+        base_output_dir=base_output_dir,
+    )
+
+    if ecofuture_preproc.utils.is_path_existing_and_read_only(path=output_path):
+        return
+
+    roi = ecofuture_preproc.roi.RegionOfInterest(
+        name=roi_name,
         base_output_dir=base_output_dir,
     )
 
@@ -52,7 +61,7 @@ def run(
 
         chiplet_paths = sorted(year_chiplet_base_dir.glob("*.tif"))
 
-        packet = ecofuture_preproc.packet.get_packet(
+        packet = ecofuture_preproc.packet.form_packet(
             paths=chiplet_paths,
             form_via_rioxarray=True,
             chunks=None,
@@ -78,8 +87,17 @@ def run(
         transect.close()
         packet.close()
 
-    return transects
+    transect = xr.concat(objs=transects, dim="year")
 
+    transect.to_netcdf(
+        path=output_path,
+        engine="netcdf4",
+    )
+
+    transect.close()
+
+    if protect:
+        ecofuture_preproc.utils.protect_path(path=output_path)
 
 
 def get_natt_coords(
@@ -178,3 +196,39 @@ def get_natt_coords(
     )
 
     return xy
+
+
+def get_transect_path(
+    source_name: ecofuture_preproc.source.DataSourceName,
+    roi_name: ecofuture_preproc.roi.ROIName,
+    base_output_dir: pathlib.Path,
+) -> pathlib.Path:
+
+    path = (
+        base_output_dir
+        / "transect"
+        / f"roi_{roi_name.value}"
+        / f"{source_name.value}_transect.nc"
+    )
+
+    path.parent.mkdir(exist_ok=True, parents=True)
+
+    return path
+
+
+def load_transect(
+    source_name: ecofuture_preproc.source.DataSourceName,
+    roi_name: ecofuture_preproc.roi.ROIName,
+    base_output_dir: pathlib.Path,
+) -> xr.DataArray:
+
+    path = get_transect_path(
+        source_name=source_name,
+        roi_name=roi_name,
+        base_output_dir=base_output_dir,
+    )
+
+    with xr.open_dataarray(filename_or_obj=path, engine="netcdf4") as handle:
+        data = handle.load()
+
+    return data
