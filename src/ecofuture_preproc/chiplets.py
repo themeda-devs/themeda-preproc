@@ -186,6 +186,10 @@ def form_year_chiplets(
 
         chiplets[row["index"], ...] = chiplet.values
 
+        chiplet.close()
+
+        del chiplet
+
         progress_bar.update()
 
     # write changes to disk
@@ -199,6 +203,8 @@ def form_year_chiplets(
         ecofuture_preproc.utils.protect_path(path=output_path)
 
     packet.close()
+
+    del packet
 
     progress_bar.close()
 
