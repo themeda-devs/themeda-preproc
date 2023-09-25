@@ -147,7 +147,7 @@ def get_colour_map(
     if source_name == ecofuture_preproc.source.DataSourceName.FIRE_SCAR_EARLY:
         max_val = 3
     elif source_name == ecofuture_preproc.source.DataSourceName.FIRE_SCAR_LATE:
-        max_val = 2
+        max_val = 3
     else:
         raise ValueError("Unexpected source")
 
