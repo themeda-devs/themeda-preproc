@@ -37,6 +37,12 @@ def form_packet(
             dataarrays=data,
             nodata=nodata,
         )
+
+        for chip in data:
+            chip.close()
+
+        del data
+
     else:
         data_array = xr.combine_by_coords(
             data_objects=data,

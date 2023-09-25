@@ -57,6 +57,8 @@ def run(
 
     for year in years:
 
+        print(year)
+
         year_chiplet_base_dir = chiplet_base_dir / str(year)
 
         chiplet_paths = sorted(year_chiplet_base_dir.glob("*.tif"))
@@ -86,6 +88,9 @@ def run(
 
         transect.close()
         packet.close()
+
+        del transect
+        del packet
 
     transect = xr.concat(objs=transects, dim="year")
 
