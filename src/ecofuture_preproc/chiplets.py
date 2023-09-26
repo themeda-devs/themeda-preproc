@@ -4,6 +4,7 @@ import multiprocessing
 import multiprocessing.synchronize
 import functools
 import dataclasses
+import contextlib
 
 import numpy as np
 import numpy.typing as npt
@@ -197,7 +198,8 @@ def form_year_chiplets(
 
     # close the handle
     # see https://github.com/numpy/numpy/issues/13510
-    chiplets._mmap.close()  # type: ignore
+    assert hasattr(chiplets, "_mmap")
+    chiplets._mmap.close()
 
     if protect:
         ecofuture_preproc.utils.protect_path(path=output_path)
@@ -209,6 +211,34 @@ def form_year_chiplets(
     progress_bar.close()
 
 
+@contextlib.contextmanager
+def chiplets_reader(
+    source_name: ecofuture_preproc.source.DataSourceName,
+    year: int,
+    roi_name: ecofuture_preproc.roi.ROIName,
+    pad_size_pix: int,
+    base_output_dir: pathlib.Path,
+    base_size_pix: int = 160,
+) -> typing.Generator[np.memmap[typing.Any, typing.Any], None, None]:
+
+    chiplets = load_chiplets(
+        source_name=source_name,
+        year=year,
+        roi_name=roi_name,
+        pad_size_pix=pad_size_pix,
+        base_output_dir=base_output_dir,
+        base_size_pix=base_size_pix,
+    )
+
+    try:
+        yield chiplets
+    finally:
+        # close the handle
+        # see https://github.com/numpy/numpy/issues/13510
+        assert hasattr(chiplets, "_mmap")
+        chiplets._mmap.close()
+
+
 def load_chiplets(
     source_name: ecofuture_preproc.source.DataSourceName,
     year: int,
@@ -216,7 +246,7 @@ def load_chiplets(
     pad_size_pix: int,
     base_output_dir: pathlib.Path,
     base_size_pix: int = 160,
-) -> np.memmap:  # type: ignore
+) -> np.memmap[typing.Any, typing.Any]:
     table = ecofuture_preproc.chiplet_table.load_table(
         roi_name=roi_name,
         base_output_dir=base_output_dir,
