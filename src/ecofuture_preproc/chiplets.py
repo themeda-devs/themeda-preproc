@@ -32,6 +32,7 @@ class ChipletFilenameInfo:
     source_name: ecofuture_preproc.source.DataSourceName
     pad_size_pix: int
     year: int
+    denan: bool = False
 
 
 def form_chiplets(
@@ -219,6 +220,7 @@ def chiplets_reader(
     pad_size_pix: int,
     base_output_dir: pathlib.Path,
     base_size_pix: int = 160,
+    denan: bool = False,
 ) -> typing.Generator[np.memmap[typing.Any, typing.Any], None, None]:
 
     chiplets = load_chiplets(
@@ -228,6 +230,7 @@ def chiplets_reader(
         pad_size_pix=pad_size_pix,
         base_output_dir=base_output_dir,
         base_size_pix=base_size_pix,
+        denan=denan,
     )
 
     try:
@@ -246,6 +249,7 @@ def load_chiplets(
     pad_size_pix: int,
     base_output_dir: pathlib.Path,
     base_size_pix: int = 160,
+    denan: bool = False,
 ) -> np.memmap[typing.Any, typing.Any]:
     table = ecofuture_preproc.chiplet_table.load_table(
         roi_name=roi_name,
@@ -259,6 +263,7 @@ def load_chiplets(
         roi_name=roi_name,
         pad_size_pix=pad_size_pix,
         base_output_dir=base_output_dir,
+        denan=denan,
     )
 
     chiplet = np.memmap(
@@ -291,10 +296,20 @@ def get_chiplet_path(
     roi_name: ecofuture_preproc.roi.ROIName,
     pad_size_pix: int,
     base_output_dir: pathlib.Path,
+    denan: bool = False,
 ) -> pathlib.Path:
+
+    if (
+        denan
+        and ecofuture_preproc.source.is_data_source_continuous(source_name=source_name)
+    ):
+        suffix = "-denan"
+    else:
+        suffix = ""
+
     chiplet_dir: pathlib.Path = (
         base_output_dir
-        / "chiplets"
+        / f"chiplets{suffix}"
         / f"roi_{roi_name.value}"
         / f"pad_{pad_size_pix}"
         / source_name.value
@@ -303,7 +318,7 @@ def get_chiplet_path(
     chiplet_dir.mkdir(exist_ok=True, parents=True)
 
     chiplet_path = chiplet_dir / (
-        f"chiplets_{source_name.value}_{year}_"
+        f"chiplets{suffix}_{source_name.value}_{year}_"
         + f"roi_{roi_name.value}_pad_{pad_size_pix}.npy"
     )
 
@@ -318,7 +333,8 @@ def parse_chiplet_filename(filename: pathlib.Path) -> ChipletFilenameInfo:
     roi_name = ecofuture_preproc.roi.ROIName(components.pop())
     assert components.pop() == "roi"
     year = int(components.pop())
-    assert components[0] == "chiplets"
+    assert components[0] in ["chiplets", "chiplets-denan"]
+    denan = components[0] == "chiplets-denan"
     source_name = ecofuture_preproc.source.DataSourceName("_".join(components[1:]))
 
     return ChipletFilenameInfo(
@@ -327,6 +343,7 @@ def parse_chiplet_filename(filename: pathlib.Path) -> ChipletFilenameInfo:
         source_name=source_name,
         year=year,
         pad_size_pix=pad_size_pix,
+        denan=denan,
     )
 
 

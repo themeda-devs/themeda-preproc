@@ -85,6 +85,11 @@ def main() -> None:
         help="Convert the data to a chiplet representation",
     )
 
+    denan_chiplets_parser = subparsers.add_parser(
+        "deanan_chiplets",
+        help="Replace the NaNs in the chiplets for continuous data sources",
+    )
+
     chiplets_to_geotiff_parser = subparsers.add_parser(
         "chiplets_to_geotiff",
         help="Convert the chiplet array data to GeoTIFF representations",
@@ -104,6 +109,7 @@ def main() -> None:
         roi_parser,
         to_chips_parser,
         to_chiplets_parser,
+        denan_chiplets_parser,
         chiplet_table_parser,
         chiplets_to_geotiff_parser,
         plot_maps_parser,
@@ -121,6 +127,7 @@ def main() -> None:
         prep_parser,
         to_chips_parser,
         to_chiplets_parser,
+        denan_chiplets_parser,
         chiplets_to_geotiff_parser,
         plot_maps_parser,
         transect_parser,
@@ -146,6 +153,7 @@ def main() -> None:
     for parser_needing_pad_size_pix in [
         chiplet_table_parser,
         to_chiplets_parser,
+        denan_chiplets_parser,
         chiplets_to_geotiff_parser,
     ]:
         parser_needing_pad_size_pix.add_argument(
@@ -177,6 +185,8 @@ def main() -> None:
         runner_str = "ecofuture_preproc.roi"
     elif args.command == "chiplet_table_prep":
         runner_str = "ecofuture_preproc.chiplet_table"
+    elif args.command == "denan_chiplets":
+        runner_str = "ecofuture_preproc.denan_chiplets"
     elif args.command == "chiplets_to_geotiff":
         runner_str = "ecofuture_preproc.chiplet_geotiff"
     elif args.command == "transect":

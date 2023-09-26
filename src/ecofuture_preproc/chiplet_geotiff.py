@@ -93,88 +93,88 @@ def convert_year_chiplets(
     if ecofuture_preproc.source.DATA_SOURCE_DTYPE[source_name] == np.float16:
         nodata = np.float32(nodata)
 
-    chiplets = ecofuture_preproc.chiplets.load_chiplets(
+    with ecofuture_preproc.chiplets.chiplets_reader(
         source_name=source_name,
         year=year,
         roi_name=roi_name,
         base_size_pix=base_size_pix,
         pad_size_pix=pad_size_pix,
         base_output_dir=base_output_dir,
-    )
+    ) as chiplets:
 
-    chip_xys = table.select(["chip_grid_ref_x_base", "chip_grid_ref_y_base"]).unique()
+        chip_xys = table.select(["chip_grid_ref_x_base", "chip_grid_ref_y_base"]).unique()
 
-    progress_bar = tqdm.tqdm(
-        iterable=None,
-        total=len(chip_xys),
-        disable=not show_progress,
-        position=progress_bar_position,
-        desc=str(year),
-        leave=False,
-        dynamic_ncols=True,
-    )
-
-    for chip_xy_row in chip_xys.iter_rows(named=True):
-        table_rows = table.filter(
-            (pl.col("chip_grid_ref_x_base") == chip_xy_row["chip_grid_ref_x_base"])
-            & (pl.col("chip_grid_ref_y_base") == chip_xy_row["chip_grid_ref_y_base"])
+        progress_bar = tqdm.tqdm(
+            iterable=None,
+            total=len(chip_xys),
+            disable=not show_progress,
+            position=progress_bar_position,
+            desc=str(year),
+            leave=False,
+            dynamic_ncols=True,
         )
 
-        output_path = get_chiplet_geotiff_path(
-            source_name=source_name,
-            year=year,
-            chip_x=chip_xy_row["chip_grid_ref_x_base"],
-            chip_y=chip_xy_row["chip_grid_ref_y_base"],
-            roi_name=roi_name,
-            base_output_dir=base_output_dir,
-        )
+        for chip_xy_row in chip_xys.iter_rows(named=True):
+            table_rows = table.filter(
+                (pl.col("chip_grid_ref_x_base") == chip_xy_row["chip_grid_ref_x_base"])
+                & (pl.col("chip_grid_ref_y_base") == chip_xy_row["chip_grid_ref_y_base"])
+            )
 
-        if not ecofuture_preproc.utils.is_path_existing_and_read_only(path=output_path):
-            data_arrays = []
+            output_path = get_chiplet_geotiff_path(
+                source_name=source_name,
+                year=year,
+                chip_x=chip_xy_row["chip_grid_ref_x_base"],
+                chip_y=chip_xy_row["chip_grid_ref_y_base"],
+                roi_name=roi_name,
+                base_output_dir=base_output_dir,
+            )
 
-            for row in table_rows.iter_rows(named=True):
-                chiplet = chiplets[row["index"], ...]
+            if not ecofuture_preproc.utils.is_path_existing_and_read_only(path=output_path):
+                data_arrays = []
 
-                data_array = ecofuture_preproc.chiplets.convert_chiplet_to_data_array(
-                    chiplet=chiplet,
-                    metadata=row,
-                    pad_size_pix=pad_size_pix,
-                    base_size_pix=base_size_pix,
-                    crs=crs,
-                    nodata=nodata,
+                for row in table_rows.iter_rows(named=True):
+                    chiplet = chiplets[row["index"], ...]
+
+                    data_array = ecofuture_preproc.chiplets.convert_chiplet_to_data_array(
+                        chiplet=chiplet,
+                        metadata=row,
+                        pad_size_pix=pad_size_pix,
+                        base_size_pix=base_size_pix,
+                        crs=crs,
+                        nodata=nodata,
+                    )
+
+                    if ecofuture_preproc.source.DATA_SOURCE_DTYPE[source_name] == (
+                        np.float16
+                    ):
+                        data_array = data_array.astype(np.float32)
+
+                    data_arrays.append(data_array)
+
+                data = rioxarray.merge.merge_arrays(
+                    dataarrays=data_arrays,
+                    nodata=ecofuture_preproc.source.DATA_SOURCE_SENTINEL[source_name],
                 )
 
-                if ecofuture_preproc.source.DATA_SOURCE_DTYPE[source_name] == (
-                    np.float16
-                ):
-                    data_array = data_array.astype(np.float32)
+                data.rio.set_crs(input_crs=crs, inplace=True)
+                data.rio.set_nodata(input_nodata=nodata, inplace=True)
 
-                data_arrays.append(data_array)
+                data = data.odc.assign_crs(crs=data.rio.crs)
 
-            data = rioxarray.merge.merge_arrays(
-                dataarrays=data_arrays,
-                nodata=ecofuture_preproc.source.DATA_SOURCE_SENTINEL[source_name],
-            )
+                data.rio.to_raster(
+                    raster_path=output_path,
+                    compress="lzw",
+                )
 
-            data.rio.set_crs(input_crs=crs, inplace=True)
-            data.rio.set_nodata(input_nodata=nodata, inplace=True)
+                data.close()
 
-            data = data.odc.assign_crs(crs=data.rio.crs)
+                for data_array in data_arrays:
+                    data_array.close()
 
-            data.rio.to_raster(
-                raster_path=output_path,
-                compress="lzw",
-            )
+                if protect:
+                    ecofuture_preproc.utils.protect_path(path=output_path)
 
-            data.close()
-
-            for data_array in data_arrays:
-                data_array.close()
-
-            if protect:
-                ecofuture_preproc.utils.protect_path(path=output_path)
-
-        progress_bar.update()
+            progress_bar.update()
 
     progress_bar.close()
 

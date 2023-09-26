@@ -97,3 +97,10 @@ DATA_SOURCE_RESAMPLERS = types.MappingProxyType(
         DataSourceName("soil_clay"): rasterio.enums.Resampling.bilinear,
     }
 )
+
+
+def is_data_source_continuous(source_name: DataSourceName) -> bool:
+    return np.issubdtype(
+        DATA_SOURCE_DTYPE[source_name],
+        np.floating,
+    )

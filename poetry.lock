@@ -4306,6 +4306,19 @@ optional = ["python-socks", "wsaccel"]
 test = ["websockets"]
 
 [[package]]
+name = "welford"
+version = "0.2.5"
+description = "Python (numpy) implementation of Welford's algorithm."
+optional = false
+python-versions = "*"
+files = [
+    {file = "welford-0.2.5.tar.gz", hash = "sha256:f0dedc139528c027c0331b0d254b6542bfa0a6782996bd3efe6c7b191ffb5116"},
+]
+
+[package.dependencies]
+numpy = "*"
+
+[[package]]
 name = "widgetsnbextension"
 version = "4.0.8"
 description = "Jupyter interactive widgets for Jupyter Notebook"
@@ -4358,4 +4371,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9,<3.12"
-content-hash = "43cb2dab0aafa1ba249313feb28248629941a4d7b25f027c0b12f73c9553038f"
+content-hash = "9b211ee375fcc1a125e1793b64f2827e17a6b61e2562c269a84ae29c7ff98ed6"
