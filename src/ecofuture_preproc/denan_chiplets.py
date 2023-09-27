@@ -5,6 +5,8 @@ import functools
 
 import numpy as np
 
+import polars as pl
+
 import tqdm
 
 import ecofuture_preproc.source
@@ -43,6 +45,14 @@ def run(
 
     years = sorted([chiplet_file_info.year for chiplet_file_info in chiplets_file_info])
 
+    table = ecofuture_preproc.chiplet_table.load_table(
+        roi_name=roi_name,
+        base_output_dir=base_output_dir,
+        pad_size_pix=pad_size_pix,
+    )
+
+    table = add_chiplet_centre_pos_to_table(table=table)
+
     # see https://pola-rs.github.io/polars-book/user-guide/misc/multiprocessing/
     mp = multiprocessing.get_context(method="spawn")
 
@@ -53,6 +63,7 @@ def run(
             run_denan_year_chiplets,
             base_output_dir=base_output_dir,
             source_name=source_name,
+            table=table,
             roi_name=roi_name,
             pad_size_pix=pad_size_pix,
             protect=protect,
@@ -72,6 +83,7 @@ def run_denan_year_chiplets(
     year: int,
     source_name: ecofuture_preproc.source.DataSourceName,
     roi_name: ecofuture_preproc.roi.ROIName,
+    table: pl.dataframe.frame.DataFrame,
     pad_size_pix: int,
     base_output_dir: pathlib.Path,
     protect: bool,
@@ -128,14 +140,27 @@ def run_denan_year_chiplets(
 
             isnan_data = np.isnan(data)
 
-            if np.all(isnan_data):
-                print(i_chiplet, data)
-
+            # if there are any nans in the data, need to replace them
             if np.any(np.isnan(data)):
 
-                # use the mean of the non-nan values as the fill value
-                # cast to a regular float first to avoid precision issues
-                fill_val = np.nanmean(data.astype(float))
+                if np.all(isnan_data):
+
+                    if source_name not in [
+                        ecofuture_preproc.source.DataSourceName.SOIL_DEPTH,
+                        ecofuture_preproc.source.DataSourceName.SOIL_ECE,
+                        ecofuture_preproc.source.DataSourceName.SOIL_CLAY,
+                    ]:
+                        raise ValueError(
+                            "Only expecting to see full nan chiplets in the soil variables"
+                        )
+
+                    fill_val = np.float16(0.0)
+
+                else:
+
+                    # use the mean of the non-nan values as the fill value
+                    # cast to a regular float first to avoid precision issues
+                    fill_val = np.nanmean(data.astype(float))
 
                 # replace nans in-place with the fill value
                 np.nan_to_num(
@@ -160,3 +185,26 @@ def run_denan_year_chiplets(
         ecofuture_preproc.utils.protect_path(path=output_path)
 
     progress_bar.close()
+
+
+def add_chiplet_centre_pos_to_table(
+    table: pl.dataframe.frame.DataFrame
+) -> pl.dataframe.frame.DataFrame:
+
+    cx = table.select(pl.col("bbox_left", "bbox_right")).mean(axis=1)
+    cy = table.select(pl.col("bbox_top", "bbox_bottom")).mean(axis=1)
+
+    updated_table = pl.concat(
+        items=[
+            table,
+            pl.DataFrame(
+                {
+                    "chiplet_centre_x": cx,
+                    "chiplet_centre_y": cy,
+                },
+            ),
+        ],
+        how="horizontal",
+    )
+
+    return updated_table
