@@ -126,6 +126,11 @@ def run_denan_year_chiplets(
 
             data = np.array(orig_chiplets[i_chiplet, ...])
 
+            isnan_data = np.isnan(data)
+
+            if np.all(isnan_data):
+                print(i_chiplet, data)
+
             if np.any(np.isnan(data)):
 
                 # use the mean of the non-nan values as the fill value

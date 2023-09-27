@@ -86,7 +86,7 @@ def main() -> None:
     )
 
     denan_chiplets_parser = subparsers.add_parser(
-        "deanan_chiplets",
+        "denan_chiplets",
         help="Replace the NaNs in the chiplets for continuous data sources",
     )
 
