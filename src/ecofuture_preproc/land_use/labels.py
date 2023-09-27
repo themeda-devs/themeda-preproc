@@ -111,7 +111,6 @@ def get_lu_code_lut(attr_table_path: pathlib.Path) -> npt.NDArray[np.uint16]:
 
 
 def get_cmap() -> ecofuture_preproc.vis.utils.ColourMap:
-
     # colour values from NLUM_250m_DescriptiveMetadata_20220622.pdf
     cmap = ecofuture_preproc.vis.utils.ColourMap(
         name="land_use",

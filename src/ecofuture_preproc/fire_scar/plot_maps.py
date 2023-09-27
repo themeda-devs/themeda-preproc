@@ -41,7 +41,6 @@ def customiser(
     source_name: ecofuture_preproc.source.DataSourceName,
     year: int,
 ) -> None:
-
     (img_widget, *_) = page.WalkWidgets(widgettype="image")
 
     name_prefix = img_widget.name.removesuffix("_img")
@@ -139,7 +138,6 @@ def get_colour_map(
     source_name: ecofuture_preproc.source.DataSourceName,
     year: int,
 ) -> tuple[ecofuture_preproc.vis.utils.ColourMap, int]:
-
     # indicate stepped
     packet_values = packet.values.flatten()
     data_max_val = int(np.max(packet_values[packet_values < 255]))

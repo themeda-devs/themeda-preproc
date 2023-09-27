@@ -27,7 +27,6 @@ def run(
     base_output_dir: pathlib.Path,
     protect: bool = True,
 ) -> None:
-
     output_path = get_transect_path(
         source_name=source_name,
         roi_name=roi_name,
@@ -56,7 +55,6 @@ def run(
     transects = []
 
     for year in years:
-
         year_chiplet_base_dir = chiplet_base_dir / str(year)
 
         chiplet_paths = sorted(year_chiplet_base_dir.glob("*.tif"))
@@ -206,7 +204,6 @@ def get_transect_path(
     roi_name: ecofuture_preproc.roi.ROIName,
     base_output_dir: pathlib.Path,
 ) -> pathlib.Path:
-
     path = (
         base_output_dir
         / "transect"
@@ -224,7 +221,6 @@ def load_transect(
     roi_name: ecofuture_preproc.roi.ROIName,
     base_output_dir: pathlib.Path,
 ) -> xr.DataArray:
-
     path = get_transect_path(
         source_name=source_name,
         roi_name=roi_name,

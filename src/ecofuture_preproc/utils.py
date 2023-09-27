@@ -16,11 +16,9 @@ def get_years_in_path(
     error_if_no_years: bool = True,
     error_if_other_files: bool = True,
 ) -> list[int]:
-
     years = []
 
     for entry in sorted(path.glob("*")):
-
         if not entry.is_dir():
             if error_if_other_files:
                 raise ValueError(f"Found unexpected non-year path at {entry}")

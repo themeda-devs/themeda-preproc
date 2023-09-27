@@ -16,7 +16,6 @@ def run(
     resolution: typing.Optional[typing.Union[float, int]] = 1_000,
     headless: bool = True,
 ) -> None:
-
     if source_name == ecofuture_preproc.source.DataSourceName.RAIN:
         cbar_label = "Annual rainfall (mm)"
     elif source_name == ecofuture_preproc.source.DataSourceName.TMAX:

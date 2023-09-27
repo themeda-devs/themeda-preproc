@@ -100,7 +100,6 @@ def form_year_chiplets(
     load_chips_masked: bool = False,
     form_packet_via_rioxarray: bool = False,
 ) -> None:
-
     progress_bar = tqdm.tqdm(
         iterable=None,
         total=len(table),
@@ -222,7 +221,6 @@ def chiplets_reader(
     base_size_pix: int = 160,
     denan: bool = False,
 ) -> typing.Generator[np.memmap[typing.Any, typing.Any], None, None]:
-
     chiplets = load_chiplets(
         source_name=source_name,
         year=year,
@@ -298,10 +296,8 @@ def get_chiplet_path(
     base_output_dir: pathlib.Path,
     denan: bool = False,
 ) -> pathlib.Path:
-
-    if (
-        denan
-        and ecofuture_preproc.source.is_data_source_continuous(source_name=source_name)
+    if denan and ecofuture_preproc.source.is_data_source_continuous(
+        source_name=source_name
     ):
         suffix = "-denan"
     else:

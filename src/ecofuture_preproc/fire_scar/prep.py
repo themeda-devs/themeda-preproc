@@ -25,7 +25,6 @@ def run(
     )
 
     for year, raw_year_path in raw_year_paths.items():
-
         # 2023 and beyond will be incomplete, at this point
         if year >= 2023:
             continue

@@ -22,7 +22,8 @@ def plot_years(
             xr.DataArray,
             ecofuture_preproc.source.DataSourceName,
             int,
-        ], None
+        ],
+        None,
     ],
     protect: bool = True,
     resolution: typing.Union[float, int] = 1_000,
@@ -51,9 +52,7 @@ def plot_years(
 
     output_path.parent.mkdir(exist_ok=True, parents=True)
 
-    years = ecofuture_preproc.utils.get_years_in_path(
-        path=chiplets_path
-    )
+    years = ecofuture_preproc.utils.get_years_in_path(path=chiplets_path)
 
     embed = veusz.embed.Embedded(hidden=headless)
     ecofuture_preproc.vis.utils.set_veusz_style(embed=embed)
@@ -63,7 +62,6 @@ def plot_years(
         max_val = None
 
     for year in years:
-
         packet = render_year(
             embed=embed,
             year=year,
@@ -90,7 +88,6 @@ def plot_years(
         del packet
 
     if set_minmax_across_years:
-
         assert min_val is not None
         assert max_val is not None
 
@@ -120,7 +117,8 @@ def render_year(
             xr.DataArray,
             ecofuture_preproc.source.DataSourceName,
             int,
-        ], None
+        ],
+        None,
     ],
     packet: typing.Optional[xr.DataArray] = None,
 ) -> xr.DataArray:
@@ -194,7 +192,6 @@ def set_img_minmax_vals(
     min_val: typing.Union[float, int],
     max_val: typing.Union[float, int],
 ) -> None:
-
     for img_widget in embed.Root.WalkWidgets(widgettype="image"):
         img_widget.min.val = min_val
         img_widget.max.val = max_val
@@ -207,9 +204,8 @@ def generic_continuous_customiser(
     source_name: ecofuture_preproc.source.DataSourceName,  # noqa
     year: int,  # noqa
     cmap_name: str = "viridis",
-    cbar_label: str = ""
+    cbar_label: str = "",
 ) -> None:
-
     (img_widget, *_) = page.WalkWidgets(widgettype="image")
 
     img_widget.colorMap.val = cmap_name

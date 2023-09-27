@@ -86,7 +86,6 @@ def convert_year_chiplets(
     protect: bool,
     show_progress: bool,
 ) -> None:
-
     pad_size_pix = 0
     crs = 3577
     nodata = ecofuture_preproc.source.DATA_SOURCE_NODATA[source_name]
@@ -101,8 +100,9 @@ def convert_year_chiplets(
         pad_size_pix=pad_size_pix,
         base_output_dir=base_output_dir,
     ) as chiplets:
-
-        chip_xys = table.select(["chip_grid_ref_x_base", "chip_grid_ref_y_base"]).unique()
+        chip_xys = table.select(
+            ["chip_grid_ref_x_base", "chip_grid_ref_y_base"]
+        ).unique()
 
         progress_bar = tqdm.tqdm(
             iterable=None,
@@ -117,7 +117,10 @@ def convert_year_chiplets(
         for chip_xy_row in chip_xys.iter_rows(named=True):
             table_rows = table.filter(
                 (pl.col("chip_grid_ref_x_base") == chip_xy_row["chip_grid_ref_x_base"])
-                & (pl.col("chip_grid_ref_y_base") == chip_xy_row["chip_grid_ref_y_base"])
+                & (
+                    pl.col("chip_grid_ref_y_base")
+                    == chip_xy_row["chip_grid_ref_y_base"]
+                )
             )
 
             output_path = get_chiplet_geotiff_path(
@@ -129,19 +132,23 @@ def convert_year_chiplets(
                 base_output_dir=base_output_dir,
             )
 
-            if not ecofuture_preproc.utils.is_path_existing_and_read_only(path=output_path):
+            if not ecofuture_preproc.utils.is_path_existing_and_read_only(
+                path=output_path
+            ):
                 data_arrays = []
 
                 for row in table_rows.iter_rows(named=True):
                     chiplet = chiplets[row["index"], ...]
 
-                    data_array = ecofuture_preproc.chiplets.convert_chiplet_to_data_array(
-                        chiplet=chiplet,
-                        metadata=row,
-                        pad_size_pix=pad_size_pix,
-                        base_size_pix=base_size_pix,
-                        crs=crs,
-                        nodata=nodata,
+                    data_array = (
+                        ecofuture_preproc.chiplets.convert_chiplet_to_data_array(
+                            chiplet=chiplet,
+                            metadata=row,
+                            pad_size_pix=pad_size_pix,
+                            base_size_pix=base_size_pix,
+                            crs=crs,
+                            nodata=nodata,
+                        )
                     )
 
                     if ecofuture_preproc.source.DATA_SOURCE_DTYPE[source_name] == (

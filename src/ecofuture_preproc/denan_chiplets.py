@@ -23,7 +23,6 @@ def run(
     cores: int,
     show_progress: bool = True,
 ) -> None:
-
     if not ecofuture_preproc.source.is_data_source_continuous(source_name=source_name):
         raise ValueError("Only useful to run this on float data types")
 
@@ -76,7 +75,6 @@ def run_denan_year_chiplets(
     protect: bool,
     show_progress: bool,
 ) -> None:
-
     progress_bar = tqdm.tqdm(
         iterable=None,
         disable=not show_progress,
@@ -107,7 +105,6 @@ def run_denan_year_chiplets(
         base_output_dir=base_output_dir,
         denan=False,
     ) as orig_chiplets:
-
         # initialise the new memmap
         denan_chiplets = np.memmap(
             filename=output_path,
@@ -122,16 +119,13 @@ def run_denan_year_chiplets(
         progress_bar.refresh()
 
         for i_chiplet in range(n_chiplets):
-
             data = np.array(orig_chiplets[i_chiplet, ...])
 
             isnan_data = np.isnan(data)
 
             # if there are any nans in the data, need to replace them
             if np.any(np.isnan(data)):
-
                 if np.all(isnan_data):
-
                     if source_name not in [
                         ecofuture_preproc.source.DataSourceName.SOIL_DEPTH,
                         ecofuture_preproc.source.DataSourceName.SOIL_ECE,
@@ -144,7 +138,6 @@ def run_denan_year_chiplets(
                     fill_val = np.float16(0.0)
 
                 else:
-
                     # use the mean of the non-nan values as the fill value
                     # cast to a regular float first to avoid precision issues
                     fill_val = np.nanmean(data.astype(float))

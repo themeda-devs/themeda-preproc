@@ -42,12 +42,10 @@ METADATA = types.MappingProxyType(
 
 
 def test_parse_chiplet_filename(base_output_dir):
-
     for source_name in ecofuture_preproc.source.DataSourceName:
         for year in [1988, 2001]:
             for roi_name in ecofuture_preproc.roi.ROIName:
                 for pad_size_pix in [0, 32]:
-
                     path = ecofuture_preproc.chiplets.get_chiplet_path(
                         source_name=source_name,
                         year=year,
@@ -72,7 +70,6 @@ def test_parse_chiplet_filename(base_output_dir):
 
 
 def test_get_chiplet_from_packet():
-
     transform = ecofuture_preproc.chiplets.get_transform_from_row(row=METADATA)
 
     true_chiplet = convert_chiplet_to_data_array(pad_size_pix=0)
@@ -90,13 +87,11 @@ def test_get_chiplet_from_packet():
 
 
 def test_convert_chiplet_to_data_array():
-
     for pad_size_pix in [0, 32]:
         convert_chiplet_to_data_array(pad_size_pix=pad_size_pix)
 
 
 def convert_chiplet_to_data_array(pad_size_pix):
-
     base_size_pix = 160
 
     base_array = np.random.rand(base_size_pix, base_size_pix)

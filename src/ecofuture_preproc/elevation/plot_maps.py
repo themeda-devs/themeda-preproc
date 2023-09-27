@@ -16,7 +16,6 @@ def run(
     resolution: typing.Optional[typing.Union[float, int]] = 1_000,
     headless: bool = True,
 ) -> None:
-
     customiser = functools.partial(
         ecofuture_preproc.vis.maps.generic_continuous_customiser,
         cbar_label="Elevation (m)",
