@@ -146,3 +146,16 @@ keep-runtime-typing = true
 [tool.fawltydeps]
 ignore_unused = ["black", "fawltydeps", "mypy", "ruff", "ipython"]
 output_format = "human_detailed"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = ["-ra", "--showlocals", "--strict-markers", "--strict-config"]
+xfail_strict = true
+filterwarnings = [
+	"error",
+	"ignore:Conversion of an array with ndim > 0 to a scalar is deprecated*:DeprecationWarning",
+]
+log_cli_level = "info"
+testpaths = [
+  "tests",
+]
