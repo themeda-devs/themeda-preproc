@@ -10,11 +10,12 @@ import numpy as np
 
 import welford
 
+import tqdm
+
 import ecofuture_preproc.source
 import ecofuture_preproc.roi
-import ecofuture_preproc.chips
-import ecofuture_preproc.packet
 import ecofuture_preproc.utils
+import ecofuture_preproc.chiplets
 
 
 @dataclasses.dataclass
@@ -32,6 +33,7 @@ def run(
     roi_name: ecofuture_preproc.roi.ROIName,
     base_output_dir: pathlib.Path,
     protect: bool,
+    show_progress: bool = True,
 ) -> None:
     if not ecofuture_preproc.source.is_data_source_continuous(source_name=source_name):
         raise ValueError("Only useful to run this on float data types")
@@ -57,9 +59,14 @@ def run(
         [
             chiplet_file_info.year
             for chiplet_file_info in chiplets_file_info
-            if chiplet_file_info.year <= last_valid_year
         ]
     )
+
+    if len(years) == 0:
+        raise ValueError(f"No chiplets found at {chiplet_base_dir}")
+
+    if len(years) > 1:
+        years = [year for year in years if year <= last_valid_year]
 
     output_path = get_output_path(
         source_name=source_name,
@@ -75,6 +82,8 @@ def run(
     min_val = None
     max_val = None
 
+    progress_bar = None
+
     for year in years:
 
         with ecofuture_preproc.chiplets.chiplets_reader(
@@ -88,9 +97,17 @@ def run(
 
             (n_chiplets, _, _) = chiplets.shape
 
+            if progress_bar is None:
+                progress_bar = tqdm.tqdm(
+                    iterable=None,
+                    disable=not show_progress,
+                    dynamic_ncols=True,
+                    total=n_chiplets * len(years),
+                )
+
             for i_chiplet in range(n_chiplets):
 
-                data = np.array(chiplets[i_chiplet, ...]).flatten()
+                data = np.array(chiplets[i_chiplet, ...]).flatten().astype(float)
 
                 # update the min and max
                 if min_val is None:
@@ -106,20 +123,26 @@ def run(
                 # now update the accumulator
                 tracker.add_all(elements=data)
 
+                progress_bar.update()
+
+    assert progress_bar is not None
+
+    progress_bar.close()
+
     assert min_val is not None
     assert max_val is not None
 
     stats = SummaryStats(
         source_name=source_name.value,
         years=years,
-        min_val=min_val,
-        max_val=max_val,
-        mean=tracker.mean,
-        sd=np.sqrt(tracker.var_p),
+        min_val=float(min_val),
+        max_val=float(max_val),
+        mean=float(tracker.mean),
+        sd=float(np.sqrt(tracker.var_p)),
     )
 
     with output_path.open("w") as handle:
-        json.dump(stats, handle)
+        json.dump(dataclasses.asdict(stats), handle)
 
     if protect:
         ecofuture_preproc.utils.protect_path(path=output_path)
