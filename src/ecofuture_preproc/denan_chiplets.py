@@ -132,7 +132,8 @@ def run_denan_year_chiplets(
                         ecofuture_preproc.source.DataSourceName.SOIL_CLAY,
                     ]:
                         raise ValueError(
-                            "Only expecting to see full nan chiplets in the soil variables"
+                            "Only expecting to see full nan chiplets "
+                            + "in the soil variables"
                         )
 
                     fill_val = np.float16(0.0)
