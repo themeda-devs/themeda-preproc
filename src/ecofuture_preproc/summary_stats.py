@@ -7,8 +7,11 @@ import dataclasses
 import json
 
 import numpy as np
+import numpy.typing as npt
 
 import welford
+
+import numba
 
 import tqdm
 
@@ -26,6 +29,52 @@ class SummaryStats:
     max_val: float
     mean: float
     sd: float
+
+
+class StatTracker:
+    """
+    A customised version of https://github.com/a-mitani/welford, optimised
+    to be faster for updating lots of little single values.
+    """
+
+    def __init__(self) -> None:
+        self.__m: float = 0.0
+        self.__s: float = 0.0
+        self.__count: int = 0
+
+    @property
+    def mean(self) -> float:
+        return self.__m
+
+    @property
+    def sd(self) -> float:
+        return float(np.sqrt(self.__s / self.__count))
+
+    @staticmethod
+    @numba.jit(nopython=True)  # type: ignore
+    def update_fast(
+        data: npt.NDArray[np.floating],
+        count: int,
+        m: float,
+        s: float,
+    ) -> tuple[int, float, float]:
+
+        for sample in data:
+            count += 1
+            delta = sample - m
+            m += delta / count
+            s += delta * (sample - m)
+
+        return (count, m, s)
+
+    def update(self, data: npt.NDArray[np.floating]) -> None:
+
+        (self.__count, self.__m, self.__s) = self.update_fast(
+            data=data,
+            count=self.__count,
+            m=self.__m,
+            s=self.__s,
+        )
 
 
 def run(

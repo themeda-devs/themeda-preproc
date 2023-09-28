@@ -249,7 +249,7 @@ def load_chiplets(
     base_size_pix: int = 160,
     denan: bool = False,
     load_into_ram: bool = False,
-) -> np.memmap[typing.Any, typing.Any]:
+) -> typing.Union[np.memmap[typing.Any, typing.Any], npt.NDArray]:
 
     chiplet_path = get_chiplet_path(
         source_name=source_name,
@@ -279,6 +279,7 @@ def load_chiplets(
 
     if load_into_ram:
         chiplets = np.array(chiplets_handle)
+        assert hasattr(chiplets_handle, "_mmap")
         chiplets_handle._mmap.close()
         return chiplets
     else:

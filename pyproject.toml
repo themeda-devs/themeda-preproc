@@ -34,6 +34,7 @@ affine = "^2.4.0"
 scipy = "^1.11.2"
 typing-extensions = "^4.8.0"
 welford = "^0.2.5"
+numba = "^0.58.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^6.2.5"
@@ -101,6 +102,7 @@ module = [
 	"matplotlib",
 	"matplotlib.colormaps",
 	"welford",
+	"numba",
 ]
 ignore_missing_imports = true
 
