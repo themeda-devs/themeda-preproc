@@ -186,3 +186,25 @@ def get_output_path(
     )
 
     return output_path
+
+
+def calc_chunk_size_given_mem_budget(
+    budget_gb: float,
+    base_size_pix: int = 160,
+) -> int:
+
+    # 16 bit floats
+    bytes_per_pixel = 2
+
+    n_bytes_per_chiplet = base_size_pix * base_size_pix * bytes_per_pixel
+
+    budget_bytes = (
+        budget_gb
+        * 1024  # MB
+        * 1024  # KB
+        * 1024  # B
+    )
+
+    chunk_size = int(np.floor(budget_bytes / n_bytes_per_chiplet))
+
+    return chunk_size

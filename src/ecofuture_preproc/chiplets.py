@@ -248,12 +248,8 @@ def load_chiplets(
     base_output_dir: pathlib.Path,
     base_size_pix: int = 160,
     denan: bool = False,
+    load_into_ram: bool = False,
 ) -> np.memmap[typing.Any, typing.Any]:
-    table = ecofuture_preproc.chiplet_table.load_table(
-        roi_name=roi_name,
-        base_output_dir=base_output_dir,
-        pad_size_pix=pad_size_pix,
-    )
 
     chiplet_path = get_chiplet_path(
         source_name=source_name,
@@ -264,7 +260,13 @@ def load_chiplets(
         denan=denan,
     )
 
-    chiplet = np.memmap(
+    table = ecofuture_preproc.chiplet_table.load_table(
+        roi_name=roi_name,
+        base_output_dir=base_output_dir,
+        pad_size_pix=pad_size_pix,
+    )
+
+    chiplets_handle = np.memmap(
         filename=chiplet_path,
         dtype=ecofuture_preproc.source.DATA_SOURCE_DTYPE[source_name],
         mode="r",
@@ -275,7 +277,12 @@ def load_chiplets(
         ),
     )
 
-    return chiplet
+    if load_into_ram:
+        chiplets = np.array(chiplets_handle)
+        chiplets_handle._mmap.close()
+        return chiplets
+    else:
+        return chiplets_handle
 
 
 def get_array_shape(
