@@ -128,9 +128,9 @@ The steps are executed by passing the appropriate step name as a positional argu
 > **Note**
 Rain and Tmax data sources are both processed through a common `climate` handler, the two fire scar data sources (early and late) are processed through a common `fire_scar` handler, and the three soil data sources are processed through a common `soil` handler.
 
-These stages are supported by two additional steps:
+These stages are supported by two additional steps: Region of Interest (ROI) preparation and Chiplet table preparation.
 
-#### Region of Interest (ROI) preparation
+### Region of Interest (ROI) preparation
 
 This stage involves converting a ROI description from a GeoJSON file into a `shapely`-based representation with a Coordinate Reference System (CRS) of the Australian Albers (3577) projection.
 The GeoJSON files are stored within the `resources/roi` directory of this package, and the prepared ROI files are written to the `data/roi` directory.
@@ -142,7 +142,7 @@ An example execution:
 poetry run ecofuture_preproc roi_prep -roi_name savanna
 ```
 
-#### Chiplet table preparation
+### Chiplet table preparation
 
 This stage involves creating a tabular representation of the metadata for each of the 'chiplet' representations, which are the final form of the data that are used in subsequent analyses.
 The set of chiplets, and hence the chiplet tables, depend on the ROI used and the padding size used in the chiplet formation.
@@ -154,7 +154,8 @@ An example execution:
 ```bash
 poetry run ecofuture_preproc chiplet_table_prep -roi_name savanna -pad_size_pix 32
 ```
-#### Acquisition
+
+### Acquisition
 
 This stage relates to the `data/raw/${DATASOURCE}` directory.
 For most of the data sources, it involves downloading raw data over HTTPS or S3 protocols.
@@ -174,7 +175,7 @@ An example execution:
 poetry run ecofuture_preproc acquire -source_name rain
 ```
 
-#### Preparation
+### Preparation
 
 In this stage, the raw data for each data source are 'prepared' and placed into the `data/prep/${DATA_SOURCE}/${YYYY}` directory.
 What is involved in 'preparation' varies across data sources, but the main idea is to minimally convert from the raw data into a representation suitable for project-specific analysis.
@@ -191,7 +192,7 @@ An example execution:
 poetry run ecofuture_preproc prep -source_name land_cover
 ```
 
-#### Chip conversion
+### Chip conversion
 
 This involves converting each data source into a common spatial representation (coordinate system, resolution, and coverage), with the land cover chips as the canonical coordinate system and resolution and a named region of interest (ROI) as the spatial coverage.
 As the canonical source, the land cover chips need to be converted from the preparation stage before the other data sources.
@@ -209,7 +210,7 @@ An example execution:
 poetry run ecofuture_preproc to_chips -source_name tmax -roi_name savanna
 ```
 
-#### Chiplet conversion
+### Chiplet conversion
 
 This stage involves creating a set of 'chiplets' for each year for each data source, where a chiplet is a small spatial region of interest - typically with a base size of 160 x 160 pixels.
 The chiplets for a given data source are stored inside a single numpy array per year, saved in `data/chiplets/roi_${ROI_NAME}/pad_${PAD_SIZE_PIX}/${DATA_SOURCE}`.
@@ -241,7 +242,7 @@ An example execution:
 poetry run ecofuture_preproc denan_chiplets -source_name elevation -roi_name savanna -pad_size_pix 32
 ```
 
-#### Summary statistics
+### Summary statistics
 
 This stage computes the mean and standard deviation for all values across space and years for each of the continuous data sources.
 
@@ -250,7 +251,7 @@ An example execution:
 poetry run ecofuture_preproc summary_statistics -source_name soil_depth -roi_name savanna
 ```
 
-#### Conversion of chiplets to GeoTIFF gridded chips
+### Conversion of chiplets to GeoTIFF gridded chips
 
 Although the above representation of the chiplets is best suited for loading into a neural network model, it is easier to otherwise interrogate the chiplet data if it is stored in GeoTIFF format.
 Hence, this step forms GeoTIFF files for each of the grid references in the common chip space (i.e., the output of the `to_chips` step).
@@ -261,7 +262,7 @@ An example execution:
 poetry run ecofuture_preproc chiplets_to_geotiff -source_name land_cover -roi_name savanna
 ```
 
-#### Creating map visualisations
+### Creating map visualisations
 
 The GeoTIFF files created in the previous step can be used to create visualisations where the data are represented in a map form, with a separate page for each year in the data source.
 
@@ -270,7 +271,7 @@ An example execution:
 poetry run ecofuture_preproc plot_maps -source_name soil_depth -roi_name savanna
 ```
 
-#### Transect extraction
+### Transect extraction
 
 The GeoTIFF files are used to extract data along the coordinates of the NATT for all years of a given data source.
 
