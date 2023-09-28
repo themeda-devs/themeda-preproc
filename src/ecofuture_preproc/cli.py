@@ -90,6 +90,11 @@ def main() -> None:
         help="Replace the NaNs in the chiplets for continuous data sources",
     )
 
+    stats_parser = subparsers.add_parser(
+        "summary_stats",
+        help="Calculate summary stats for the continuous data sources",
+    )
+
     chiplets_to_geotiff_parser = subparsers.add_parser(
         "chiplets_to_geotiff",
         help="Convert the chiplet array data to GeoTIFF representations",
@@ -112,6 +117,7 @@ def main() -> None:
         denan_chiplets_parser,
         chiplet_table_parser,
         chiplets_to_geotiff_parser,
+        stats_parser,
         plot_maps_parser,
         transect_parser,
     ]:
@@ -131,6 +137,7 @@ def main() -> None:
         chiplets_to_geotiff_parser,
         plot_maps_parser,
         transect_parser,
+        stats_parser,
     ]:
         parser_needing_source_name.add_argument(
             "-source_name",
@@ -191,6 +198,8 @@ def main() -> None:
         runner_str = "ecofuture_preproc.chiplet_geotiff"
     elif args.command == "transect":
         runner_str = "ecofuture_preproc.transect"
+    elif args.command == "summary_stats":
+        runner_str = "ecofuture_preproc.summary_stats"
     else:
         handler_name = ecofuture_preproc.source.DATA_SOURCE_HANDLER[args.source_name]
         runner_str = f"ecofuture_preproc.{handler_name}.{args.command}"
