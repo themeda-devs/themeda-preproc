@@ -232,7 +232,7 @@ An example execution:
 poetry run ecofuture_preproc to_chiplets -source_name fire_scar_early -roi_name savanna -pad_size_pix 32
 ```
 
-### Replacing NaNs
+#### Replacing NaNs
 
 This stage replaces any NaNs that are present in the chiplet data for sources with continuous values, typically withe mean of the other values in the chiplet.
 
@@ -241,7 +241,7 @@ An example execution:
 poetry run ecofuture_preproc denan_chiplets -source_name elevation -roi_name savanna -pad_size_pix 32
 ```
 
-### Summary statistics
+#### Summary statistics
 
 This stage computes the mean and standard deviation for all values across space and years for each of the continuous data sources.
 
