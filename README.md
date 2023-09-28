@@ -51,21 +51,26 @@ Note that most functions for interacting with this data ask for a `base_output_d
 
 ### Chiplet data loading
 
-For loading the chiplets for a given year and data source, the relevant function is `ecofuture_preproc.chiplets.load_chiplets`.
-This returns a 3D memmapped numpy array, where the first dimension is the chiplet instance, the second dimension is the vertical spatial dimension, and the third dimension is the horizontal spatial dimension.
+For loading the chiplets for a given year and data source, the relevant function is most likely `ecofuture_preproc.chiplets.chiplets_reader`.
+This returns a context manager for a 3D memmapped numpy array, within which the first dimension is the chiplet instance, the second dimension is the vertical spatial dimension, and the third dimension is the horizontal spatial dimension.
 Because the variable is memmapped, there is no memory cost to loading the chiplets until individual items are accessed.
+The context manager closes the file handle upon exiting, so make sure to not have any lingering references to the chiplet data or else you may see segfaults.
 
 For example, the chiplets for the land use data source from 1996 can be loaded by something like:
 
 ```python
-chiplets = ecofuture_preproc.chiplets.load_chiplets(
+with ecofuture_preproc.chiplets.chiplets_reader(
     source_name=ecofuture_preproc.source.DataSourceName("land_use"),
     year=1996,
     roi_name=ecofuture_preproc.roi.ROIName("savanna"),
     pad_size_pix=32,
     base_output_dir=pathlib.Path("~/data").expanduser(),
-)
+) as chiplets:
+    # do stuff
 ```
+
+There is also the lower-level `ecofuture_preproc.chiplets.load_chiplets` function, which does not clean up the memmap structure.
+It includes the option to `load_into_ram`, if you want to access all the chiplet data and you have enough RAM.
 
 ### Chiplet metadata access
 
@@ -85,6 +90,20 @@ This returns a Polars `DataFrame` tabular representation, in which each row corr
 By selecting and filtering within this table, the indices of interest can be obtained and then used to index into the chiplet data array.
 
 
+### Chiplet summary statistics
+
+For the continuous data sources, the mean, standard deviation, minimum, and maximum values have been computed across chiplets and years.
+These values can be loaded using `ecofuture_preproc.summary_statistics.load_stats`.
+For example:
+
+```python
+stats = ecofuture_preproc.summary_statistics.load_stats(
+    source_name=source_name,
+    roi_name=roi_name,
+    base_output_dir=base_output_dir,
+)
+```
+
 ## Running the pre-processing
 
 The pre-processing steps are executed via the `ecofuture_preproc` command; for example:
@@ -103,7 +122,7 @@ For unmonitored execution, you can use `--no-show_progress` to hide the progress
 ### Approach
 
 The pre-processing of the data associated with each data source occurs within a set of sequential stages: acquisition, preparation, chip conversion, chiplet conversion, conversion from chiplets to GeoTIFF files, map-based visualisations, and extracting data along the Northern Australia Tropical Transect (NATT).
-Each data source handler has a directory in the package, containing files implementing these steps: `acquire.py`, `prep.py`, `to_chips.py`, `to_chiplets.py`, and `plot_maps.py` (the conversion from chiplets to GeoTIFF files and the NATT extraction is the same across data sources and so is handled by `chiplet_geotiff.py` and `transect.py`, respectively).
+Each data source handler has a directory in the package, containing files implementing these steps: `acquire.py`, `prep.py`, `to_chips.py`, `to_chiplets.py`, and `plot_maps.py` (the conversion from chiplets to GeoTIFF files, the de-NaN processing, the summary statistics, and the NATT extraction are the same across data sources and so are handled by `chiplet_geotiff.py`, `denan_chiplets.py`, `summary_statistics.py`, and `transect.py`, respectively).
 The steps are executed by passing the appropriate step name as a positional argument to `ecofuture_preproc`.
 
 > **Note**
@@ -211,6 +230,24 @@ Additionally, the pixels classified as 'water' can be re-labelled as 'ocean' of 
 An example execution:
 ```bash
 poetry run ecofuture_preproc to_chiplets -source_name fire_scar_early -roi_name savanna -pad_size_pix 32
+```
+
+### Replacing NaNs
+
+This stage replaces any NaNs that are present in the chiplet data for sources with continuous values, typically withe mean of the other values in the chiplet.
+
+An example execution:
+```bash
+poetry run ecofuture_preproc denan_chiplets -source_name elevation -roi_name savanna -pad_size_pix 32
+```
+
+### Summary statistics
+
+This stage computes the mean and standard deviation for all values across space and years for each of the continuous data sources.
+
+An example execution:
+```bash
+poetry run ecofuture_preproc summary_statistics -source_name soil_depth -roi_name savanna
 ```
 
 #### Conversion of chiplets to GeoTIFF gridded chips

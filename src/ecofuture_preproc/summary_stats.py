@@ -5,11 +5,10 @@ Calculates descriptive summary statistics for continuous data sources.
 import pathlib
 import dataclasses
 import json
+import contextlib
 
 import numpy as np
 import numpy.typing as npt
-
-import welford
 
 import numba
 
@@ -58,7 +57,6 @@ class StatTracker:
         m: float,
         s: float,
     ) -> tuple[int, float, float]:
-
         for sample in data:
             count += 1
             delta = sample - m
@@ -68,7 +66,6 @@ class StatTracker:
         return (count, m, s)
 
     def update(self, data: npt.NDArray[np.floating]) -> None:
-
         (self.__count, self.__m, self.__s) = self.update_fast(
             data=data,
             count=self.__count,
@@ -104,12 +101,7 @@ def run(
         for chiplet_path in sorted(chiplet_base_dir.glob("*.npy"))
     ]
 
-    years = sorted(
-        [
-            chiplet_file_info.year
-            for chiplet_file_info in chiplets_file_info
-        ]
-    )
+    years = sorted([chiplet_file_info.year for chiplet_file_info in chiplets_file_info])
 
     if len(years) == 0:
         raise ValueError(f"No chiplets found at {chiplet_base_dir}")
@@ -127,56 +119,48 @@ def run(
         return
 
     # helper to accumulate the mean and SD estimates
-    tracker = welford.Welford()
+    tracker = StatTracker()
     min_val = None
     max_val = None
 
-    progress_bar = None
-
-    for year in years:
-
-        with ecofuture_preproc.chiplets.chiplets_reader(
-            source_name=source_name,
-            year=year,
-            roi_name=roi_name,
-            pad_size_pix=0,
-            base_output_dir=base_output_dir,
-            denan=True,
-        ) as chiplets:
-
-            (n_chiplets, _, _) = chiplets.shape
-
-            if progress_bar is None:
-                progress_bar = tqdm.tqdm(
-                    iterable=None,
-                    disable=not show_progress,
-                    dynamic_ncols=True,
-                    total=n_chiplets * len(years),
+    with contextlib.closing(
+        tqdm.tqdm(
+            iterable=None,
+            disable=not show_progress,
+            dynamic_ncols=True,
+            total=len(years),
+        )
+    ) as progress_bar:
+        for year in years:
+            data = (
+                ecofuture_preproc.chiplets.load_chiplets(
+                    source_name=source_name,
+                    year=year,
+                    roi_name=roi_name,
+                    pad_size_pix=0,
+                    base_output_dir=base_output_dir,
+                    denan=True,
+                    load_into_ram=True,
                 )
+                .flatten()
+                .astype(float)
+            )
 
-            for i_chiplet in range(n_chiplets):
+            # update the min and max
+            if min_val is None:
+                min_val = np.min(data)
+            else:
+                min_val = min(min_val, np.min(data))
 
-                data = np.array(chiplets[i_chiplet, ...]).flatten().astype(float)
+            if max_val is None:
+                max_val = np.max(data)
+            else:
+                max_val = max(max_val, np.max(data))
 
-                # update the min and max
-                if min_val is None:
-                    min_val = np.min(data)
-                else:
-                    min_val = min(min_val, np.min(data))
+            # now update the accumulator
+            tracker.update(data=data)
 
-                if max_val is None:
-                    max_val = np.max(data)
-                else:
-                    max_val = max(max_val, np.max(data))
-
-                # now update the accumulator
-                tracker.add_all(elements=data)
-
-                progress_bar.update()
-
-    assert progress_bar is not None
-
-    progress_bar.close()
+            progress_bar.update()
 
     assert min_val is not None
     assert max_val is not None
@@ -186,8 +170,8 @@ def run(
         years=years,
         min_val=float(min_val),
         max_val=float(max_val),
-        mean=float(tracker.mean),
-        sd=float(np.sqrt(tracker.var_p)),
+        mean=tracker.mean,
+        sd=tracker.sd,
     )
 
     with output_path.open("w") as handle:
@@ -202,7 +186,6 @@ def load_stats(
     roi_name: ecofuture_preproc.roi.ROIName,
     base_output_dir: pathlib.Path,
 ) -> SummaryStats:
-
     path = get_output_path(
         source_name=source_name,
         roi_name=roi_name,
@@ -221,11 +204,8 @@ def get_output_path(
     roi_name: ecofuture_preproc.roi.ROIName,
     base_output_dir: pathlib.Path,
 ) -> pathlib.Path:
-
     output_dir: pathlib.Path = (
-        base_output_dir
-        / "summary_stats"
-        / f"roi_{roi_name.value}"
+        base_output_dir / "summary_stats" / f"roi_{roi_name.value}"
     )
 
     output_dir.mkdir(exist_ok=True, parents=True)
@@ -241,18 +221,12 @@ def calc_chunk_size_given_mem_budget(
     budget_gb: float,
     base_size_pix: int = 160,
 ) -> int:
-
     # 16 bit floats
     bytes_per_pixel = 2
 
     n_bytes_per_chiplet = base_size_pix * base_size_pix * bytes_per_pixel
 
-    budget_bytes = (
-        budget_gb
-        * 1024  # MB
-        * 1024  # KB
-        * 1024  # B
-    )
+    budget_bytes = budget_gb * 1024 * 1024 * 1024  # MB  # KB  # B
 
     chunk_size = int(np.floor(budget_bytes / n_bytes_per_chiplet))
 

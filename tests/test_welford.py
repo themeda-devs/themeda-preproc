@@ -1,4 +1,3 @@
-
 import numpy as np
 
 import welford
@@ -7,7 +6,6 @@ import ecofuture_preproc.summary_stats
 
 
 def test_welford():
-
     seed = 51321412
 
     rand = np.random.default_rng(seed=seed)
@@ -18,7 +16,6 @@ def test_welford():
     tracker = ecofuture_preproc.summary_stats.StatTracker()
 
     for data_sample in data:
-
         data_sample = data_sample.flatten()
 
         w_tracker.add_all(data_sample)

@@ -219,7 +219,7 @@ def chiplets_reader(
     pad_size_pix: int,
     base_output_dir: pathlib.Path,
     base_size_pix: int = 160,
-    denan: bool = False,
+    denan: bool = True,
 ) -> typing.Generator[np.memmap[typing.Any, typing.Any], None, None]:
     chiplets = load_chiplets(
         source_name=source_name,
@@ -247,10 +247,9 @@ def load_chiplets(
     pad_size_pix: int,
     base_output_dir: pathlib.Path,
     base_size_pix: int = 160,
-    denan: bool = False,
+    denan: bool = True,
     load_into_ram: bool = False,
 ) -> typing.Union[np.memmap[typing.Any, typing.Any], npt.NDArray]:
-
     chiplet_path = get_chiplet_path(
         source_name=source_name,
         year=year,
