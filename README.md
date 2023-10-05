@@ -93,11 +93,11 @@ By selecting and filtering within this table, the indices of interest can be obt
 ### Chiplet summary statistics
 
 For the continuous data sources, the mean, standard deviation, minimum, and maximum values have been computed across chiplets and years.
-These values can be loaded using `ecofuture_preproc.summary_statistics.load_stats`.
+These values can be loaded using `ecofuture_preproc.summary_stats.load_stats`.
 For example:
 
 ```python
-stats = ecofuture_preproc.summary_statistics.load_stats(
+stats = ecofuture_preproc.summary_stats.load_stats(
     source_name=source_name,
     roi_name=roi_name,
     base_output_dir=base_output_dir,
