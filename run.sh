@@ -31,6 +31,7 @@ poetry run ecofuture_preproc to_chiplets -source_name land_cover -roi_name savan
 #poetry run ecofuture_preproc denan_chiplets -source_name tmax -roi_name savanna -pad_size_pix 0
 #poetry run ecofuture_preproc chiplets_to_geotiff -source_name tmax -roi_name savanna
 #poetry run ecofuture_preproc plot_maps -source_name tmax -roi_name savanna
+#poetry run ecofuture_preproc summary_stats -source_name tmax -roi_name savanna
 
 # ANU climate - rain
 #poetry run ecofuture_preproc acquire -source_name rain
@@ -42,6 +43,8 @@ poetry run ecofuture_preproc to_chiplets -source_name land_cover -roi_name savan
 #poetry run ecofuture_preproc denan_chiplets -source_name rain -roi_name savanna -pad_size_pix 0
 #poetry run ecofuture_preproc chiplets_to_geotiff -source_name rain -roi_name savanna
 #poetry run ecofuture_preproc plot_maps -source_name rain -roi_name savanna
+#poetry run ecofuture_preproc summary_stats -source_name rain -roi_name savanna
+#poetry run ecofuture_preproc summary_stats -source_name rain -roi_name savanna --log_transformed
 
 # land use
 #poetry run ecofuture_preproc acquire -source_name land_use
@@ -78,6 +81,7 @@ poetry run ecofuture_preproc to_chiplets -source_name land_cover -roi_name savan
 #poetry run ecofuture_preproc denan_chiplets -source_name elevation -roi_name savanna -pad_size_pix 0
 #poetry run ecofuture_preproc chiplets_to_geotiff -source_name elevation -roi_name savanna
 #poetry run ecofuture_preproc plot_maps -source_name elevation -roi_name savanna
+#poetry run ecofuture_preproc summary_stats -source_name elevation -roi_name savanna
 
 # soil depth
 #poetry run ecofuture_preproc acquire -source_name soil_depth
@@ -89,6 +93,7 @@ poetry run ecofuture_preproc to_chiplets -source_name land_cover -roi_name savan
 #poetry run ecofuture_preproc denan_chiplets -source_name soil_depth -roi_name savanna -pad_size_pix 0
 #poetry run ecofuture_preproc chiplets_to_geotiff -source_name soil_depth -roi_name savanna
 #poetry run ecofuture_preproc plot_maps -source_name soil_depth -roi_name savanna
+#poetry run ecofuture_preproc summary_stats -source_name soil_depth -roi_name savanna
 
 # soil clay
 #poetry run ecofuture_preproc acquire -source_name soil_clay
@@ -100,6 +105,7 @@ poetry run ecofuture_preproc to_chiplets -source_name land_cover -roi_name savan
 #poetry run ecofuture_preproc denan_chiplets -source_name soil_clay -roi_name savanna -pad_size_pix 0
 #poetry run ecofuture_preproc chiplets_to_geotiff -source_name soil_clay -roi_name savanna
 #poetry run ecofuture_preproc plot_maps -source_name soil_clay -roi_name savanna
+#poetry run ecofuture_preproc summary_stats -source_name soil_clay -roi_name savanna
 
 # soil ece
 #poetry run ecofuture_preproc acquire -source_name soil_ece
@@ -111,3 +117,4 @@ poetry run ecofuture_preproc to_chiplets -source_name land_cover -roi_name savan
 #poetry run ecofuture_preproc denan_chiplets -source_name soil_ece -roi_name savanna -pad_size_pix 0
 #poetry run ecofuture_preproc chiplets_to_geotiff -source_name soil_ece -roi_name savanna
 #poetry run ecofuture_preproc plot_maps -source_name soil_ece -roi_name savanna
+#poetry run ecofuture_preproc summary_stats -source_name soil_ece -roi_name savanna
