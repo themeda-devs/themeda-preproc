@@ -28,6 +28,7 @@ class SummaryStats:
     max_val: float
     mean: float
     sd: float
+    log_transformed: bool
 
 
 class StatTracker:
@@ -80,6 +81,7 @@ def run(
     base_output_dir: pathlib.Path,
     protect: bool,
     show_progress: bool = True,
+    log_transformed: bool = False,
 ) -> None:
     if not ecofuture_preproc.source.is_data_source_continuous(source_name=source_name):
         raise ValueError("Only useful to run this on float data types")
@@ -113,6 +115,7 @@ def run(
         source_name=source_name,
         roi_name=roi_name,
         base_output_dir=base_output_dir,
+        log_transformed=log_transformed,
     )
 
     if ecofuture_preproc.utils.is_path_existing_and_read_only(path=output_path):
@@ -146,6 +149,9 @@ def run(
                 .astype(float)
             )
 
+            if log_transformed:
+                data = np.log(data)
+
             # update the min and max
             if min_val is None:
                 min_val = np.min(data)
@@ -172,6 +178,7 @@ def run(
         max_val=float(max_val),
         mean=tracker.mean,
         sd=tracker.sd,
+        log_transformed=log_transformed,
     )
 
     with output_path.open("w") as handle:
@@ -185,11 +192,13 @@ def load_stats(
     source_name: ecofuture_preproc.source.DataSourceName,
     roi_name: ecofuture_preproc.roi.ROIName,
     base_output_dir: pathlib.Path,
+    log_transformed: bool = False,
 ) -> SummaryStats:
     path = get_output_path(
         source_name=source_name,
         roi_name=roi_name,
         base_output_dir=base_output_dir,
+        log_transformed=log_transformed,
     )
 
     data = json.loads(path.read_text())
@@ -203,6 +212,7 @@ def get_output_path(
     source_name: ecofuture_preproc.source.DataSourceName,
     roi_name: ecofuture_preproc.roi.ROIName,
     base_output_dir: pathlib.Path,
+    log_transformed: bool = False,
 ) -> pathlib.Path:
     output_dir: pathlib.Path = (
         base_output_dir / "summary_stats" / f"roi_{roi_name.value}"
@@ -210,8 +220,10 @@ def get_output_path(
 
     output_dir.mkdir(exist_ok=True, parents=True)
 
+    postfix = "_log_transformed" if log_transformed else ""
+
     output_path = output_dir / (
-        f"summary_stats_{source_name.value}_roi_{roi_name.value}.json"
+        f"summary_stats_{source_name.value}_roi_{roi_name.value}{postfix}.json"
     )
 
     return output_path

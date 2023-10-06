@@ -183,6 +183,13 @@ def main() -> None:
             default=True,
         )
 
+    for parser_needing_log_transformed in [stats_parser]:
+        parser_needing_log_transformed.add_argument(
+            "--log_transformed",
+            action=argparse.BooleanOptionalAction,
+            default=False,
+        )
+
     args = parser.parse_args()
 
     if args.command is None:

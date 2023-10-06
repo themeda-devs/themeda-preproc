@@ -13,11 +13,11 @@
 
 # chiplet table prep
 #poetry run ecofuture_preproc chiplet_table_prep -roi_name savanna -pad_size_pix 32
-poetry run ecofuture_preproc chiplet_table_prep -roi_name savanna -pad_size_pix 0
+#poetry run ecofuture_preproc chiplet_table_prep -roi_name savanna -pad_size_pix 0
 
 # land cover
 #poetry run ecofuture_preproc to_chiplets -source_name land_cover -roi_name savanna -pad_size_pix 32
-#poetry run ecofuture_preproc to_chiplets -source_name land_cover -roi_name savanna -pad_size_pix 0
+poetry run ecofuture_preproc to_chiplets -source_name land_cover -roi_name savanna -pad_size_pix 0
 #poetry run ecofuture_preproc chiplets_to_geotiff -source_name land_cover -roi_name savanna
 #poetry run ecofuture_preproc plot_maps -source_name land_cover -roi_name savanna
 
