@@ -137,7 +137,7 @@ def get_colour_map(
     packet: xr.DataArray,
     source_name: ecofuture_preproc.source.DataSourceName,
     year: int,
-) -> tuple[ecofuture_preproc.vis.utils.ColourMap, int]:
+) -> tuple[ecofuture_preproc.vis.colourmap.ColourMap, int]:
     # indicate stepped
     packet_values = packet.values.flatten()
     data_max_val = int(np.max(packet_values[packet_values < 255]))
@@ -156,7 +156,7 @@ def get_colour_map(
     grey_cmap = grey_cmap.resampled(lutsize=max_val + 1)
 
     entries = [
-        ecofuture_preproc.vis.utils.ColourMapEntry(
+        ecofuture_preproc.vis.colourmap.ColourMapEntry(
             label=str(value),
             value=value,
             colour=tuple(int(val * 255) for val in grey_cmap(value)),
@@ -164,7 +164,7 @@ def get_colour_map(
         for value in range(max_val + 1)
     ]
 
-    cmap = ecofuture_preproc.vis.utils.ColourMap(
+    cmap = ecofuture_preproc.vis.colourmap.ColourMap(
         name=f"{source_name.value}_{year}",
         entries=entries,
     )

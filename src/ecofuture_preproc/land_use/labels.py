@@ -111,72 +111,72 @@ def get_lu_code_lut(attr_table_path: pathlib.Path) -> npt.NDArray[np.uint16]:
     return lut
 
 
-def get_cmap() -> ecofuture_preproc.vis.utils.ColourMap:
+def get_cmap() -> ecofuture_preproc.vis.colourmap.ColourMap:
     # colour values from NLUM_250m_DescriptiveMetadata_20220622.pdf
-    cmap = ecofuture_preproc.vis.utils.ColourMap(
+    cmap = ecofuture_preproc.vis.colourmap.ColourMap(
         name="land_use",
         entries=[
-            ecofuture_preproc.vis.utils.ColourMapEntry(
+            ecofuture_preproc.vis.colourmap.ColourMapEntry(
                 label="No data",
                 value=0,
                 colour=(0, 0, 0),
             ),
-            ecofuture_preproc.vis.utils.ColourMapEntry(
+            ecofuture_preproc.vis.colourmap.ColourMapEntry(
                 label="Nature conservation",
                 value=1,
                 colour=(150, 102, 204),
             ),
-            ecofuture_preproc.vis.utils.ColourMapEntry(
+            ecofuture_preproc.vis.colourmap.ColourMapEntry(
                 label="Managed resource protection",
                 value=2,
                 colour=(201, 190, 255),
             ),
-            ecofuture_preproc.vis.utils.ColourMapEntry(
+            ecofuture_preproc.vis.colourmap.ColourMapEntry(
                 label="Other minimal use",
                 value=3,
                 colour=(222, 135, 221),
             ),
-            ecofuture_preproc.vis.utils.ColourMapEntry(
+            ecofuture_preproc.vis.colourmap.ColourMapEntry(
                 label="Grazing native vegetation",
                 value=4,
                 colour=(217, 214, 207),  # (255, 255, 229) is too bright
             ),
-            ecofuture_preproc.vis.utils.ColourMapEntry(
+            ecofuture_preproc.vis.colourmap.ColourMapEntry(
                 label="Production native forests",
                 value=5,
                 colour=(41, 137, 68),
             ),
-            ecofuture_preproc.vis.utils.ColourMapEntry(
+            ecofuture_preproc.vis.colourmap.ColourMapEntry(
                 label="Grazing modified pastures",
                 value=6,
                 colour=(255, 211, 127),
             ),
-            ecofuture_preproc.vis.utils.ColourMapEntry(
+            ecofuture_preproc.vis.colourmap.ColourMapEntry(
                 label="Plantation forests",
                 value=7,
                 colour=(173, 255, 181),
             ),
-            ecofuture_preproc.vis.utils.ColourMapEntry(
+            ecofuture_preproc.vis.colourmap.ColourMapEntry(
                 label="Cropping",
                 value=8,
                 colour=(255, 255, 0),
             ),
-            ecofuture_preproc.vis.utils.ColourMapEntry(
+            ecofuture_preproc.vis.colourmap.ColourMapEntry(
                 label="Horticulture",
                 value=9,
                 colour=(171, 135, 120),
             ),
-            ecofuture_preproc.vis.utils.ColourMapEntry(
+            ecofuture_preproc.vis.colourmap.ColourMapEntry(
                 label="Intensive uses",
                 value=10,
                 colour=(255, 0, 0),
             ),
-            ecofuture_preproc.vis.utils.ColourMapEntry(
+            ecofuture_preproc.vis.colourmap.ColourMapEntry(
                 label="Mining and waste",
                 value=11,
                 colour=(71, 130, 143),
             ),
-            ecofuture_preproc.vis.utils.ColourMapEntry(
+            ecofuture_preproc.vis.colourmap.ColourMapEntry(
                 label="Water",
                 value=12,
                 colour=(0, 0, 255),

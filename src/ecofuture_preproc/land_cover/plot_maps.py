@@ -125,7 +125,7 @@ def customiser(
     )
 
 
-def get_colour_map() -> ecofuture_preproc.vis.utils.ColourMap:
+def get_colour_map() -> ecofuture_preproc.vis.colourmap.ColourMap:
     csv_path = pathlib.Path(
         str(
             importlib.resources.files("ecofuture_preproc.resources.relabel").joinpath(
@@ -144,16 +144,16 @@ def get_colour_map() -> ecofuture_preproc.vis.utils.ColourMap:
 
             value = ecofuture_preproc.utils.num_str_to_int(num_str=row["LCNS_n"])
             label = row["LCNS_label"]
-            colour = ecofuture_preproc.vis.utils.hex_to_rgb(colour=row["LCNS_HexCol"])
+            colour = ecofuture_preproc.vis.colourmap.hex_to_rgb(colour=row["LCNS_HexCol"])
             entries.append(
-                ecofuture_preproc.vis.utils.ColourMapEntry(
+                ecofuture_preproc.vis.colourmap.ColourMapEntry(
                     label=label,
                     value=value,
                     colour=colour,
                 )
             )
 
-    cmap = ecofuture_preproc.vis.utils.ColourMap(
+    cmap = ecofuture_preproc.vis.colourmap.ColourMap(
         name="land_cover",
         entries=entries,
     )
