@@ -28,7 +28,7 @@ class SummaryStats:
     max_val: float
     mean: float
     sd: float
-    log_transformed: bool
+    log_transformed: bool = False
 
 
 class StatTracker:
