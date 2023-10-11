@@ -12,11 +12,21 @@ class ColourMapEntry:
     value: int
     colour: typing.Union[RGBType, RGBAType]
 
+    @property
+    def hex(self) -> str:
+        return f"#{self.colour[0]:02x}{self.colour[1]:02x}{self.colour[2]:02x}"
+
 
 @dataclasses.dataclass
 class ColourMap:
     name: str
     entries: list[ColourMapEntry]
+
+    def __len__(self):
+        return len(self.entries)
+    
+    def __iter__(self):
+        return iter(self.entries)
 
     def as_veusz_colourmap(self, stepped: bool = False) -> list[RGBAType]:
         cmap = [(0, 0, 0, 0) for _ in range(256)]

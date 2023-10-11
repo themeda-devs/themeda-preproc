@@ -10,7 +10,7 @@ import xarray as xr
 
 import ecofuture_preproc.roi
 import ecofuture_preproc.utils
-import ecofuture_preproc.vis.utils
+import ecofuture_preproc.vis.colourmap
 
 
 SENTINEL_VAL: typing.Final = 99
