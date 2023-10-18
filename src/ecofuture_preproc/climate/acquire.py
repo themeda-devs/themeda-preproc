@@ -11,12 +11,12 @@ import siphon.catalog
 
 import tqdm
 
-import ecofuture_preproc.source
-import ecofuture_preproc.utils
+import themeda_preproc.source
+import themeda_preproc.utils
 
 
 def run(
-    source_name: ecofuture_preproc.source.DataSourceName,
+    source_name: themeda_preproc.source.DataSourceName,
     base_output_dir: pathlib.Path,
     protect: bool = True,
     show_progress: bool = True,
@@ -72,6 +72,6 @@ def run(
             dataset.download(filename=str(local_path))
 
             if protect:
-                ecofuture_preproc.utils.protect_path(path=local_path)
+                themeda_preproc.utils.protect_path(path=local_path)
 
             progress_bar.update()

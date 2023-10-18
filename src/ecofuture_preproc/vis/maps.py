@@ -5,22 +5,22 @@ import xarray as xr
 
 import veusz.embed
 
-import ecofuture_preproc.source
-import ecofuture_preproc.roi
-import ecofuture_preproc.packet
-import ecofuture_preproc.vis.utils
+import themeda_preproc.source
+import themeda_preproc.roi
+import themeda_preproc.packet
+import themeda_preproc.vis.utils
 
 
 def plot_years(
-    source_name: ecofuture_preproc.source.DataSourceName,
-    roi_name: ecofuture_preproc.roi.ROIName,
+    source_name: themeda_preproc.source.DataSourceName,
+    roi_name: themeda_preproc.roi.ROIName,
     base_output_dir: pathlib.Path,
     customiser: typing.Callable[
         [
             veusz.embed.Embedded,
             veusz.embed.WidgetNode,
             xr.DataArray,
-            ecofuture_preproc.source.DataSourceName,
+            themeda_preproc.source.DataSourceName,
             int,
         ],
         None,
@@ -45,17 +45,17 @@ def plot_years(
         / f"{source_name.value}_maps.pdf"
     )
 
-    if ecofuture_preproc.utils.is_path_existing_and_read_only(
+    if themeda_preproc.utils.is_path_existing_and_read_only(
         path=output_path,
     ):
         return
 
     output_path.parent.mkdir(exist_ok=True, parents=True)
 
-    years = ecofuture_preproc.utils.get_years_in_path(path=chiplets_path)
+    years = themeda_preproc.utils.get_years_in_path(path=chiplets_path)
 
     embed = veusz.embed.Embedded(hidden=headless)
-    ecofuture_preproc.vis.utils.set_veusz_style(embed=embed)
+    themeda_preproc.vis.utils.set_veusz_style(embed=embed)
 
     if set_minmax_across_years:
         min_val = None
@@ -97,17 +97,17 @@ def plot_years(
 
     embed.Export(
         str(output_path),
-        page=ecofuture_preproc.vis.utils.get_page_list(embed=embed),
+        page=themeda_preproc.vis.utils.get_page_list(embed=embed),
     )
 
     if protect:
-        ecofuture_preproc.utils.protect_path(path=output_path)
+        themeda_preproc.utils.protect_path(path=output_path)
 
 
 def render_year(
     embed: veusz.embed.Embedded,
     year: int,
-    source_name: ecofuture_preproc.source.DataSourceName,
+    source_name: themeda_preproc.source.DataSourceName,
     chiplets_path: pathlib.Path,
     resolution: typing.Union[float, int],
     customiser: typing.Callable[
@@ -115,7 +115,7 @@ def render_year(
             veusz.embed.Embedded,
             veusz.embed.WidgetNode,
             xr.DataArray,
-            ecofuture_preproc.source.DataSourceName,
+            themeda_preproc.source.DataSourceName,
             int,
         ],
         None,
@@ -148,7 +148,7 @@ def render_year(
 
     graph.aspect.val = packet.sizes["x"] / packet.sizes["y"]
 
-    ecofuture_preproc.vis.utils.set_margins(
+    themeda_preproc.vis.utils.set_margins(
         widget=graph,
         margins={"R": "3.929cm"},
         null_absent=True,
@@ -201,7 +201,7 @@ def generic_continuous_customiser(
     embed: veusz.embed.Embedded,  # noqa
     page: veusz.embed.WidgetNode,
     packet: xr.DataArray,  # noqa
-    source_name: ecofuture_preproc.source.DataSourceName,  # noqa
+    source_name: themeda_preproc.source.DataSourceName,  # noqa
     year: int,  # noqa
     cmap_name: str = "viridis",
     cbar_label: str = "",
@@ -232,18 +232,18 @@ def generic_continuous_customiser(
 
 def get_packet(
     year: int,
-    source_name: ecofuture_preproc.source.DataSourceName,
+    source_name: themeda_preproc.source.DataSourceName,
     chiplets_path: pathlib.Path,
     resolution: typing.Optional[typing.Union[float, int]],
     form_via_rioxarray: bool = True,
 ) -> xr.DataArray:
     paths = sorted((chiplets_path / str(year)).glob("*.tif"))
 
-    nodata = ecofuture_preproc.source.DATA_SOURCE_SENTINEL[source_name]
+    nodata = themeda_preproc.source.DATA_SOURCE_SENTINEL[source_name]
 
-    resampling = ecofuture_preproc.source.DATA_SOURCE_RESAMPLERS[source_name]
+    resampling = themeda_preproc.source.DATA_SOURCE_RESAMPLERS[source_name]
 
-    packet = ecofuture_preproc.packet.form_packet(
+    packet = themeda_preproc.packet.form_packet(
         paths=paths,
         form_via_rioxarray=form_via_rioxarray,
         new_resolution=resolution,

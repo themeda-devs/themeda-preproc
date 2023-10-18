@@ -11,16 +11,16 @@ import polars as pl
 
 import tqdm
 
-import ecofuture_preproc.roi
-import ecofuture_preproc.chiplets
-import ecofuture_preproc.chiplet_table
-import ecofuture_preproc.source
-import ecofuture_preproc.utils
+import themeda_preproc.roi
+import themeda_preproc.chiplets
+import themeda_preproc.chiplet_table
+import themeda_preproc.source
+import themeda_preproc.utils
 
 
 def run(
-    source_name: ecofuture_preproc.source.DataSourceName,
-    roi_name: ecofuture_preproc.roi.ROIName,
+    source_name: themeda_preproc.source.DataSourceName,
+    roi_name: themeda_preproc.roi.ROIName,
     base_output_dir: pathlib.Path,
     cores: int,
     base_size_pix: int = 160,
@@ -29,7 +29,7 @@ def run(
 ) -> None:
     pad_size_pix = 0
 
-    table = ecofuture_preproc.chiplet_table.load_table(
+    table = themeda_preproc.chiplet_table.load_table(
         roi_name=roi_name,
         base_output_dir=base_output_dir,
         pad_size_pix=pad_size_pix,
@@ -44,7 +44,7 @@ def run(
     )
 
     chiplets_file_info = [
-        ecofuture_preproc.chiplets.parse_chiplet_filename(filename=chiplet_path)
+        themeda_preproc.chiplets.parse_chiplet_filename(filename=chiplet_path)
         for chiplet_path in sorted(chiplet_base_dir.glob("*.npy"))
     ]
 
@@ -79,8 +79,8 @@ def convert_year_chiplets(
     progress_bar_position: int,
     year: int,
     base_output_dir: pathlib.Path,
-    source_name: ecofuture_preproc.source.DataSourceName,
-    roi_name: ecofuture_preproc.roi.ROIName,
+    source_name: themeda_preproc.source.DataSourceName,
+    roi_name: themeda_preproc.roi.ROIName,
     table: pl.dataframe.frame.DataFrame,
     base_size_pix: int,
     protect: bool,
@@ -88,11 +88,11 @@ def convert_year_chiplets(
 ) -> None:
     pad_size_pix = 0
     crs = 3577
-    nodata = ecofuture_preproc.source.DATA_SOURCE_NODATA[source_name]
-    if ecofuture_preproc.source.DATA_SOURCE_DTYPE[source_name] == np.float16:
+    nodata = themeda_preproc.source.DATA_SOURCE_NODATA[source_name]
+    if themeda_preproc.source.DATA_SOURCE_DTYPE[source_name] == np.float16:
         nodata = np.float32(nodata)
 
-    with ecofuture_preproc.chiplets.chiplets_reader(
+    with themeda_preproc.chiplets.chiplets_reader(
         source_name=source_name,
         year=year,
         roi_name=roi_name,
@@ -132,7 +132,7 @@ def convert_year_chiplets(
                 base_output_dir=base_output_dir,
             )
 
-            if not ecofuture_preproc.utils.is_path_existing_and_read_only(
+            if not themeda_preproc.utils.is_path_existing_and_read_only(
                 path=output_path
             ):
                 data_arrays = []
@@ -141,7 +141,7 @@ def convert_year_chiplets(
                     chiplet = chiplets[row["index"], ...]
 
                     data_array = (
-                        ecofuture_preproc.chiplets.convert_chiplet_to_data_array(
+                        themeda_preproc.chiplets.convert_chiplet_to_data_array(
                             chiplet=chiplet,
                             metadata=row,
                             pad_size_pix=pad_size_pix,
@@ -151,7 +151,7 @@ def convert_year_chiplets(
                         )
                     )
 
-                    if ecofuture_preproc.source.DATA_SOURCE_DTYPE[source_name] == (
+                    if themeda_preproc.source.DATA_SOURCE_DTYPE[source_name] == (
                         np.float16
                     ):
                         data_array = data_array.astype(np.float32)
@@ -160,7 +160,7 @@ def convert_year_chiplets(
 
                 data = rioxarray.merge.merge_arrays(
                     dataarrays=data_arrays,
-                    nodata=ecofuture_preproc.source.DATA_SOURCE_SENTINEL[source_name],
+                    nodata=themeda_preproc.source.DATA_SOURCE_SENTINEL[source_name],
                 )
 
                 data.rio.set_crs(input_crs=crs, inplace=True)
@@ -179,7 +179,7 @@ def convert_year_chiplets(
                     data_array.close()
 
                 if protect:
-                    ecofuture_preproc.utils.protect_path(path=output_path)
+                    themeda_preproc.utils.protect_path(path=output_path)
 
             progress_bar.update()
 
@@ -187,11 +187,11 @@ def convert_year_chiplets(
 
 
 def get_chiplet_geotiff_path(
-    source_name: ecofuture_preproc.source.DataSourceName,
+    source_name: themeda_preproc.source.DataSourceName,
     year: int,
     chip_x: int,
     chip_y: int,
-    roi_name: ecofuture_preproc.roi.ROIName,
+    roi_name: themeda_preproc.roi.ROIName,
     base_output_dir: pathlib.Path,
 ) -> pathlib.Path:
     chiplet_geotiff_dir: pathlib.Path = (

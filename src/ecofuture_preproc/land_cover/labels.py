@@ -8,8 +8,8 @@ import numpy.typing as npt
 
 import xarray as xr
 
-import ecofuture_preproc.roi
-import ecofuture_preproc.utils
+import themeda_preproc.roi
+import themeda_preproc.utils
 
 
 SENTINEL_VAL: typing.Final = 99
@@ -23,7 +23,7 @@ def relabel_chiplet(
     chiplet: xr.DataArray,
     partial_roi_overlap: bool,
     relabel_lut: npt.NDArray[np.uint8],
-    coastal_roi: ecofuture_preproc.roi.RegionOfInterest,
+    coastal_roi: themeda_preproc.roi.RegionOfInterest,
     inplace: bool = True,
 ) -> xr.DataArray:
     if not inplace:
@@ -76,7 +76,7 @@ def relabel_chiplet(
 def get_relabel_lut() -> npt.NDArray[np.uint8]:
     csv_path = pathlib.Path(
         str(
-            importlib.resources.files("ecofuture_preproc.resources.relabel").joinpath(
+            importlib.resources.files("themeda_preproc.resources.relabel").joinpath(
                 "DEALC_to_LCNS_v2.csv"
             )
         )
@@ -87,8 +87,8 @@ def get_relabel_lut() -> npt.NDArray[np.uint8]:
     with csv_path.open(newline="", encoding="latin") as handle:
         reader = csv.DictReader(f=handle)
         for row in reader:
-            dea_level_4 = ecofuture_preproc.utils.num_str_to_int(num_str=row["level4"])
-            new_label = ecofuture_preproc.utils.num_str_to_int(num_str=row["LCNS_n"])
+            dea_level_4 = themeda_preproc.utils.num_str_to_int(num_str=row["level4"])
+            new_label = themeda_preproc.utils.num_str_to_int(num_str=row["LCNS_n"])
 
             if (dea_level_4 < 0 or new_label < 0) or (
                 dea_level_4 > 127 or new_label > 255

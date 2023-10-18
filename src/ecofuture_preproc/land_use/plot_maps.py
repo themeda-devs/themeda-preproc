@@ -7,22 +7,22 @@ import xarray as xr
 
 import veusz.embed
 
-import ecofuture_preproc.roi
-import ecofuture_preproc.source
-import ecofuture_preproc.vis.utils
-import ecofuture_preproc.vis.maps
-import ecofuture_preproc.land_use.labels
+import themeda_preproc.roi
+import themeda_preproc.source
+import themeda_preproc.vis.utils
+import themeda_preproc.vis.maps
+import themeda_preproc.land_use.labels
 
 
 def run(
-    source_name: ecofuture_preproc.source.DataSourceName,
-    roi_name: ecofuture_preproc.roi.ROIName,
+    source_name: themeda_preproc.source.DataSourceName,
+    roi_name: themeda_preproc.roi.ROIName,
     base_output_dir: pathlib.Path,
     protect: bool = True,
     resolution: typing.Optional[typing.Union[float, int]] = 1_000,
     headless: bool = True,
 ) -> None:
-    ecofuture_preproc.vis.maps.plot_years(
+    themeda_preproc.vis.maps.plot_years(
         source_name=source_name,
         roi_name=roi_name,
         base_output_dir=base_output_dir,
@@ -37,7 +37,7 @@ def customiser(
     embed: veusz.embed.Embedded,
     page: veusz.embed.WidgetNode,
     packet: xr.DataArray,  # noqa
-    source_name: ecofuture_preproc.source.DataSourceName,  # noqa
+    source_name: themeda_preproc.source.DataSourceName,  # noqa
     year: int,  # noqa
 ) -> None:
     (img_widget, *_) = page.WalkWidgets(widgettype="image")
@@ -46,7 +46,7 @@ def customiser(
 
     cmap_name = f"{name_prefix}_cmap"
 
-    cmap = ecofuture_preproc.land_use.labels.get_cmap()
+    cmap = themeda_preproc.land_use.labels.get_cmap()
 
     embed.AddCustom(
         ctype="colormap",
@@ -107,7 +107,7 @@ def customiser(
     dummy_xy.yData.val = np.arange(n_entries).tolist()
     dummy_xy.labels.val = f"{name_prefix}_cbar_labels"
 
-    ecofuture_preproc.vis.utils.set_margins(
+    themeda_preproc.vis.utils.set_margins(
         widget=cbar_graph,
         margins={
             "L": "11.37cm",
@@ -117,7 +117,7 @@ def customiser(
         },
     )
 
-    ecofuture_preproc.vis.utils.set_margins(
+    themeda_preproc.vis.utils.set_margins(
         widget=graph,
         margins={"R": "3.929cm"},
         null_absent=True,

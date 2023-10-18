@@ -9,7 +9,7 @@ import pickle
 
 import shapely
 
-import ecofuture_preproc.utils
+import themeda_preproc.utils
 
 
 class ROIName(enum.Enum):
@@ -54,14 +54,14 @@ class RegionOfInterest:
         if self.base_output_dir is None:
             raise ValueError("Need to set `base_output_dir`")
         return (
-            self.base_output_dir / "roi" / f"ecofuture_roi_shape_{self.name.value}.pkl"
+            self.base_output_dir / "roi" / f"themeda_roi_shape_{self.name.value}.pkl"
         )
 
     @property
     def geojson_path(self) -> pathlib.Path:
         path = pathlib.Path(
             str(
-                importlib.resources.files("ecofuture_preproc.resources.roi").joinpath(
+                importlib.resources.files("themeda_preproc.resources.roi").joinpath(
                     self._geojson_filename_lut[self.name.value]
                 )
             )
@@ -100,7 +100,7 @@ class RegionOfInterest:
             ) from err
 
         if src_crs != dst_crs:
-            region = ecofuture_preproc.utils.transform_shape(
+            region = themeda_preproc.utils.transform_shape(
                 src_crs=src_crs,
                 dst_crs=dst_crs,
                 shape=region,
@@ -139,4 +139,4 @@ def run(
     roi.prepare()
 
     if protect:
-        ecofuture_preproc.utils.protect_path(path=roi.shape_path)
+        themeda_preproc.utils.protect_path(path=roi.shape_path)

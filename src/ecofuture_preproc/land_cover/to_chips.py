@@ -8,20 +8,20 @@ import odc.geo.xr  # noqa
 
 import tqdm
 
-import ecofuture_preproc.source
-import ecofuture_preproc.roi
-import ecofuture_preproc.utils
-import ecofuture_preproc.land_cover.utils
+import themeda_preproc.source
+import themeda_preproc.roi
+import themeda_preproc.utils
+import themeda_preproc.land_cover.utils
 
 
 def run(
-    source_name: ecofuture_preproc.source.DataSourceName,
-    roi_name: ecofuture_preproc.roi.ROIName,
+    source_name: themeda_preproc.source.DataSourceName,
+    roi_name: themeda_preproc.roi.ROIName,
     base_output_dir: pathlib.Path,
     protect: bool = True,
     show_progress: bool = True,
 ) -> None:
-    roi = ecofuture_preproc.roi.RegionOfInterest(
+    roi = themeda_preproc.roi.RegionOfInterest(
         name=roi_name,
         base_output_dir=base_output_dir,
         load=True,
@@ -39,7 +39,7 @@ def run(
             continue
 
         for chip_path in year.glob("*.tif"):
-            chip_path_info = ecofuture_preproc.land_cover.utils.parse_chip_path(
+            chip_path_info = themeda_preproc.land_cover.utils.parse_chip_path(
                 path=chip_path,
             )
 
@@ -69,7 +69,7 @@ def run(
                 output_dir.mkdir(exist_ok=True, parents=True)
                 output_path = output_dir / chip_path_info.path.name
 
-                if not ecofuture_preproc.utils.is_path_existing_and_read_only(
+                if not themeda_preproc.utils.is_path_existing_and_read_only(
                     path=output_path
                 ):
                     shutil.copy2(
@@ -78,17 +78,17 @@ def run(
                     )
 
                     if protect:
-                        ecofuture_preproc.utils.protect_path(path=output_path)
+                        themeda_preproc.utils.protect_path(path=output_path)
 
             progress_bar.update()
 
 
 def is_grid_ref_valid(
-    grid_ref_chip_path_info: ecofuture_preproc.chips.ChipPathInfo,
-    roi: ecofuture_preproc.roi.RegionOfInterest,
+    grid_ref_chip_path_info: themeda_preproc.chips.ChipPathInfo,
+    roi: themeda_preproc.roi.RegionOfInterest,
 ) -> bool:
     with contextlib.closing(
-        ecofuture_preproc.chips.read_chip(
+        themeda_preproc.chips.read_chip(
             path=grid_ref_chip_path_info.path,
             load_data=False,
         )

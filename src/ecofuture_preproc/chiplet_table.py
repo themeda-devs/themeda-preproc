@@ -15,12 +15,12 @@ import tqdm
 import shapely
 import affine
 
-import ecofuture_preproc.roi
-import ecofuture_preproc.chips
+import themeda_preproc.roi
+import themeda_preproc.chips
 
 
 def run(
-    roi_name: ecofuture_preproc.roi.ROIName,
+    roi_name: themeda_preproc.roi.ROIName,
     base_output_dir: pathlib.Path,
     pad_size_pix: int,
     protect: bool = True,
@@ -33,11 +33,11 @@ def run(
     )
 
     # if it already exists and is protected, bail
-    if ecofuture_preproc.utils.is_path_existing_and_read_only(path=table_path):
+    if themeda_preproc.utils.is_path_existing_and_read_only(path=table_path):
         print(f"Path {table_path} exists and is protected; skipping")
         return
 
-    roi = ecofuture_preproc.roi.RegionOfInterest(
+    roi = themeda_preproc.roi.RegionOfInterest(
         name=roi_name,
         base_output_dir=base_output_dir,
         load=True,
@@ -69,7 +69,7 @@ def run(
     )
 
     ref_chips: list[xr.DataArray] = [
-        ecofuture_preproc.chips.read_chip(
+        themeda_preproc.chips.read_chip(
             path=ref_chip_path,
             chunks="auto",
             load_data=False,
@@ -88,11 +88,11 @@ def run(
     table.write_parquet(file=table_path)
 
     if protect:
-        ecofuture_preproc.utils.protect_path(path=table_path)
+        themeda_preproc.utils.protect_path(path=table_path)
 
 
 def get_table_path(
-    roi_name: ecofuture_preproc.roi.ROIName,
+    roi_name: themeda_preproc.roi.ROIName,
     base_output_dir: pathlib.Path,
     pad_size_pix: int,
 ) -> pathlib.Path:
@@ -113,7 +113,7 @@ def get_table_path(
 
 
 def load_table(
-    roi_name: ecofuture_preproc.roi.ROIName,
+    roi_name: themeda_preproc.roi.ROIName,
     base_output_dir: pathlib.Path,
     pad_size_pix: int,
 ) -> pl.dataframe.frame.DataFrame:
@@ -130,7 +130,7 @@ def load_table(
 
 def form_chiplet_table(
     chips: list[xr.DataArray],
-    roi: ecofuture_preproc.roi.RegionOfInterest,
+    roi: themeda_preproc.roi.RegionOfInterest,
     pad_size_pix: int,
     rand_seed: int,
     base_size_pix: int = 160,
@@ -188,13 +188,13 @@ def form_chiplet_table(
 
 def form_chiplet_table_entry(
     chip: xr.DataArray,
-    roi: ecofuture_preproc.roi.RegionOfInterest,
+    roi: themeda_preproc.roi.RegionOfInterest,
     base_size_pix: int,
     pad_size_pix: int,
 ) -> pl.dataframe.frame.DataFrame:
     chip_transform = chip.rio.transform()
 
-    chip_grid_ref = ecofuture_preproc.chips.get_grid_ref_from_chip(chip=chip)
+    chip_grid_ref = themeda_preproc.chips.get_grid_ref_from_chip(chip=chip)
 
     schema = get_schema()
 
@@ -325,7 +325,7 @@ def get_schema() -> dict[str, typing.Union[pl.Int64, pl.UInt64, pl.Float64]]:
     return schema
 
 
-def get_rand_seed(roi_name: ecofuture_preproc.roi.ROIName, pad_size_pix: int) -> int:
+def get_rand_seed(roi_name: themeda_preproc.roi.ROIName, pad_size_pix: int) -> int:
     rand_seed_lut = types.MappingProxyType(
         {
             ("savanna", 32): 845627234,

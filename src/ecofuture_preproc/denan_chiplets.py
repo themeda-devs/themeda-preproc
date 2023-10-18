@@ -7,23 +7,23 @@ import numpy as np
 
 import tqdm
 
-import ecofuture_preproc.source
-import ecofuture_preproc.roi
-import ecofuture_preproc.chips
-import ecofuture_preproc.packet
-import ecofuture_preproc.utils
+import themeda_preproc.source
+import themeda_preproc.roi
+import themeda_preproc.chips
+import themeda_preproc.packet
+import themeda_preproc.utils
 
 
 def run(
-    source_name: ecofuture_preproc.source.DataSourceName,
-    roi_name: ecofuture_preproc.roi.ROIName,
+    source_name: themeda_preproc.source.DataSourceName,
+    roi_name: themeda_preproc.roi.ROIName,
     pad_size_pix: int,
     base_output_dir: pathlib.Path,
     protect: bool,
     cores: int,
     show_progress: bool = True,
 ) -> None:
-    if not ecofuture_preproc.source.is_data_source_continuous(source_name=source_name):
+    if not themeda_preproc.source.is_data_source_continuous(source_name=source_name):
         raise ValueError("Only useful to run this on float data types")
 
     chiplet_base_dir = (
@@ -35,7 +35,7 @@ def run(
     )
 
     chiplets_file_info = [
-        ecofuture_preproc.chiplets.parse_chiplet_filename(filename=chiplet_path)
+        themeda_preproc.chiplets.parse_chiplet_filename(filename=chiplet_path)
         for chiplet_path in sorted(chiplet_base_dir.glob("*.npy"))
     ]
 
@@ -68,8 +68,8 @@ def run(
 def run_denan_year_chiplets(
     progress_bar_position: int,
     year: int,
-    source_name: ecofuture_preproc.source.DataSourceName,
-    roi_name: ecofuture_preproc.roi.ROIName,
+    source_name: themeda_preproc.source.DataSourceName,
+    roi_name: themeda_preproc.roi.ROIName,
     pad_size_pix: int,
     base_output_dir: pathlib.Path,
     protect: bool,
@@ -84,7 +84,7 @@ def run_denan_year_chiplets(
         dynamic_ncols=True,
     )
 
-    output_path = ecofuture_preproc.chiplets.get_chiplet_path(
+    output_path = themeda_preproc.chiplets.get_chiplet_path(
         source_name=source_name,
         year=year,
         roi_name=roi_name,
@@ -93,11 +93,11 @@ def run_denan_year_chiplets(
         denan=True,
     )
 
-    if ecofuture_preproc.utils.is_path_existing_and_read_only(path=output_path):
+    if themeda_preproc.utils.is_path_existing_and_read_only(path=output_path):
         return
 
     # load the original chiplets
-    with ecofuture_preproc.chiplets.chiplets_reader(
+    with themeda_preproc.chiplets.chiplets_reader(
         source_name=source_name,
         year=year,
         roi_name=roi_name,
@@ -127,9 +127,9 @@ def run_denan_year_chiplets(
             if np.any(np.isnan(data)):
                 if np.all(isnan_data):
                     if source_name not in [
-                        ecofuture_preproc.source.DataSourceName.SOIL_DEPTH,
-                        ecofuture_preproc.source.DataSourceName.SOIL_ECE,
-                        ecofuture_preproc.source.DataSourceName.SOIL_CLAY,
+                        themeda_preproc.source.DataSourceName.SOIL_DEPTH,
+                        themeda_preproc.source.DataSourceName.SOIL_ECE,
+                        themeda_preproc.source.DataSourceName.SOIL_CLAY,
                     ]:
                         raise ValueError(
                             "Only expecting to see full nan chiplets "
@@ -163,6 +163,6 @@ def run_denan_year_chiplets(
         denan_chiplets._mmap.close()
 
     if protect:
-        ecofuture_preproc.utils.protect_path(path=output_path)
+        themeda_preproc.utils.protect_path(path=output_path)
 
     progress_bar.close()

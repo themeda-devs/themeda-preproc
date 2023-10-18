@@ -6,13 +6,13 @@ import shutil
 
 import tqdm
 
-import ecofuture_preproc.source
-import ecofuture_preproc.utils
-import ecofuture_preproc.land_cover.utils
+import themeda_preproc.source
+import themeda_preproc.utils
+import themeda_preproc.land_cover.utils
 
 
 def run(
-    source_name: ecofuture_preproc.source.DataSourceName,
+    source_name: themeda_preproc.source.DataSourceName,
     base_output_dir: pathlib.Path,
     protect: bool = True,
     show_progress: bool = True,
@@ -23,7 +23,7 @@ def run(
     raw_chip_path_info = collections.defaultdict(list)
 
     for chip_path in raw_dir.glob("*.tif"):
-        chip_path_info = ecofuture_preproc.land_cover.utils.parse_chip_path(
+        chip_path_info = themeda_preproc.land_cover.utils.parse_chip_path(
             path=chip_path,
         )
 
@@ -60,7 +60,7 @@ def run(
                 output_dir.mkdir(exist_ok=True, parents=True)
                 output_path = output_dir / chip_path_info.path.name
 
-                if not ecofuture_preproc.utils.is_path_existing_and_read_only(
+                if not themeda_preproc.utils.is_path_existing_and_read_only(
                     path=output_path
                 ):
                     shutil.copy2(
@@ -69,13 +69,13 @@ def run(
                     )
 
                     if protect:
-                        ecofuture_preproc.utils.protect_path(path=output_path)
+                        themeda_preproc.utils.protect_path(path=output_path)
 
             progress_bar.update()
 
 
 def is_grid_ref_valid(
-    grid_ref_raw_chip_path_info: list[ecofuture_preproc.chips.ChipPathInfo],
+    grid_ref_raw_chip_path_info: list[themeda_preproc.chips.ChipPathInfo],
     expected_n_years: int,
 ) -> bool:
     n_years = len(grid_ref_raw_chip_path_info)
@@ -83,14 +83,14 @@ def is_grid_ref_valid(
     if n_years != expected_n_years:
         return False
 
-    reference_chip = ecofuture_preproc.chips.read_chip(
+    reference_chip = themeda_preproc.chips.read_chip(
         path=grid_ref_raw_chip_path_info[0].path,
         load_data=False,
     )
 
     for comparison_chip_path_info in grid_ref_raw_chip_path_info[1:]:
         with contextlib.closing(
-            ecofuture_preproc.chips.read_chip(
+            themeda_preproc.chips.read_chip(
                 path=comparison_chip_path_info.path,
                 load_data=False,
             )

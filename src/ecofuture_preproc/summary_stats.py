@@ -14,10 +14,10 @@ import numba
 
 import tqdm
 
-import ecofuture_preproc.source
-import ecofuture_preproc.roi
-import ecofuture_preproc.utils
-import ecofuture_preproc.chiplets
+import themeda_preproc.source
+import themeda_preproc.roi
+import themeda_preproc.utils
+import themeda_preproc.chiplets
 
 
 @dataclasses.dataclass
@@ -76,14 +76,14 @@ class StatTracker:
 
 
 def run(
-    source_name: ecofuture_preproc.source.DataSourceName,
-    roi_name: ecofuture_preproc.roi.ROIName,
+    source_name: themeda_preproc.source.DataSourceName,
+    roi_name: themeda_preproc.roi.ROIName,
     base_output_dir: pathlib.Path,
     protect: bool,
     show_progress: bool = True,
     log_transformed: bool = False,
 ) -> None:
-    if not ecofuture_preproc.source.is_data_source_continuous(source_name=source_name):
+    if not themeda_preproc.source.is_data_source_continuous(source_name=source_name):
         raise ValueError("Only useful to run this on float data types")
 
     # only consider data for up to and including this year
@@ -99,7 +99,7 @@ def run(
     )
 
     chiplets_file_info = [
-        ecofuture_preproc.chiplets.parse_chiplet_filename(filename=chiplet_path)
+        themeda_preproc.chiplets.parse_chiplet_filename(filename=chiplet_path)
         for chiplet_path in sorted(chiplet_base_dir.glob("*.npy"))
     ]
 
@@ -118,7 +118,7 @@ def run(
         log_transformed=log_transformed,
     )
 
-    if ecofuture_preproc.utils.is_path_existing_and_read_only(path=output_path):
+    if themeda_preproc.utils.is_path_existing_and_read_only(path=output_path):
         return
 
     # helper to accumulate the mean and SD estimates
@@ -136,7 +136,7 @@ def run(
     ) as progress_bar:
         for year in years:
             data = (
-                ecofuture_preproc.chiplets.load_chiplets(
+                themeda_preproc.chiplets.load_chiplets(
                     source_name=source_name,
                     year=year,
                     roi_name=roi_name,
@@ -185,12 +185,12 @@ def run(
         json.dump(dataclasses.asdict(stats), handle)
 
     if protect:
-        ecofuture_preproc.utils.protect_path(path=output_path)
+        themeda_preproc.utils.protect_path(path=output_path)
 
 
 def load_stats(
-    source_name: ecofuture_preproc.source.DataSourceName,
-    roi_name: ecofuture_preproc.roi.ROIName,
+    source_name: themeda_preproc.source.DataSourceName,
+    roi_name: themeda_preproc.roi.ROIName,
     base_output_dir: pathlib.Path,
     log_transformed: bool = False,
 ) -> SummaryStats:
@@ -209,8 +209,8 @@ def load_stats(
 
 
 def get_output_path(
-    source_name: ecofuture_preproc.source.DataSourceName,
-    roi_name: ecofuture_preproc.roi.ROIName,
+    source_name: themeda_preproc.source.DataSourceName,
+    roi_name: themeda_preproc.roi.ROIName,
     base_output_dir: pathlib.Path,
     log_transformed: bool = False,
 ) -> pathlib.Path:

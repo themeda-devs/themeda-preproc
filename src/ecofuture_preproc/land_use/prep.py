@@ -3,14 +3,14 @@ import shutil
 
 import xarray as xr
 
-import ecofuture_preproc.source
-import ecofuture_preproc.utils
-import ecofuture_preproc.land_cover.utils
-import ecofuture_preproc.land_use.labels
+import themeda_preproc.source
+import themeda_preproc.utils
+import themeda_preproc.land_cover.utils
+import themeda_preproc.land_use.labels
 
 
 def run(
-    source_name: ecofuture_preproc.source.DataSourceName,
+    source_name: themeda_preproc.source.DataSourceName,
     base_output_dir: pathlib.Path,
     protect: bool = True,
 ) -> None:
@@ -24,7 +24,7 @@ def run(
         output_dir.mkdir(exist_ok=True, parents=True)
         output_path = output_dir / f"{source_name.value}_{chip_year}.tif"
 
-        if not ecofuture_preproc.utils.is_path_existing_and_read_only(path=output_path):
+        if not themeda_preproc.utils.is_path_existing_and_read_only(path=output_path):
             # for the files between 1992 and 2005, we have had to export from
             # ArcCatalog, which doesn't exported the land use codes we are after
             # we need to convert from the 'value' stored in the tif file into
@@ -44,17 +44,17 @@ def run(
                 )
 
             if protect:
-                ecofuture_preproc.utils.protect_path(path=output_path)
+                themeda_preproc.utils.protect_path(path=output_path)
 
 
 def convert_chip_value_to_land_use_code(chip_path: pathlib.Path) -> xr.DataArray:
-    lu_code_lut = ecofuture_preproc.land_use.labels.get_lu_code_lut(
+    lu_code_lut = themeda_preproc.land_use.labels.get_lu_code_lut(
         attr_table_path=chip_path.with_suffix(".txt")
     )
 
-    chip = ecofuture_preproc.chips.read_chip(path=chip_path)
+    chip = themeda_preproc.chips.read_chip(path=chip_path)
 
-    chip_converted = ecofuture_preproc.land_use.labels.relabel_chip(
+    chip_converted = themeda_preproc.land_use.labels.relabel_chip(
         chip=chip,
         relabel_lut=lu_code_lut,
     )

@@ -3,14 +3,14 @@ import types
 
 import xarray as xr
 
-import ecofuture_preproc.chips
-import ecofuture_preproc.roi
+import themeda_preproc.chips
+import themeda_preproc.roi
 
 
 def load_reference_chips(
     base_output_dir: pathlib.Path,
-    roi_name: ecofuture_preproc.roi.ROIName,
-) -> types.MappingProxyType[ecofuture_preproc.chips.GridRef, xr.DataArray]:
+    roi_name: themeda_preproc.roi.ROIName,
+) -> types.MappingProxyType[themeda_preproc.chips.GridRef, xr.DataArray]:
     base_chip_dir = base_output_dir / "chips" / f"roi_{roi_name.value}" / "land_cover"
 
     # work out which DEA chip year to use as the reference
@@ -23,12 +23,12 @@ def load_reference_chips(
     chip_dir = base_chip_dir / str(base_chip_ref_year)
 
     # load all the DEA chips
-    base_chips: dict[ecofuture_preproc.chips.GridRef, xr.DataArray] = {}
+    base_chips: dict[themeda_preproc.chips.GridRef, xr.DataArray] = {}
 
     for base_chip_path in sorted(chip_dir.glob("*.tif")):
         base_chip_path_info = parse_chip_path(path=base_chip_path)
 
-        base_chip = ecofuture_preproc.chips.read_chip(
+        base_chip = themeda_preproc.chips.read_chip(
             path=base_chip_path,
             chunks="auto",
         )
@@ -43,7 +43,7 @@ def load_reference_chips(
     return base_chips
 
 
-def parse_chip_path(path: pathlib.Path) -> ecofuture_preproc.chips.ChipPathInfo:
+def parse_chip_path(path: pathlib.Path) -> themeda_preproc.chips.ChipPathInfo:
     "Parses the metadata in a chip filename"
 
     # example: ga_ls_landcover_class_cyear_2_1-0-0_au_x9y-24_1993-01-01_level4
@@ -69,7 +69,7 @@ def parse_chip_path(path: pathlib.Path) -> ecofuture_preproc.chips.ChipPathInfo:
 
     year = int(year)
 
-    chip_path_info = ecofuture_preproc.chips.ChipPathInfo(
+    chip_path_info = themeda_preproc.chips.ChipPathInfo(
         path=path,
         year=year,
         grid_ref=grid_ref,
@@ -78,7 +78,7 @@ def parse_chip_path(path: pathlib.Path) -> ecofuture_preproc.chips.ChipPathInfo:
     return chip_path_info
 
 
-def get_grid_ref_from_xy_str(xy_str: str) -> ecofuture_preproc.chips.GridRef:
+def get_grid_ref_from_xy_str(xy_str: str) -> themeda_preproc.chips.GridRef:
     if not xy_str.startswith("x") or "y" not in xy_str:
         raise ValueError("Unexpected filename format")
 
@@ -88,4 +88,4 @@ def get_grid_ref_from_xy_str(xy_str: str) -> ecofuture_preproc.chips.GridRef:
     if any([not x.is_integer() or not y.is_integer()]):
         raise ValueError("Grid reference is unexpectedly float")
 
-    return ecofuture_preproc.chips.GridRef(x=int(x), y=int(y))
+    return themeda_preproc.chips.GridRef(x=int(x), y=int(y))

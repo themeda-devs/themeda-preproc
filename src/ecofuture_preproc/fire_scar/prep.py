@@ -7,13 +7,13 @@ import fiona
 
 import odc.geo.geom
 
-import ecofuture_preproc.source
-import ecofuture_preproc.utils
-import ecofuture_preproc.land_cover.utils
+import themeda_preproc.source
+import themeda_preproc.utils
+import themeda_preproc.land_cover.utils
 
 
 def run(
-    source_name: ecofuture_preproc.source.DataSourceName,
+    source_name: themeda_preproc.source.DataSourceName,
     base_output_dir: pathlib.Path,
     protect: bool = True,
 ) -> None:
@@ -34,7 +34,7 @@ def run(
 
         output_path = output_dir / f"{source_name.value}_{year}.pkl"
 
-        if not ecofuture_preproc.utils.is_path_existing_and_read_only(path=output_path):
+        if not themeda_preproc.utils.is_path_existing_and_read_only(path=output_path):
             year_data = process_year(
                 source_name=source_name,
                 path=raw_year_path,
@@ -44,7 +44,7 @@ def run(
                 pickle.dump(year_data, handle)
 
         if protect:
-            ecofuture_preproc.utils.protect_path(path=output_path)
+            themeda_preproc.utils.protect_path(path=output_path)
 
 
 def get_year_from_path(path: pathlib.Path) -> int:
@@ -67,7 +67,7 @@ def get_year_from_path(path: pathlib.Path) -> int:
 
 
 def process_year(
-    source_name: ecofuture_preproc.source.DataSourceName,
+    source_name: themeda_preproc.source.DataSourceName,
     path: pathlib.Path,
 ) -> list[odc.geo.geom.Geometry]:
     geoms = []

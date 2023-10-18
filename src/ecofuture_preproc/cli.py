@@ -4,8 +4,8 @@ import os
 import importlib
 import inspect
 
-import ecofuture_preproc.roi
-import ecofuture_preproc.source
+import themeda_preproc.roi
+import themeda_preproc.source
 
 
 def main() -> None:
@@ -14,12 +14,12 @@ def main() -> None:
     os.environ["DASK_" + "ARRAY__" + "SLICING__" + "SPLIT_LARGE_CHUNKS"] = "false"
 
     parser = argparse.ArgumentParser(
-        description="Pre-processing for the Ecofuture project",
+        description="Pre-processing for the Themeda project",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
     default_base_output_dir = os.environ.get(
-        "ECOFUTURE_PREPROC_BASE_OUTPUT_DIR",
+        "THEMEDA_PREPROC_BASE_OUTPUT_DIR",
         default=(pathlib.Path(__file__).parent / "../../../../" / "data").resolve(),
     )
 
@@ -124,8 +124,8 @@ def main() -> None:
         parser_needing_roi_name.add_argument(
             "-roi_name",
             required=True,
-            choices=list(ecofuture_preproc.roi.ROIName),
-            type=ecofuture_preproc.roi.ROIName,
+            choices=list(themeda_preproc.roi.ROIName),
+            type=themeda_preproc.roi.ROIName,
         )
 
     for parser_needing_source_name in [
@@ -142,8 +142,8 @@ def main() -> None:
         parser_needing_source_name.add_argument(
             "-source_name",
             required=True,
-            choices=list(ecofuture_preproc.source.DataSourceName),
-            type=ecofuture_preproc.source.DataSourceName,
+            choices=list(themeda_preproc.source.DataSourceName),
+            type=themeda_preproc.source.DataSourceName,
         )
 
     for parser_needing_base_size_pix in [
@@ -196,20 +196,20 @@ def main() -> None:
         raise ValueError("Please provide a command")
 
     if args.command == "roi_prep":
-        runner_str = "ecofuture_preproc.roi"
+        runner_str = "themeda_preproc.roi"
     elif args.command == "chiplet_table_prep":
-        runner_str = "ecofuture_preproc.chiplet_table"
+        runner_str = "themeda_preproc.chiplet_table"
     elif args.command == "denan_chiplets":
-        runner_str = "ecofuture_preproc.denan_chiplets"
+        runner_str = "themeda_preproc.denan_chiplets"
     elif args.command == "chiplets_to_geotiff":
-        runner_str = "ecofuture_preproc.chiplet_geotiff"
+        runner_str = "themeda_preproc.chiplet_geotiff"
     elif args.command == "transect":
-        runner_str = "ecofuture_preproc.transect"
+        runner_str = "themeda_preproc.transect"
     elif args.command == "summary_stats":
-        runner_str = "ecofuture_preproc.summary_stats"
+        runner_str = "themeda_preproc.summary_stats"
     else:
-        handler_name = ecofuture_preproc.source.DATA_SOURCE_HANDLER[args.source_name]
-        runner_str = f"ecofuture_preproc.{handler_name}.{args.command}"
+        handler_name = themeda_preproc.source.DATA_SOURCE_HANDLER[args.source_name]
+        runner_str = f"themeda_preproc.{handler_name}.{args.command}"
 
     module = importlib.import_module(name=runner_str)
     function = module.run

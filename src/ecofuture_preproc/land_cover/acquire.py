@@ -11,12 +11,12 @@ import botocore
 
 import tqdm
 
-import ecofuture_preproc.source
-import ecofuture_preproc.utils
+import themeda_preproc.source
+import themeda_preproc.utils
 
 
 def run(
-    source_name: ecofuture_preproc.source.DataSourceName,
+    source_name: themeda_preproc.source.DataSourceName,
     base_output_dir: pathlib.Path,
     protect: bool = True,
     show_progress: bool = True,
@@ -48,7 +48,7 @@ def run(
                 if path.name.endswith("level4.tif"):
                     local_path = output_dir / path.name
 
-                    if not ecofuture_preproc.utils.is_path_existing_and_read_only(
+                    if not themeda_preproc.utils.is_path_existing_and_read_only(
                         path=local_path
                     ):
                         to_download[item["Key"]] = local_path
@@ -68,6 +68,6 @@ def run(
                 )
 
                 if protect:
-                    ecofuture_preproc.utils.protect_path(path=local_path)
+                    themeda_preproc.utils.protect_path(path=local_path)
 
                 progress_bar.update()

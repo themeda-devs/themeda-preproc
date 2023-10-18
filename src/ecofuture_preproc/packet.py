@@ -10,8 +10,8 @@ import xarray as xr
 import rioxarray.merge
 import rasterio.enums
 
-import ecofuture_preproc.chips
-import ecofuture_preproc.chiplets
+import themeda_preproc.chips
+import themeda_preproc.chiplets
 
 
 def form_packet(
@@ -24,7 +24,7 @@ def form_packet(
     load_chips_masked: bool = False,
 ) -> xr.DataArray:
     data = [
-        ecofuture_preproc.chips.read_chip(
+        themeda_preproc.chips.read_chip(
             path=path,
             chunks=chunks,
             masked=load_chips_masked,

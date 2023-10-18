@@ -4,9 +4,9 @@ import numpy as np
 
 import xarray as xr
 
-import ecofuture_preproc.chiplets
-import ecofuture_preproc.source
-import ecofuture_preproc.roi
+import themeda_preproc.chiplets
+import themeda_preproc.source
+import themeda_preproc.roi
 
 
 # demo chiplet metadata
@@ -42,11 +42,11 @@ METADATA = types.MappingProxyType(
 
 
 def test_parse_chiplet_filename(base_output_dir):
-    for source_name in ecofuture_preproc.source.DataSourceName:
+    for source_name in themeda_preproc.source.DataSourceName:
         for year in [1988, 2001]:
-            for roi_name in ecofuture_preproc.roi.ROIName:
+            for roi_name in themeda_preproc.roi.ROIName:
                 for pad_size_pix in [0, 32]:
-                    path = ecofuture_preproc.chiplets.get_chiplet_path(
+                    path = themeda_preproc.chiplets.get_chiplet_path(
                         source_name=source_name,
                         year=year,
                         roi_name=roi_name,
@@ -54,7 +54,7 @@ def test_parse_chiplet_filename(base_output_dir):
                         base_output_dir=base_output_dir,
                     )
 
-                    true_info = ecofuture_preproc.chiplets.ChipletFilenameInfo(
+                    true_info = themeda_preproc.chiplets.ChipletFilenameInfo(
                         path=path,
                         roi_name=roi_name,
                         source_name=source_name,
@@ -62,7 +62,7 @@ def test_parse_chiplet_filename(base_output_dir):
                         pad_size_pix=pad_size_pix,
                     )
 
-                    inferred_info = ecofuture_preproc.chiplets.parse_chiplet_filename(
+                    inferred_info = themeda_preproc.chiplets.parse_chiplet_filename(
                         filename=path
                     )
 
@@ -70,11 +70,11 @@ def test_parse_chiplet_filename(base_output_dir):
 
 
 def test_get_chiplet_from_packet():
-    transform = ecofuture_preproc.chiplets.get_transform_from_row(row=METADATA)
+    transform = themeda_preproc.chiplets.get_transform_from_row(row=METADATA)
 
     true_chiplet = convert_chiplet_to_data_array(pad_size_pix=0)
 
-    inferred_chiplet = ecofuture_preproc.chiplets.get_chiplet_from_packet(
+    inferred_chiplet = themeda_preproc.chiplets.get_chiplet_from_packet(
         packet=true_chiplet,
         chip_i_x_base=METADATA["chip_i_x_base"],
         chip_i_y_base=METADATA["chip_i_y_base"],
@@ -102,7 +102,7 @@ def convert_chiplet_to_data_array(pad_size_pix):
         constant_values=999.0,
     )
 
-    da = ecofuture_preproc.chiplets.convert_chiplet_to_data_array(
+    da = themeda_preproc.chiplets.convert_chiplet_to_data_array(
         chiplet=raw_array,
         metadata=METADATA,
         pad_size_pix=pad_size_pix,

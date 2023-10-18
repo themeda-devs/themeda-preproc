@@ -9,21 +9,21 @@ import veusz.embed
 
 import matplotlib
 
-import ecofuture_preproc.roi
-import ecofuture_preproc.source
-import ecofuture_preproc.vis.utils
-import ecofuture_preproc.vis.maps
+import themeda_preproc.roi
+import themeda_preproc.source
+import themeda_preproc.vis.utils
+import themeda_preproc.vis.maps
 
 
 def run(
-    source_name: ecofuture_preproc.source.DataSourceName,
-    roi_name: ecofuture_preproc.roi.ROIName,
+    source_name: themeda_preproc.source.DataSourceName,
+    roi_name: themeda_preproc.roi.ROIName,
     base_output_dir: pathlib.Path,
     protect: bool = True,
     resolution: typing.Optional[typing.Union[float, int]] = 1_000,
     headless: bool = True,
 ) -> None:
-    ecofuture_preproc.vis.maps.plot_years(
+    themeda_preproc.vis.maps.plot_years(
         source_name=source_name,
         roi_name=roi_name,
         base_output_dir=base_output_dir,
@@ -38,7 +38,7 @@ def customiser(
     embed: veusz.embed.Embedded,
     page: veusz.embed.WidgetNode,
     packet: xr.DataArray,
-    source_name: ecofuture_preproc.source.DataSourceName,
+    source_name: themeda_preproc.source.DataSourceName,
     year: int,
 ) -> None:
     (img_widget, *_) = page.WalkWidgets(widgettype="image")
@@ -116,7 +116,7 @@ def customiser(
     dummy_xy.yData.val = np.arange(n_entries).tolist()
     dummy_xy.labels.val = f"{name_prefix}_cbar_labels"
 
-    ecofuture_preproc.vis.utils.set_margins(
+    themeda_preproc.vis.utils.set_margins(
         widget=cbar_graph,
         margins={
             "L": "12.111cm",
@@ -126,7 +126,7 @@ def customiser(
         },
     )
 
-    ecofuture_preproc.vis.utils.set_margins(
+    themeda_preproc.vis.utils.set_margins(
         widget=graph,
         margins={"R": "3.929cm"},
         null_absent=True,
@@ -135,16 +135,16 @@ def customiser(
 
 def get_colour_map(
     packet: xr.DataArray,
-    source_name: ecofuture_preproc.source.DataSourceName,
+    source_name: themeda_preproc.source.DataSourceName,
     year: int,
-) -> tuple[ecofuture_preproc.vis.colourmap.ColourMap, int]:
+) -> tuple[themeda_preproc.vis.colourmap.ColourMap, int]:
     # indicate stepped
     packet_values = packet.values.flatten()
     data_max_val = int(np.max(packet_values[packet_values < 255]))
 
-    if source_name == ecofuture_preproc.source.DataSourceName.FIRE_SCAR_EARLY:
+    if source_name == themeda_preproc.source.DataSourceName.FIRE_SCAR_EARLY:
         max_val = 3
-    elif source_name == ecofuture_preproc.source.DataSourceName.FIRE_SCAR_LATE:
+    elif source_name == themeda_preproc.source.DataSourceName.FIRE_SCAR_LATE:
         max_val = 3
     else:
         raise ValueError("Unexpected source")
@@ -156,7 +156,7 @@ def get_colour_map(
     grey_cmap = grey_cmap.resampled(lutsize=max_val + 1)
 
     entries = [
-        ecofuture_preproc.vis.colourmap.ColourMapEntry(
+        themeda_preproc.vis.colourmap.ColourMapEntry(
             label=str(value),
             value=value,
             colour=tuple(int(val * 255) for val in grey_cmap(value)),
@@ -164,7 +164,7 @@ def get_colour_map(
         for value in range(max_val + 1)
     ]
 
-    cmap = ecofuture_preproc.vis.colourmap.ColourMap(
+    cmap = themeda_preproc.vis.colourmap.ColourMap(
         name=f"{source_name.value}_{year}",
         entries=entries,
     )

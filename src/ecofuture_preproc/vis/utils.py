@@ -17,7 +17,7 @@ def set_veusz_style(
 ) -> None:
     style_path = pathlib.Path(
         str(
-            importlib.resources.files("ecofuture_preproc.resources.vis").joinpath(
+            importlib.resources.files("themeda_preproc.resources.vis").joinpath(
                 "veusz_stylesheet.vst"
             )
         )

@@ -8,21 +8,21 @@ import xarray as xr
 
 import tqdm
 
-import ecofuture_preproc.source
-import ecofuture_preproc.utils
-import ecofuture_preproc.land_cover.utils
+import themeda_preproc.source
+import themeda_preproc.utils
+import themeda_preproc.land_cover.utils
 
 
 @dataclasses.dataclass(frozen=True)
 class ChipPathInfo:
-    source_name: ecofuture_preproc.source.DataSourceName
+    source_name: themeda_preproc.source.DataSourceName
     path: pathlib.Path
     year: int
     month: int
 
 
 def run(
-    source_name: ecofuture_preproc.source.DataSourceName,
+    source_name: themeda_preproc.source.DataSourceName,
     base_output_dir: pathlib.Path,
     protect: bool = True,
     show_progress: bool = True,
@@ -58,7 +58,7 @@ def run(
             output_dir.mkdir(exist_ok=True, parents=True)
             output_path = output_dir / f"{source_name.value}_{year}.tif"
 
-            if not ecofuture_preproc.utils.is_path_existing_and_read_only(
+            if not themeda_preproc.utils.is_path_existing_and_read_only(
                 path=output_path
             ):
                 data = summarise_year_chips(
@@ -75,17 +75,17 @@ def run(
                 data.close()
 
                 if protect:
-                    ecofuture_preproc.utils.protect_path(path=output_path)
+                    themeda_preproc.utils.protect_path(path=output_path)
 
             progress_bar.update()
 
 
 def summarise_year_chips(
     year_raw_path_info: list[ChipPathInfo],
-    source_name: ecofuture_preproc.source.DataSourceName,
+    source_name: themeda_preproc.source.DataSourceName,
 ) -> xr.DataArray:
     year_chips = [
-        ecofuture_preproc.chips.read_chip(
+        themeda_preproc.chips.read_chip(
             path=chip_path_info.path,
             masked=True,
             load_data=True,
@@ -95,9 +95,9 @@ def summarise_year_chips(
 
     year_data = xr.concat(objs=year_chips, dim="time")
 
-    if source_name == ecofuture_preproc.source.DataSourceName("rain"):
+    if source_name == themeda_preproc.source.DataSourceName("rain"):
         summ_func = year_data.sum
-    elif source_name == ecofuture_preproc.source.DataSourceName("tmax"):
+    elif source_name == themeda_preproc.source.DataSourceName("tmax"):
         summ_func = year_data.mean
     else:
         raise ValueError(f"Unexpected source name ({source_name})")
@@ -150,7 +150,7 @@ def parse_chip_path(path: pathlib.Path) -> ChipPathInfo:
     (year, month) = map(int, [yearmonth[:4], yearmonth[-2:]])
 
     return ChipPathInfo(
-        source_name=ecofuture_preproc.source.DataSourceName(source_name),
+        source_name=themeda_preproc.source.DataSourceName(source_name),
         path=path,
         year=year,
         month=month,

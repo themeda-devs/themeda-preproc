@@ -2,7 +2,7 @@ import numpy as np
 
 import welford
 
-import ecofuture_preproc.summary_stats
+import themeda_preproc.summary_stats
 
 
 def test_welford():
@@ -13,7 +13,7 @@ def test_welford():
     data = rand.random((10, 3, 4, 4))
 
     w_tracker = welford.Welford()
-    tracker = ecofuture_preproc.summary_stats.StatTracker()
+    tracker = themeda_preproc.summary_stats.StatTracker()
 
     for data_sample in data:
         data_sample = data_sample.flatten()

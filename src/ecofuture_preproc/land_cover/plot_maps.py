@@ -9,21 +9,21 @@ import xarray as xr
 
 import veusz.embed
 
-import ecofuture_preproc.roi
-import ecofuture_preproc.source
-import ecofuture_preproc.vis.utils
-import ecofuture_preproc.vis.maps
+import themeda_preproc.roi
+import themeda_preproc.source
+import themeda_preproc.vis.utils
+import themeda_preproc.vis.maps
 
 
 def run(
-    source_name: ecofuture_preproc.source.DataSourceName,
-    roi_name: ecofuture_preproc.roi.ROIName,
+    source_name: themeda_preproc.source.DataSourceName,
+    roi_name: themeda_preproc.roi.ROIName,
     base_output_dir: pathlib.Path,
     protect: bool = True,
     resolution: typing.Optional[typing.Union[float, int]] = 1_000,
     headless: bool = True,
 ) -> None:
-    ecofuture_preproc.vis.maps.plot_years(
+    themeda_preproc.vis.maps.plot_years(
         source_name=source_name,
         roi_name=roi_name,
         base_output_dir=base_output_dir,
@@ -38,7 +38,7 @@ def customiser(
     embed: veusz.embed.Embedded,
     page: veusz.embed.WidgetNode,
     packet: xr.DataArray,  # noqa
-    source_name: ecofuture_preproc.source.DataSourceName,  # noqa
+    source_name: themeda_preproc.source.DataSourceName,  # noqa
     year: int,  # noqa
 ) -> None:
     (img_widget, *_) = page.WalkWidgets(widgettype="image")
@@ -108,7 +108,7 @@ def customiser(
     dummy_xy.yData.val = np.arange(n_entries).tolist()
     dummy_xy.labels.val = f"{name_prefix}_cbar_labels"
 
-    ecofuture_preproc.vis.utils.set_margins(
+    themeda_preproc.vis.utils.set_margins(
         widget=cbar_graph,
         margins={
             "L": "11.37cm",
@@ -118,17 +118,17 @@ def customiser(
         },
     )
 
-    ecofuture_preproc.vis.utils.set_margins(
+    themeda_preproc.vis.utils.set_margins(
         widget=graph,
         margins={"R": "3.929cm"},
         null_absent=True,
     )
 
 
-def get_colour_map() -> ecofuture_preproc.vis.colourmap.ColourMap:
+def get_colour_map() -> themeda_preproc.vis.colourmap.ColourMap:
     csv_path = pathlib.Path(
         str(
-            importlib.resources.files("ecofuture_preproc.resources.relabel").joinpath(
+            importlib.resources.files("themeda_preproc.resources.relabel").joinpath(
                 "LCNS_codes_colours.csv"
             )
         )
@@ -142,18 +142,18 @@ def get_colour_map() -> ecofuture_preproc.vis.colourmap.ColourMap:
             if all(row_val == "" for row_val in row.values()):
                 continue
 
-            value = ecofuture_preproc.utils.num_str_to_int(num_str=row["LCNS_n"])
+            value = themeda_preproc.utils.num_str_to_int(num_str=row["LCNS_n"])
             label = row["LCNS_label"]
-            colour = ecofuture_preproc.vis.colourmap.hex_to_rgb(colour=row["LCNS_HexCol"])
+            colour = themeda_preproc.vis.colourmap.hex_to_rgb(colour=row["LCNS_HexCol"])
             entries.append(
-                ecofuture_preproc.vis.colourmap.ColourMapEntry(
+                themeda_preproc.vis.colourmap.ColourMapEntry(
                     label=label,
                     value=value,
                     colour=colour,
                 )
             )
 
-    cmap = ecofuture_preproc.vis.colourmap.ColourMap(
+    cmap = themeda_preproc.vis.colourmap.ColourMap(
         name="land_cover",
         entries=entries,
     )

@@ -9,10 +9,10 @@ import xarray as xr
 
 import shapely
 
-import ecofuture_preproc.roi
-import ecofuture_preproc.utils
-import ecofuture_preproc.source
-import ecofuture_preproc.packet
+import themeda_preproc.roi
+import themeda_preproc.utils
+import themeda_preproc.source
+import themeda_preproc.packet
 
 
 @dataclasses.dataclass
@@ -22,8 +22,8 @@ class PointLatLon:
 
 
 def run(
-    source_name: ecofuture_preproc.source.DataSourceName,
-    roi_name: ecofuture_preproc.roi.ROIName,
+    source_name: themeda_preproc.source.DataSourceName,
+    roi_name: themeda_preproc.roi.ROIName,
     base_output_dir: pathlib.Path,
     protect: bool = True,
 ) -> None:
@@ -33,10 +33,10 @@ def run(
         base_output_dir=base_output_dir,
     )
 
-    if ecofuture_preproc.utils.is_path_existing_and_read_only(path=output_path):
+    if themeda_preproc.utils.is_path_existing_and_read_only(path=output_path):
         return
 
-    roi = ecofuture_preproc.roi.RegionOfInterest(
+    roi = themeda_preproc.roi.RegionOfInterest(
         name=roi_name,
         base_output_dir=base_output_dir,
     )
@@ -50,7 +50,7 @@ def run(
         / source_name.value
     )
 
-    years = ecofuture_preproc.utils.get_years_in_path(path=chiplet_base_dir)
+    years = themeda_preproc.utils.get_years_in_path(path=chiplet_base_dir)
 
     transects = []
 
@@ -59,7 +59,7 @@ def run(
 
         chiplet_paths = sorted(year_chiplet_base_dir.glob("*.tif"))
 
-        packet = ecofuture_preproc.packet.form_packet(
+        packet = themeda_preproc.packet.form_packet(
             paths=chiplet_paths,
             form_via_rioxarray=True,
             chunks=None,
@@ -98,13 +98,13 @@ def run(
     transect.close()
 
     if protect:
-        ecofuture_preproc.utils.protect_path(path=output_path)
+        themeda_preproc.utils.protect_path(path=output_path)
 
 
 def get_natt_coords(
-    roi: ecofuture_preproc.roi.RegionOfInterest,
+    roi: themeda_preproc.roi.RegionOfInterest,
 ) -> xr.Dataset:
-    roi_shape_latlon = ecofuture_preproc.utils.transform_shape(
+    roi_shape_latlon = themeda_preproc.utils.transform_shape(
         src_crs=3577,
         dst_crs=4326,
         shape=roi.shape,
@@ -146,7 +146,7 @@ def get_natt_coords(
     )
 
     (transect_start_albers, transect_end_albers) = (
-        ecofuture_preproc.utils.transform_shape(
+        themeda_preproc.utils.transform_shape(
             src_crs=4326,
             dst_crs=3577,
             shape=shapely.Point(transect_point.longitude, transect_point.latitude),
@@ -200,8 +200,8 @@ def get_natt_coords(
 
 
 def get_transect_path(
-    source_name: ecofuture_preproc.source.DataSourceName,
-    roi_name: ecofuture_preproc.roi.ROIName,
+    source_name: themeda_preproc.source.DataSourceName,
+    roi_name: themeda_preproc.roi.ROIName,
     base_output_dir: pathlib.Path,
 ) -> pathlib.Path:
     path = (
@@ -217,8 +217,8 @@ def get_transect_path(
 
 
 def load_transect(
-    source_name: ecofuture_preproc.source.DataSourceName,
-    roi_name: ecofuture_preproc.roi.ROIName,
+    source_name: themeda_preproc.source.DataSourceName,
+    roi_name: themeda_preproc.roi.ROIName,
     base_output_dir: pathlib.Path,
 ) -> xr.DataArray:
     path = get_transect_path(

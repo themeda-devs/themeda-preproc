@@ -17,19 +17,19 @@ import affine
 
 import tqdm
 
-import ecofuture_preproc.source
-import ecofuture_preproc.roi
-import ecofuture_preproc.chips
-import ecofuture_preproc.packet
-import ecofuture_preproc.chiplet_table
-import ecofuture_preproc.utils
+import themeda_preproc.source
+import themeda_preproc.roi
+import themeda_preproc.chips
+import themeda_preproc.packet
+import themeda_preproc.chiplet_table
+import themeda_preproc.utils
 
 
 @dataclasses.dataclass(frozen=True)
 class ChipletFilenameInfo:
     path: pathlib.Path
-    roi_name: ecofuture_preproc.roi.ROIName
-    source_name: ecofuture_preproc.source.DataSourceName
+    roi_name: themeda_preproc.roi.ROIName
+    source_name: themeda_preproc.source.DataSourceName
     pad_size_pix: int
     year: int
     denan: bool = False
@@ -37,8 +37,8 @@ class ChipletFilenameInfo:
 
 def form_chiplets(
     table: pl.dataframe.frame.DataFrame,
-    source_name: ecofuture_preproc.source.DataSourceName,
-    roi: ecofuture_preproc.roi.RegionOfInterest,
+    source_name: themeda_preproc.source.DataSourceName,
+    roi: themeda_preproc.roi.RegionOfInterest,
     base_size_pix: int,
     pad_size_pix: int,
     base_output_dir: pathlib.Path,
@@ -55,7 +55,7 @@ def form_chiplets(
         base_output_dir / "chips" / f"roi_{roi.name.value}" / source_name.value
     )
 
-    years = ecofuture_preproc.utils.get_years_in_path(path=source_chip_dir)
+    years = themeda_preproc.utils.get_years_in_path(path=source_chip_dir)
 
     with multiprocessing.Manager() as manager:
         lock = manager.RLock()
@@ -87,8 +87,8 @@ def form_year_chiplets(
     progress_bar_position: int,
     year: int,
     table: pl.dataframe.frame.DataFrame,
-    source_name: ecofuture_preproc.source.DataSourceName,
-    roi: ecofuture_preproc.roi.RegionOfInterest,
+    source_name: themeda_preproc.source.DataSourceName,
+    roi: themeda_preproc.roi.RegionOfInterest,
     base_size_pix: int,
     pad_size_pix: int,
     base_output_dir: pathlib.Path,
@@ -126,24 +126,24 @@ def form_year_chiplets(
     output_path = get_chiplet_path(
         source_name=source_name,
         year=year,
-        roi_name=ecofuture_preproc.roi.ROIName(roi.name),
+        roi_name=themeda_preproc.roi.ROIName(roi.name),
         pad_size_pix=pad_size_pix,
         base_output_dir=base_output_dir,
     )
 
-    if ecofuture_preproc.utils.is_path_existing_and_read_only(path=output_path):
+    if themeda_preproc.utils.is_path_existing_and_read_only(path=output_path):
         return
 
-    packet = ecofuture_preproc.packet.form_packet(
+    packet = themeda_preproc.packet.form_packet(
         paths=chip_paths,
         form_via_rioxarray=form_packet_via_rioxarray,
-        nodata=ecofuture_preproc.source.DATA_SOURCE_NODATA[source_name],
+        nodata=themeda_preproc.source.DATA_SOURCE_NODATA[source_name],
         load_chips_masked=load_chips_masked,
     )
 
     chiplets = np.memmap(
         filename=output_path,
-        dtype=ecofuture_preproc.source.DATA_SOURCE_DTYPE[source_name],
+        dtype=themeda_preproc.source.DATA_SOURCE_DTYPE[source_name],
         mode="w+",
         shape=get_array_shape(
             table=table,
@@ -152,10 +152,10 @@ def form_year_chiplets(
         ),
     )
 
-    transforms: dict[ecofuture_preproc.chips.GridRef, affine.Affine] = {}
+    transforms: dict[themeda_preproc.chips.GridRef, affine.Affine] = {}
 
     for row in table.iter_rows(named=True):
-        grid_ref = ecofuture_preproc.chips.GridRef(
+        grid_ref = themeda_preproc.chips.GridRef(
             x=row["chip_grid_ref_x_base"],
             y=row["chip_grid_ref_y_base"],
         )
@@ -202,7 +202,7 @@ def form_year_chiplets(
     chiplets._mmap.close()
 
     if protect:
-        ecofuture_preproc.utils.protect_path(path=output_path)
+        themeda_preproc.utils.protect_path(path=output_path)
 
     packet.close()
 
@@ -213,9 +213,9 @@ def form_year_chiplets(
 
 @contextlib.contextmanager
 def chiplets_reader(
-    source_name: ecofuture_preproc.source.DataSourceName,
+    source_name: themeda_preproc.source.DataSourceName,
     year: int,
-    roi_name: ecofuture_preproc.roi.ROIName,
+    roi_name: themeda_preproc.roi.ROIName,
     pad_size_pix: int,
     base_output_dir: pathlib.Path,
     base_size_pix: int = 160,
@@ -241,9 +241,9 @@ def chiplets_reader(
 
 
 def load_chiplets(
-    source_name: ecofuture_preproc.source.DataSourceName,
+    source_name: themeda_preproc.source.DataSourceName,
     year: int,
-    roi_name: ecofuture_preproc.roi.ROIName,
+    roi_name: themeda_preproc.roi.ROIName,
     pad_size_pix: int,
     base_output_dir: pathlib.Path,
     base_size_pix: int = 160,
@@ -259,7 +259,7 @@ def load_chiplets(
         denan=denan,
     )
 
-    table = ecofuture_preproc.chiplet_table.load_table(
+    table = themeda_preproc.chiplet_table.load_table(
         roi_name=roi_name,
         base_output_dir=base_output_dir,
         pad_size_pix=pad_size_pix,
@@ -267,7 +267,7 @@ def load_chiplets(
 
     chiplets_handle = np.memmap(
         filename=chiplet_path,
-        dtype=ecofuture_preproc.source.DATA_SOURCE_DTYPE[source_name],
+        dtype=themeda_preproc.source.DATA_SOURCE_DTYPE[source_name],
         mode="r",
         shape=get_array_shape(
             table=table,
@@ -296,14 +296,14 @@ def get_array_shape(
 
 
 def get_chiplet_path(
-    source_name: ecofuture_preproc.source.DataSourceName,
+    source_name: themeda_preproc.source.DataSourceName,
     year: int,
-    roi_name: ecofuture_preproc.roi.ROIName,
+    roi_name: themeda_preproc.roi.ROIName,
     pad_size_pix: int,
     base_output_dir: pathlib.Path,
     denan: bool = False,
 ) -> pathlib.Path:
-    if denan and ecofuture_preproc.source.is_data_source_continuous(
+    if denan and themeda_preproc.source.is_data_source_continuous(
         source_name=source_name
     ):
         suffix = "-denan"
@@ -333,12 +333,12 @@ def parse_chiplet_filename(filename: pathlib.Path) -> ChipletFilenameInfo:
 
     pad_size_pix = int(components.pop())
     assert components.pop() == "pad"
-    roi_name = ecofuture_preproc.roi.ROIName(components.pop())
+    roi_name = themeda_preproc.roi.ROIName(components.pop())
     assert components.pop() == "roi"
     year = int(components.pop())
     assert components[0] in ["chiplets", "chiplets-denan"]
     denan = components[0] == "chiplets-denan"
-    source_name = ecofuture_preproc.source.DataSourceName("_".join(components[1:]))
+    source_name = themeda_preproc.source.DataSourceName("_".join(components[1:]))
 
     return ChipletFilenameInfo(
         path=filename,

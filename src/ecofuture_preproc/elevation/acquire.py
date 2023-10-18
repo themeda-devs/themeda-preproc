@@ -7,12 +7,12 @@ srtm-1sec-demh-v1-COG.tif
 
 import pathlib
 
-import ecofuture_preproc.source
-import ecofuture_preproc.utils
+import themeda_preproc.source
+import themeda_preproc.utils
 
 
 def run(
-    source_name: ecofuture_preproc.source.DataSourceName,
+    source_name: themeda_preproc.source.DataSourceName,
     base_output_dir: pathlib.Path,
     protect: bool = True,
 ) -> None:
@@ -31,10 +31,10 @@ def run(
     local_path = output_dir / filename
 
     if not local_path.exists():
-        ecofuture_preproc.utils.download_file(
+        themeda_preproc.utils.download_file(
             url=url,
             output_path=local_path,
         )
 
     if protect:
-        ecofuture_preproc.utils.protect_path(path=local_path)
+        themeda_preproc.utils.protect_path(path=local_path)
