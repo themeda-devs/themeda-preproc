@@ -53,9 +53,7 @@ class RegionOfInterest:
     def shape_path(self) -> pathlib.Path:
         if self.base_output_dir is None:
             raise ValueError("Need to set `base_output_dir`")
-        return (
-            self.base_output_dir / "roi" / f"themeda_roi_shape_{self.name.value}.pkl"
-        )
+        return self.base_output_dir / "roi" / f"themeda_roi_shape_{self.name.value}.pkl"
 
     @property
     def geojson_path(self) -> pathlib.Path:

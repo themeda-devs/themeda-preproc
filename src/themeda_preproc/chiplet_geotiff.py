@@ -140,15 +140,13 @@ def convert_year_chiplets(
                 for row in table_rows.iter_rows(named=True):
                     chiplet = chiplets[row["index"], ...]
 
-                    data_array = (
-                        themeda_preproc.chiplets.convert_chiplet_to_data_array(
-                            chiplet=chiplet,
-                            metadata=row,
-                            pad_size_pix=pad_size_pix,
-                            base_size_pix=base_size_pix,
-                            crs=crs,
-                            nodata=nodata,
-                        )
+                    data_array = themeda_preproc.chiplets.convert_chiplet_to_data_array(
+                        chiplet=chiplet,
+                        metadata=row,
+                        pad_size_pix=pad_size_pix,
+                        base_size_pix=base_size_pix,
+                        crs=crs,
+                        nodata=nodata,
                     )
 
                     if themeda_preproc.source.DATA_SOURCE_DTYPE[source_name] == (

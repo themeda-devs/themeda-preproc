@@ -9,7 +9,6 @@ import distro
 import veusz.embed
 
 
-
 def set_veusz_style(
     embed: veusz.embed.Embedded,
     font: typing.Optional[typing.Union[str, dict[str, str]]] = None,

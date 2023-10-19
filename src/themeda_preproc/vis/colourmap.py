@@ -13,7 +13,7 @@ class ColourMapEntry:
     colour: typing.Union[RGBType, RGBAType]
 
     @property
-    def hex(self) -> str:
+    def hex(self) -> str:  # noqa: A003
         return f"#{self.colour[0]:02x}{self.colour[1]:02x}{self.colour[2]:02x}"
 
 
@@ -22,10 +22,10 @@ class ColourMap:
     name: str
     entries: list[ColourMapEntry]
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.entries)
-    
-    def __iter__(self):
+
+    def __iter__(self) -> typing.Iterator[ColourMapEntry]:
         return iter(self.entries)
 
     def as_veusz_colourmap(self, stepped: bool = False) -> list[RGBAType]:
