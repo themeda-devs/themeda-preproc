@@ -1,7 +1,5 @@
 # Themeda pre-processing
 
-[[_TOC_]]
-
 ## Installation
 
 This package requires Python 3.9+ and Poetry.
