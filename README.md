@@ -1,4 +1,4 @@
-# Ecofuture pre-processing
+# Themeda pre-processing
 
 [[_TOC_]]
 
@@ -7,7 +7,7 @@
 This package requires Python 3.9+ and Poetry.
 First, clone the repository to a local directory:
 ```bash
-git clone https://gitlab.unimelb.edu.au/mdap/ecofuture-preproc
+git clone https://gitlab.unimelb.edu.au/mdap/themeda-preproc
 ```
 Then change into the package directory and setup Poetry to use a new virtual environment:
 ```bash
@@ -31,7 +31,7 @@ Then install the necessary system packages (see the [requirements for building `
 
 Then create a build directory, download the `veusz` source code, and extract:
 ```bash
-# assuming in `code/ecofuture-preproc`
+# assuming in `code/themeda-preproc`
 cd ../..
 mkdir build
 cd build
@@ -41,7 +41,7 @@ cd veusz-veusz-3.6.2
 ```
 and then build and install:
 ```bash
-poetry -C ../../code/ecofuture-preproc run pip install .
+poetry -C ../../code/themeda-preproc run pip install .
 ```
 
 ## Using the pre-processing output
@@ -51,7 +51,7 @@ Note that most functions for interacting with this data ask for a `base_output_d
 
 ### Chiplet data loading
 
-For loading the chiplets for a given year and data source, the relevant function is most likely `ecofuture_preproc.chiplets.chiplets_reader`.
+For loading the chiplets for a given year and data source, the relevant function is most likely `themeda_preproc.chiplets.chiplets_reader`.
 This returns a context manager for a 3D memmapped numpy array, within which the first dimension is the chiplet instance, the second dimension is the vertical spatial dimension, and the third dimension is the horizontal spatial dimension.
 Because the variable is memmapped, there is no memory cost to loading the chiplets until individual items are accessed.
 The context manager closes the file handle upon exiting, so make sure to not have any lingering references to the chiplet data or else you may see segfaults.
@@ -59,28 +59,28 @@ The context manager closes the file handle upon exiting, so make sure to not hav
 For example, the chiplets for the land use data source from 1996 can be loaded by something like:
 
 ```python
-with ecofuture_preproc.chiplets.chiplets_reader(
-    source_name=ecofuture_preproc.source.DataSourceName("land_use"),
+with themeda_preproc.chiplets.chiplets_reader(
+    source_name=themeda_preproc.source.DataSourceName("land_use"),
     year=1996,
-    roi_name=ecofuture_preproc.roi.ROIName("savanna"),
+    roi_name=themeda_preproc.roi.ROIName("savanna"),
     pad_size_pix=32,
     base_output_dir=pathlib.Path("~/data").expanduser(),
 ) as chiplets:
     # do stuff
 ```
 
-There is also the lower-level `ecofuture_preproc.chiplets.load_chiplets` function, which does not clean up the memmap structure.
+There is also the lower-level `themeda_preproc.chiplets.load_chiplets` function, which does not clean up the memmap structure.
 It includes the option to `load_into_ram`, if you want to access all the chiplet data and you have enough RAM.
 
 ### Chiplet metadata access
 
 To access the chiplets of interest within the loaded chiplet data structure, we need to know the properties of each chiplet index.
-That information is obtained by loading the appropriate metadata table, using the `ecofuture_preproc.chiplet_table.load_table` function.
+That information is obtained by loading the appropriate metadata table, using the `themeda_preproc.chiplet_table.load_table` function.
 For example:
 
 ```python
-table = ecofuture_preproc.chiplet_table.load_table(
-    roi_name=ecofuture_preproc.roi.ROIName("savanna"),
+table = themeda_preproc.chiplet_table.load_table(
+    roi_name=themeda_preproc.roi.ROIName("savanna"),
     base_output_dir=pathlib.Path("~/data").expanduser(),
     pad_size_pix=32,
 )
@@ -93,11 +93,11 @@ By selecting and filtering within this table, the indices of interest can be obt
 ### Chiplet summary statistics
 
 For the continuous data sources, the mean, standard deviation, minimum, and maximum values have been computed across chiplets and years.
-These values can be loaded using `ecofuture_preproc.summary_stats.load_stats`.
+These values can be loaded using `themeda_preproc.summary_stats.load_stats`.
 For example:
 
 ```python
-stats = ecofuture_preproc.summary_stats.load_stats(
+stats = themeda_preproc.summary_stats.load_stats(
     source_name=source_name,
     roi_name=roi_name,
     base_output_dir=base_output_dir,
@@ -106,16 +106,16 @@ stats = ecofuture_preproc.summary_stats.load_stats(
 
 ## Running the pre-processing
 
-The pre-processing steps are executed via the `ecofuture_preproc` command; for example:
+The pre-processing steps are executed via the `themeda_preproc` command; for example:
 ```bash
-poetry run ecofuture_preproc --help
+poetry run themeda_preproc --help
 ```
 
 To see all the steps required to run through the complete pipeline, see `run.sh` in the root directory of the package.
 
 > **Warning**
 The pre-processing operations can consume a lot of RAM, CPU, and storage resources.
-You can use the `-cores` option to `ecofuture_preproc` to limit the use of multiprocessing in the chiplets conversion stages.
+You can use the `-cores` option to `themeda_preproc` to limit the use of multiprocessing in the chiplets conversion stages.
 Note that progress bars don't work all that well under multiprocessing (see [this issue with `tqdm`](https://github.com/tqdm/tqdm/issues/1000)); the only workaround I have found is to clear each progress bar after it has finished.
 For unmonitored execution, you can use `--no-show_progress` to hide the progress bars.
 
@@ -123,7 +123,7 @@ For unmonitored execution, you can use `--no-show_progress` to hide the progress
 
 The pre-processing of the data associated with each data source occurs within a set of sequential stages: acquisition, preparation, chip conversion, chiplet conversion, conversion from chiplets to GeoTIFF files, map-based visualisations, and extracting data along the Northern Australia Tropical Transect (NATT).
 Each data source handler has a directory in the package, containing files implementing these steps: `acquire.py`, `prep.py`, `to_chips.py`, `to_chiplets.py`, and `plot_maps.py` (the conversion from chiplets to GeoTIFF files, the de-NaN processing, the summary statistics, and the NATT extraction are the same across data sources and so are handled by `chiplet_geotiff.py`, `denan_chiplets.py`, `summary_statistics.py`, and `transect.py`, respectively).
-The steps are executed by passing the appropriate step name as a positional argument to `ecofuture_preproc`.
+The steps are executed by passing the appropriate step name as a positional argument to `themeda_preproc`.
 
 > **Note**
 Rain and Tmax data sources are both processed through a common `climate` handler, the two fire scar data sources (early and late) are processed through a common `fire_scar` handler, and the three soil data sources are processed through a common `soil` handler.
@@ -139,7 +139,7 @@ See `roi.py` in the package for details.
 
 An example execution:
 ```bash
-poetry run ecofuture_preproc roi_prep -roi_name savanna
+poetry run themeda_preproc roi_prep -roi_name savanna
 ```
 
 ### Chiplet table preparation
@@ -152,7 +152,7 @@ See `chiplet_table.py` in the package for details.
 
 An example execution:
 ```bash
-poetry run ecofuture_preproc chiplet_table_prep -roi_name savanna -pad_size_pix 32
+poetry run themeda_preproc chiplet_table_prep -roi_name savanna -pad_size_pix 32
 ```
 
 ### Acquisition
@@ -172,7 +172,7 @@ The attribute tables are also exported via ArcCatalog, as plain text files.
 
 An example execution:
 ```bash
-poetry run ecofuture_preproc acquire -source_name rain
+poetry run themeda_preproc acquire -source_name rain
 ```
 
 ### Preparation
@@ -189,7 +189,7 @@ What is involved in 'preparation' varies across data sources, but the main idea 
 
 An example execution:
 ```bash
-poetry run ecofuture_preproc prep -source_name land_cover
+poetry run themeda_preproc prep -source_name land_cover
 ```
 
 ### Chip conversion
@@ -207,7 +207,7 @@ Those fire scar instance shapes that intersect with the land cover chip are then
 
 An example execution:
 ```bash
-poetry run ecofuture_preproc to_chips -source_name tmax -roi_name savanna
+poetry run themeda_preproc to_chips -source_name tmax -roi_name savanna
 ```
 
 ### Chiplet conversion
@@ -230,7 +230,7 @@ Additionally, the pixels classified as 'water' can be re-labelled as 'ocean' of 
 
 An example execution:
 ```bash
-poetry run ecofuture_preproc to_chiplets -source_name fire_scar_early -roi_name savanna -pad_size_pix 32
+poetry run themeda_preproc to_chiplets -source_name fire_scar_early -roi_name savanna -pad_size_pix 32
 ```
 
 ### Replacing NaNs
@@ -239,7 +239,7 @@ This stage replaces any NaNs that are present in the chiplet data for sources wi
 
 An example execution:
 ```bash
-poetry run ecofuture_preproc denan_chiplets -source_name elevation -roi_name savanna -pad_size_pix 32
+poetry run themeda_preproc denan_chiplets -source_name elevation -roi_name savanna -pad_size_pix 32
 ```
 
 ### Summary statistics
@@ -248,7 +248,7 @@ This stage computes the mean and standard deviation for all values across space 
 
 An example execution:
 ```bash
-poetry run ecofuture_preproc summary_statistics -source_name soil_depth -roi_name savanna
+poetry run themeda_preproc summary_statistics -source_name soil_depth -roi_name savanna
 ```
 
 ### Conversion of chiplets to GeoTIFF gridded chips
@@ -259,7 +259,7 @@ Note that this assumes that chiplets with a padding size of 0 have been created.
 
 An example execution:
 ```bash
-poetry run ecofuture_preproc chiplets_to_geotiff -source_name land_cover -roi_name savanna
+poetry run themeda_preproc chiplets_to_geotiff -source_name land_cover -roi_name savanna
 ```
 
 ### Creating map visualisations
@@ -268,7 +268,7 @@ The GeoTIFF files created in the previous step can be used to create visualisati
 
 An example execution:
 ```bash
-poetry run ecofuture_preproc plot_maps -source_name soil_depth -roi_name savanna
+poetry run themeda_preproc plot_maps -source_name soil_depth -roi_name savanna
 ```
 
 ### Transect extraction
@@ -277,7 +277,7 @@ The GeoTIFF files are used to extract data along the coordinates of the NATT for
 
 An example execution:
 ```bash
-poetry run ecofuture_preproc transect -source_name soil_ece -roi_name savanna
+poetry run themeda_preproc transect -source_name soil_ece -roi_name savanna
 ```
 
 ## Authors
