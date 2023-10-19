@@ -50,7 +50,7 @@
 #poetry run themeda_preproc acquire -source_name land_use
 #poetry run themeda_preproc prep -source_name land_use
 #poetry run themeda_preproc to_chips -source_name land_use -roi_name savanna
-poetry run themeda_preproc to_chiplets -source_name land_use -roi_name savanna -pad_size_pix 32
+#poetry run themeda_preproc to_chiplets -source_name land_use -roi_name savanna -pad_size_pix 32
 #poetry run themeda_preproc to_chiplets -source_name land_use -roi_name savanna -pad_size_pix 0
 #poetry run themeda_preproc -cores 32 chiplets_to_geotiff -source_name land_use -roi_name savanna
 #xvfb-run poetry run themeda_preproc plot_maps -source_name land_use -roi_name savanna
@@ -118,3 +118,6 @@ poetry run themeda_preproc to_chiplets -source_name land_use -roi_name savanna -
 #poetry run themeda_preproc -cores 32 chiplets_to_geotiff -source_name soil_ece -roi_name savanna
 #xvfb-run poetry run themeda_preproc plot_maps -source_name soil_ece -roi_name savanna
 #poetry run themeda_preproc summary_stats -source_name soil_ece -roi_name savanna
+
+# hash db formation
+poetry run themeda_preproc form_hash_db -hash_db_path themeda_preproc_file_db_smb_20231020.json

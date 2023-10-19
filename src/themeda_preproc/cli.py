@@ -110,6 +110,11 @@ def main() -> None:
         help="Extract data along the NATT",
     )
 
+    form_hash_db_parser = subparsers.add_parser(
+        "form_hash_db",
+        help="Calculate the hashes of all files in the output directory",
+    )
+
     for parser_needing_roi_name in [
         roi_parser,
         to_chips_parser,
@@ -190,6 +195,13 @@ def main() -> None:
             default=False,
         )
 
+    for parser_needing_hash_db_path in [form_hash_db_parser]:
+        parser_needing_hash_db_path.add_argument(
+            "-hash_db_path",
+            required=True,
+            type=pathlib.Path,
+        )
+
     args = parser.parse_args()
 
     if args.command is None:
@@ -207,12 +219,18 @@ def main() -> None:
         runner_str = "themeda_preproc.transect"
     elif args.command == "summary_stats":
         runner_str = "themeda_preproc.summary_stats"
+    elif args.command == "form_hash_db":
+        runner_str = "themeda_preproc.hashcheck"
+        runner_function = "run_form_hash_db"
     else:
         handler_name = themeda_preproc.source.DATA_SOURCE_HANDLER[args.source_name]
         runner_str = f"themeda_preproc.{handler_name}.{args.command}"
 
     module = importlib.import_module(name=runner_str)
-    function = module.run
+    try:
+        function = getattr(module, runner_function)
+    except NameError:
+        function = module.run
     signature = inspect.signature(function)
     param_names = list(signature.parameters)
     args = {param_name: getattr(args, param_name) for param_name in param_names}
