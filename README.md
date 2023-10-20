@@ -278,6 +278,24 @@ An example execution:
 poetry run themeda_preproc transect -source_name soil_ece -roi_name savanna
 ```
 
+### Data validation
+
+The integrity of the data output can be validated by first creating a database of file paths and their associated MD5 sum hashes for a reference storage location and then verifying that each file path in a different storage location has a matching MD5 sum hash.
+
+The creation of the reference database is achieved via something like:
+```bash
+poetry run themeda_preproc form_hash_db -hash_db_path ${HASH_DB_PATH}
+```
+where `HASH_DB_PATH` specifies a location to save the hash database (in JSON format), such as `themeda_preproc_file_db_smb_20231020.json`.
+
+A given storage location can then be validated by running something like:
+```bash
+poetry run themeda_preproc check_against_hash_db -hash_db_path ${HASH_DB_PATH}
+```
+where `HASH_DB_PATH` is the output of the previous command.
+Note that you may want to use the `-base_output_dir` argument to specify a different base directory to assess.
+
+
 ## Authors
 
 Staff at the [Melbourne Data Analytics Platform (MDAP)](https://mdap.unimelb.edu.au/), University of Melbourne.

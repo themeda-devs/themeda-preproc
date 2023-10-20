@@ -115,6 +115,11 @@ def main() -> None:
         help="Calculate the hashes of all files in the output directory",
     )
 
+    check_against_hash_db_parser = subparsers.add_parser(
+        "check_against_hash_db",
+        help="Compares the hashes of all files in the output directory",
+    )
+
     for parser_needing_roi_name in [
         roi_parser,
         to_chips_parser,
@@ -195,7 +200,10 @@ def main() -> None:
             default=False,
         )
 
-    for parser_needing_hash_db_path in [form_hash_db_parser]:
+    for parser_needing_hash_db_path in [
+        form_hash_db_parser,
+        check_against_hash_db_parser,
+    ]:
         parser_needing_hash_db_path.add_argument(
             "-hash_db_path",
             required=True,
@@ -222,6 +230,9 @@ def main() -> None:
     elif args.command == "form_hash_db":
         runner_str = "themeda_preproc.hashcheck"
         runner_function = "run_form_hash_db"
+    elif args.command == "check_against_hash_db":
+        runner_str = "themeda_preproc.hashcheck"
+        runner_function = "run_check_against_hash_db"
     else:
         handler_name = themeda_preproc.source.DATA_SOURCE_HANDLER[args.source_name]
         runner_str = f"themeda_preproc.{handler_name}.{args.command}"
