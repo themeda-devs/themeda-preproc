@@ -65,7 +65,7 @@ def run_check_against_hash_db(
             else:
                 absentees.append(file_path)
 
-        progress_bar.update()
+            progress_bar.update()
 
     assert (match_count + len(mismatches) + len(absentees)) == len(file_paths)
 
