@@ -290,10 +290,12 @@ where `HASH_DB_PATH` specifies a location to save the hash database (in JSON for
 
 A given storage location can then be validated by running something like:
 ```bash
-poetry run themeda_preproc check_against_hash_db -hash_db_path ${HASH_DB_PATH}
+poetry run themeda_preproc check_against_hash_db -hash_db_path ${HASH_DB_PATH} | tee ${OUTPUT_PATH}
 ```
-where `HASH_DB_PATH` is the output of the previous command.
-Note that you may want to use the `-base_output_dir` argument to specify a different base directory to assess.
+where `HASH_DB_PATH` is the output of the previous command and `OUTPUT_PATH` is a path of your choosing in which the validation errors will be written as plain text (the `tee` command also allows this output to be printed to the screen; use `>` instead if this is unwanted), such as `themeda_preproc_validation_run_output.txt`.
+
+> **Note**
+You may want to use the `-base_output_dir` argument to specify a different base directory to assess.
 
 
 ## Authors
