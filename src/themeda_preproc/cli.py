@@ -4,6 +4,8 @@ import os
 import importlib
 import inspect
 
+import numpy as np
+
 import themeda_preproc.roi
 import themeda_preproc.source
 
@@ -120,6 +122,11 @@ def main() -> None:
         help="Compares the hashes of all files in the output directory",
     )
 
+    pad_chiplets_parser = subparsers.add_parser(
+        "pad_chiplets",
+        help="Converts chiplets without padding to have padding",
+    )
+
     for parser_needing_roi_name in [
         roi_parser,
         to_chips_parser,
@@ -130,6 +137,7 @@ def main() -> None:
         stats_parser,
         plot_maps_parser,
         transect_parser,
+        pad_chiplets_parser,
     ]:
         parser_needing_roi_name.add_argument(
             "-roi_name",
@@ -160,6 +168,7 @@ def main() -> None:
         chiplet_table_parser,
         to_chiplets_parser,
         chiplets_to_geotiff_parser,
+        pad_chiplets_parser,
     ]:
         parser_needing_base_size_pix.add_argument(
             "-base_size_pix",
@@ -172,6 +181,7 @@ def main() -> None:
         to_chiplets_parser,
         denan_chiplets_parser,
         chiplets_to_geotiff_parser,
+        pad_chiplets_parser,
     ]:
         parser_needing_pad_size_pix.add_argument(
             "-pad_size_pix",
@@ -210,6 +220,45 @@ def main() -> None:
             type=pathlib.Path,
         )
 
+    for parser_needing_output_path in [
+        pad_chiplets_parser,
+    ]:
+        parser_needing_output_path.add_argument(
+            "-output_path",
+            required=True,
+            type=pathlib.Path,
+        )
+
+    for parser_needing_chiplets_path in [
+        pad_chiplets_parser,
+    ]:
+        parser_needing_chiplets_path.add_argument(
+            "-chiplets_path",
+            required=True,
+            type=pathlib.Path,
+        )
+
+    for parser_needing_dtype in [
+        pad_chiplets_parser,
+    ]:
+        parser_needing_dtype.add_argument(
+            "-dtype",
+            required=True,
+            type=np.dtype,
+            help="Chiplet datatype (e.g., 'uint8')",
+        )
+
+    for parser_needing_n_in_extra_dim in [
+        pad_chiplets_parser,
+    ]:
+        parser_needing_n_in_extra_dim.add_argument(
+            "-n_in_extra_dim",
+            required=False,
+            type=int,
+            help="Number of values in an extra second axis (or 0 if absent)",
+            default=0,
+        )
+
     args = parser.parse_args()
 
     if args.command is None:
@@ -233,6 +282,8 @@ def main() -> None:
     elif args.command == "check_against_hash_db":
         runner_str = "themeda_preproc.hashcheck"
         runner_function = "run_check_against_hash_db"
+    elif args.command == "pad_chiplets":
+        runner_str = "themeda_preproc.pad_chiplets"
     else:
         handler_name = themeda_preproc.source.DATA_SOURCE_HANDLER[args.source_name]
         runner_str = f"themeda_preproc.{handler_name}.{args.command}"

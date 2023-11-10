@@ -120,4 +120,8 @@
 #poetry run themeda_preproc summary_stats -source_name soil_ece -roi_name savanna
 
 # hash db formation
-poetry run themeda_preproc form_hash_db -hash_db_path themeda_preproc_file_db_smb_20231020.json
+# poetry run themeda_preproc form_hash_db -hash_db_path themeda_preproc_file_db_smb_20231020.json
+
+poetry run themeda_preproc pad_chiplets -chiplets_path ~/preproc/data/chiplets/roi_savanna/pad_0/land_cover/chiplets_land_cover_2020_roi_savanna_pad_0.npy -output_path ~/preproc/mnt/analysis/pad_test.npy -dtype uint8 -roi_name savanna  
+
+
