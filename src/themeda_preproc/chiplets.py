@@ -366,6 +366,7 @@ def get_chiplet_from_packet(
     chip_i_to_coords_transform: affine.Affine,
     base_size_pix: int,
     pad_size_pix: int,
+    method: typing.Optional[str] = None,
 ) -> xr.DataArray:
     i_x = (
         np.arange(
@@ -386,7 +387,7 @@ def get_chiplet_from_packet(
 
     (x, y) = chip_i_to_coords_transform * i_xy
 
-    chiplet = packet.sel(x=x, y=y)
+    chiplet = packet.sel(x=x, y=y, method=method)
 
     return chiplet
 

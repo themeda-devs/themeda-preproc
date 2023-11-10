@@ -1,10 +1,11 @@
 import typing
 import contextlib
-import collections
 import pathlib
 
 import numpy as np
 import numpy.typing as npt
+
+import xarray as xr
 
 import polars as pl
 
@@ -13,7 +14,6 @@ import tqdm
 import affine
 
 import rioxarray.merge
-import rasterio
 
 import themeda_preproc.roi
 import themeda_preproc.chips
@@ -122,14 +122,23 @@ def run(
                         themeda_preproc.chiplets.get_transform_from_row(row=row)
                     )
 
-                padded_chiplet = themeda_preproc.chiplets.get_chiplet_from_packet(
-                    packet=data_array,
-                    chip_i_x_base=row["chip_i_x_base"],
-                    chip_i_y_base=row["chip_i_y_base"],
-                    chip_i_to_coords_transform=transforms[grid_ref],
-                    base_size_pix=base_size_pix,
-                    pad_size_pix=pad_size_pix,
-                )
+                try:
+                    padded_chiplet = themeda_preproc.chiplets.get_chiplet_from_packet(
+                        packet=data_array,
+                        chip_i_x_base=row["chip_i_x_base"],
+                        chip_i_y_base=row["chip_i_y_base"],
+                        chip_i_to_coords_transform=transforms[grid_ref],
+                        base_size_pix=base_size_pix,
+                        pad_size_pix=pad_size_pix,
+                        method="nearest",
+                    )
+
+                except KeyError as err:
+                    print("---")
+                    print(err.args)
+                    print(row)
+                    print(grid_ref)
+                    continue
 
                 if n_in_extra_dim > 0:
                     padded_chiplets[row["index"], i_extra_dim, ...] = padded_chiplet
@@ -144,6 +153,25 @@ def run(
 
     if protect:
         themeda_preproc.utils.protect_path(path=output_path)
+
+
+def add_padding_to_packet(
+    packet: xr.DataArray,
+    pad_size_pix: int,
+) -> xr.DataArray:
+
+    x_delta = np.abs(packet.x[1] - packet.x[0]).item()
+    y_delta = np.abs(packet.y[1] - packet.y[0]).item()
+
+    # current boundaries
+    (left, bottom, right, top) = packet.rio.bounds(recalc=True)
+
+    left -= x_delta * pad_size_pix
+    bottom -= y_delta * pad_size_pix
+    right += x_delta * pad_size_pix
+    top += y_delta * pad_size_pix
+
+    return packet.rio.pad_box(minx=left, miny=bottom, maxx=right, maxy=top)
 
 
 def load_chiplets(
@@ -173,81 +201,3 @@ def load_chiplets(
     )
 
     return chiplets_handle
-
-
-def chiplet_to_inmem_raster(
-    chiplet: npt.NDArray,
-    metadata: dict[str, typing.Any],
-    pad_size_pix: int = 0,
-) -> rasterio.io.MemoryFile:
-
-    data_array = themeda_preproc.chiplets.convert_chiplet_to_data_array(
-        chiplet=chiplet,
-        metadata=metadata,
-        pad_size_pix=pad_size_pix,
-    )
-
-    memfile = rasterio.MemoryFile()
-
-    with memfile.open(
-        driver="GTiff",
-        count=int(data_array.rio.count),
-        width=int(data_array.rio.width),
-        height=int(data_array.rio.height),
-        dtype=str(data_array.dtype),
-        crs=data_array.rio.crs,
-        transform=data_array.rio.transform(recalc=True),
-        nodata=data_array.rio.nodata,
-    ) as dataset:
-        dataset.write(data_array.values, 1)
-
-    return memfile
-
-
-def chiplets_to_raster(
-    chiplets: list[npt.NDArray],
-    chiplet_table: pl.dataframe.frame.DataFrame,
-    chiplet_processor_func: typing.Optional[
-        typing.Callable[[npt.NDArray], npt.NDArray]
-    ] = None,
-    show_progress: bool = False,
-) -> tuple[npt.NDArray, affine.Affine]:
-
-    i = 0
-
-    memfiles: collections.deque[rasterio.io.MemoryFile] = collections.deque()
-
-    with contextlib.closing(
-        tqdm.tqdm(
-            iterable=None,
-            total=len(chiplet_table),
-            disable=not show_progress,
-        )
-    ) as progress_bar:
-
-        for (i_chiplet, metadata) in enumerate(chiplet_table.iter_rows(named=True)):
-
-            curr_chiplets = [
-                curr_chiplet[i_chiplet, ...]
-                for curr_chiplet in chiplets
-            ]
-
-            if chiplet_processor_func is not None:
-                chiplet = chiplet_processor_func(curr_chiplets)
-            else:
-                (chiplet,) = curr_chiplets
-
-            if chiplet.dtype == np.float16:
-                chiplet = chiplet.astype(np.float32)
-
-            memfiles.append(chiplet_to_inmem_raster(chiplet=chiplet, metadata=metadata))
-
-            progress_bar.update()
-
-            i += 1
-
-    handles = [memfile.open() for memfile in memfiles]
-
-    merged: tuple[npt.NDArray, affine.Affine] = rasterio.merge.merge(datasets=handles)
-
-    return merged

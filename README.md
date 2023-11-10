@@ -278,6 +278,19 @@ An example execution:
 poetry run themeda_preproc transect -source_name soil_ece -roi_name savanna
 ```
 
+
+### Chiplet padding
+
+The capacity to convert an arbirary NumPy array of chiplets (as is output from `to_chiplets` for a particular data source) to a padded form is provided by the `pad_chiplets` sub-command.
+Because this sub-command is less tightly bound to the structure of the data files, its arguments are a bit different; see its help for details.
+
+Here is an example that pads the unpadded land cover values - this should be the same as the padded output from `to_chiplets`, except at the edges of the ROI.
+```bash
+poetry run themeda_preproc pad_chiplets -chiplets_path ${BASE_OUTPUT_DIR}/chiplets/roi_savanna/pad_0/land_cover/chiplets_land_cover_2020_roi_savanna_pad_0.npy -output_path pad_demo.npy -dtype uint8 -roi_name savanna
+```
+
+If the chiplets have an extra dimension, placed second in the axis order, then use the `n_in_extra_dim` parameter to provide the size of this axis.
+
 ### Data validation
 
 The integrity of the data output can be validated by first creating a database of file paths and their associated MD5 sum hashes for a reference storage location and then verifying that each file path in a different storage location has a matching MD5 sum hash.
