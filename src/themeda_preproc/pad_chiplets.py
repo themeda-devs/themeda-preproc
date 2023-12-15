@@ -33,7 +33,6 @@ def run(
     protect: bool = True,
     show_progress: bool = True,
 ) -> None:
-
     # if it already exists and is protected, bail
     if themeda_preproc.utils.is_path_existing_and_read_only(path=output_path):
         print(f"Path {output_path} exists and is protected; skipping")
@@ -66,9 +65,9 @@ def run(
     output_spatial_dim_size = base_size_pix + pad_size_pix * 2
     output_shape: typing.Union[tuple[int, int, int, int], tuple[int, int, int]]
     if n_in_extra_dim > 0:
-        output_shape = (
-            (chiplets.shape[0], n_in_extra_dim) + (output_spatial_dim_size,) * 2
-        )
+        output_shape = (chiplets.shape[0], n_in_extra_dim) + (
+            output_spatial_dim_size,
+        ) * 2
     else:
         output_shape = (chiplets.shape[0],) + (output_spatial_dim_size,) * 2
 
@@ -92,10 +91,8 @@ def run(
             disable=not show_progress,
         )
     ) as progress_bar:
-
         # consider each entry in the additional dim separately, because memory
         for i_extra_dim in range(chiplets.shape[1]):
-
             data_array = rioxarray.merge.merge_arrays(
                 dataarrays=[
                     themeda_preproc.chiplets.convert_chiplet_to_data_array(
@@ -111,16 +108,15 @@ def run(
             )
 
             for row in pad_table.iter_rows(named=True):
-
                 grid_ref = themeda_preproc.chips.GridRef(
                     x=row["chip_grid_ref_x_base"],
                     y=row["chip_grid_ref_y_base"],
                 )
 
                 if grid_ref not in transforms:
-                    transforms[grid_ref] = (
-                        themeda_preproc.chiplets.get_transform_from_row(row=row)
-                    )
+                    transforms[
+                        grid_ref
+                    ] = themeda_preproc.chiplets.get_transform_from_row(row=row)
 
                 try:
                     padded_chiplet = themeda_preproc.chiplets.get_chiplet_from_packet(
@@ -159,7 +155,6 @@ def add_padding_to_packet(
     packet: xr.DataArray,
     pad_size_pix: int,
 ) -> xr.DataArray:
-
     x_delta = np.abs(packet.x[1] - packet.x[0]).item()
     y_delta = np.abs(packet.y[1] - packet.y[0]).item()
 
@@ -182,7 +177,6 @@ def load_chiplets(
     base_size_pix: int = 160,
     pad_size_pix: int = 0,
 ) -> np.memmap[typing.Any, np.dtype[typing.Any]]:
-
     shape = themeda_preproc.chiplets.get_array_shape(
         table=chiplet_table,
         base_size_pix=base_size_pix,
