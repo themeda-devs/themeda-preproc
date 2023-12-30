@@ -5,7 +5,7 @@
 This package requires Python 3.9+ and Poetry.
 First, clone the repository to a local directory:
 ```bash
-git clone https://gitlab.unimelb.edu.au/mdap/themeda-preproc
+git clone https://github.com/themeda-devs/themeda-preproc/
 ```
 Then change into the package directory and setup Poetry to use a new virtual environment:
 ```bash
